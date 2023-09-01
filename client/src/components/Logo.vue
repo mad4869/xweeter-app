@@ -4,7 +4,7 @@ const { size } = defineProps<{ size: 'sm' | 'md' | 'lg' }>()
 const sizes = {
     sm: 'w-8',
     md: 'w-16',
-    lg: '32'
+    lg: 'w-32'
 }
 </script>
 
