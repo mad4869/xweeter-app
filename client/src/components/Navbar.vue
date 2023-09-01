@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import Logo from './Logo.vue';
+
+const MENUS = ['Profile', 'Leaderboard', 'Logout']
 </script>
 
 <template>
@@ -9,10 +11,10 @@ import Logo from './Logo.vue';
         <div class="col-span-2 flex justify-center items-center">
             <Logo size="w-8" />
         </div>
-        <ul class="col-span-1 flex justify-center items-center gap-4">
-            <li>Profile</li>
-            <li>Leaderboard</li>
-            <li>Logout</li>
+        <ul class="col-span-1 flex justify-center items-center gap-8">
+            <li v-for="menu in MENUS" :key="menu"
+                class="px-2 py-1 rounded-md cursor-pointer transition-colors ease-in hover:bg-slate-300/5 hover:backdrop-blur-md">
+                {{ menu }}</li>
         </ul>
     </nav>
 </template>
