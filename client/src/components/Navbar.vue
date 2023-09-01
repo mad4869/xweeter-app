@@ -13,7 +13,7 @@ const MENUS = ['Profile', 'Leaderboard', 'Logout']
         </div>
         <ul class="col-span-1 flex justify-center items-center gap-8">
             <li v-for="menu in MENUS" :key="menu"
-                class="px-2 py-1 rounded-md cursor-pointer transition-colors ease-in hover:bg-slate-300/5 hover:backdrop-blur-md">
+                class="px-2 py-1 rounded-md cursor-pointer transition-colors ease-in hover:bg-sky-600/10 hover:backdrop-blur-md">
                 {{ menu }}
             </li>
         </ul>
