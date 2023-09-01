@@ -6,15 +6,16 @@ const MENUS = ['Profile', 'Leaderboard', 'Logout']
 
 <template>
     <nav
-        class="grid grid-cols-4 place-items-center mx-auto px-20 py-4 text-white border-b border-solid border-sky-600 shadow-md shadow-sky-600/50">
+        class="sticky top-0 grid grid-cols-4 place-items-center mx-auto px-20 py-4 bg-slate-900 text-white border-b border-solid border-sky-600 shadow-md shadow-sky-600/50 z-10">
         <div class="col-span-1"></div>
         <div class="col-span-2 flex justify-center items-center">
-            <Logo size="w-8" />
+            <Logo size="sm" />
         </div>
         <ul class="col-span-1 flex justify-center items-center gap-8">
             <li v-for="menu in MENUS" :key="menu"
                 class="px-2 py-1 rounded-md cursor-pointer transition-colors ease-in hover:bg-slate-300/5 hover:backdrop-blur-md">
-                {{ menu }}</li>
+                {{ menu }}
+            </li>
         </ul>
     </nav>
 </template>
