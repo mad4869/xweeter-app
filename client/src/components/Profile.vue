@@ -3,7 +3,7 @@
 </script>
 
 <template>
-    <section class="flex flex-col justify-evenly items-center h-full border border-solid border-sky-800 rounded-xl">
+    <section class="flex-[2] flex flex-col justify-evenly items-center border border-solid border-sky-800 rounded-xl">
         <div class="flex justify-between items-center w-full px-8 pb-4 border-b border-solid border-sky-600/20">
             <div>
                 <span
