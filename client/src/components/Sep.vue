@@ -3,7 +3,7 @@ const { title } = defineProps<{ title: string }>()
 </script>
 
 <template>
-    <div class="sticky top-16 flex items-center p-4 bg-slate-900 text-2xl text-white font-bold capitalize z-[5]">
+    <div class="sticky top-0 flex items-center w-fit p-4 text-2xl text-white font-bold capitalize z-20">
         {{ title }}
     </div>
 </template>

@@ -10,9 +10,9 @@
         <div class="flex items-center gap-2 px-4 group">
             <font-awesome-icon icon="fa-regular fa-sun" class="text-white" />
             <label for="dark-mode"
-                class="flex items-center w-9 h-6 px-1 border-2 border-solid border-sky-800 rounded-full group-hover:cursor-pointer peer">
+                class="flex items-center w-9 h-6 px-1 border-2 border-solid border-sky-800 rounded-full group-hover:cursor-pointer">
                 <input type="checkbox" name="dark-mode" id="dark-mode" role="switch"
-                    class="appearance-none w-3 h-3 bg-slate-600 rounded-full transition-all duration-300 checked:translate-x-full checked:bg-sky-600">
+                    class="appearance-none w-3 h-3 bg-slate-600 rounded-full transition-all duration-300 checked:translate-x-full checked:bg-sky-600 group-hover:cursor-pointer">
             </label>
             <font-awesome-icon icon="fa-regular fa-moon" class="text-white" />
         </div>

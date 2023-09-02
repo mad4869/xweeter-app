@@ -4,6 +4,7 @@ import Zweet from './Zweet.vue';
 import Sep from './Sep.vue';
 import Profile from './Profile.vue';
 import SettingBar from './SettingBar.vue';
+import Suggestions from './Suggestions.vue';
 
 const contents = [
     { fullname: 'Budi Sudarsono', username: '@BudiSudarsono', zweet: 'I have been better lately' },
@@ -29,7 +30,9 @@ const contents = [
             <Zweet v-for="(content, index) in contents" :key="index" :fullname="content.fullname"
                 :username="content.username" :zweet="content.zweet" />
         </article>
-        <aside class="col-span-1"></aside>
+        <aside class="sticky top-20 col-span-1 flex flex-col justify-center gap-4 h-side">
+            <Suggestions />
+        </aside>
     </main>
 </template>
 
