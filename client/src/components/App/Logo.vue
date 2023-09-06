@@ -9,7 +9,7 @@ const sizes = {
 </script>
 
 <template>
-    <img :class="sizes[size]" src="../assets/logo.png" loading="lazy">
+    <img :class="sizes[size]" src="../../assets/logo.png" loading="lazy">
 </template>
 
 <style scoped></style>

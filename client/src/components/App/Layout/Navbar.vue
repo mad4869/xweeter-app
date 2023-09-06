@@ -1,7 +1,11 @@
 <script setup lang="ts">
-import Logo from './Logo.vue';
+import Logo from '../Logo.vue';
 
-const MENUS = ['Profile', 'Leaderboard', 'Logout']
+const menus = [
+    { path: '/profile', name: 'Profile' },
+    { path: '/leaderboard', name: 'Leaderboard' },
+    { path: '/logout', name: 'Logout' },
+]
 </script>
 
 <template>
@@ -12,10 +16,10 @@ const MENUS = ['Profile', 'Leaderboard', 'Logout']
             <Logo size="sm" />
         </div>
         <ul class="col-span-1 flex justify-center items-center gap-8">
-            <li v-for="menu in MENUS" :key="menu"
+            <router-link v-for="menu in menus" :key="menu.name" :to="menu.path"
                 class="px-2 py-1 rounded-md cursor-pointer transition-colors ease-in hover:bg-sky-600/10 hover:backdrop-blur-md">
-                {{ menu }}
-            </li>
+                {{ menu.name }}
+            </router-link>
         </ul>
     </nav>
 </template>
