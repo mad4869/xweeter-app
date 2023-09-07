@@ -1,9 +1,6 @@
 # Created by https://www.toptal.com/developers/gitignore/api/vue,flask
 # Edit at https://www.toptal.com/developers/gitignore?templates=vue,flask
 
-### VSCode ###
-.vscode/
-
 ### Flask ###
 instance/*
 !instance/.gitignore
@@ -187,10 +184,11 @@ dist-ssr
 *.local
 
 # Editor directories and files
-.vscode/*
+.vscode/
 !.vscode/extensions.json
 .idea
 .DS_Store
+schema.txt
 *.suo
 *.ntvs*
 *.njsproj

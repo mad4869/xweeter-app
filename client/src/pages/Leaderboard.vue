@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import Layout from '../components/App/Layout/index.vue' 
+import Layout from '../components/App/Layout/index.vue'
+import Table from '../components/Leaderboard/Table.vue';
 </script>
 
 <template>
     <Layout>
-        <h1>Leaderboard</h1>
+        <Table />
     </Layout>
 </template>
 
