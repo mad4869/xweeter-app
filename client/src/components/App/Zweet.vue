@@ -1,5 +1,5 @@
 <script setup lang="ts">
-const { fullname, username, zweet } = defineProps<{
+defineProps<{
     fullname: string,
     username: string,
     zweet: string

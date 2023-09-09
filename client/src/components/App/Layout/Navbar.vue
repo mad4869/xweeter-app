@@ -23,5 +23,3 @@ const menus = [
         </ul>
     </nav>
 </template>
-
-<style scoped></style>

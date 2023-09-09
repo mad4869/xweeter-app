@@ -19,5 +19,3 @@ const contents = [
             :zweet="content.zweet" />
     </section>
 </template>
-
-<style scoped></style>

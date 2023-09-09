@@ -1,5 +1,5 @@
 <script setup lang="ts">
-const { title } = defineProps<{ title: string }>()
+defineProps<{ title: string }>()
 </script>
 
 <template>
@@ -7,5 +7,3 @@ const { title } = defineProps<{ title: string }>()
         {{ title }}
     </div>
 </template>
-
-<style scoped></style>

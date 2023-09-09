@@ -10,5 +10,3 @@ import Profile from '../components/Profile/Profile.vue';
         <Profile />
     </Layout>
 </template>
-
-<style scoped></style>

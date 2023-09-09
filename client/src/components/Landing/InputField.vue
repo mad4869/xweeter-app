@@ -35,9 +35,3 @@ defineProps<{
         </div>
     </section>
 </template>
-
-<style scoped>
-.error {
-    @apply border-red-400
-}
-</style>

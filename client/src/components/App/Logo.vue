@@ -1,5 +1,5 @@
 <script setup lang="ts">
-const { size } = defineProps<{ size: 'sm' | 'md' | 'lg' }>()
+defineProps<{ size: 'sm' | 'md' | 'lg' }>()
 
 const sizes = {
     sm: 'w-8',
@@ -11,5 +11,3 @@ const sizes = {
 <template>
     <img :class="sizes[size]" src="../../assets/logo.png" loading="lazy">
 </template>
-
-<style scoped></style>

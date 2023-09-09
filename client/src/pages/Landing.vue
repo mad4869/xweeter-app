@@ -10,5 +10,3 @@ import Cta from '../components/Landing/Cta.vue';
         <Cta />
     </main>
 </template>
-
-<style scoped></style>

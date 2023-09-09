@@ -8,5 +8,3 @@ import Table from '../components/Leaderboard/Table.vue';
         <Table />
     </Layout>
 </template>
-
-<style scoped></style>

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-const { fullname, username, lastZweet } = defineProps<{
+defineProps<{
     fullname: string,
     username: string,
     lastZweet: string
@@ -26,5 +26,3 @@ const { fullname, username, lastZweet } = defineProps<{
         </div>
     </section>
 </template>
-
-<style scoped></style>

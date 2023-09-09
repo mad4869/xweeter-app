@@ -22,5 +22,3 @@ const users = [
         </div>
     </section>
 </template>
-
-<style scoped></style>

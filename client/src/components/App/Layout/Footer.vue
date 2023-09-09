@@ -10,5 +10,3 @@ const year = new Date().getFullYear()
         </section>
     </footer>
 </template>
-
-<style scoped></style>
