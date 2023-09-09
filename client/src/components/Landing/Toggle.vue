@@ -1,18 +1,18 @@
 <script setup lang="ts">
-import { ref } from 'vue';
-
-const activeBtn = ref("Sign Up")
-const activateBtn = (btn: string) => {
-    activeBtn.value = btn
-}
+defineProps<{
+    activeBtn: 'Sign Up' | 'Sign In'
+}>()
+defineEmits<{
+    (e: 'activateBtn', btn: 'Sign Up' | 'Sign In'): void
+}>()
 </script>
 
 <template>
     <div class="flex items-center w-40 border border-solid border-sky-600 rounded-lg overflow-hidden">
-        <button :class="{ active: activeBtn === 'Sign Up' }" @click="activateBtn('Sign Up')">
+        <button :class="{ active: activeBtn === 'Sign Up' }" @click="$emit('activateBtn', 'Sign Up')">
             Sign Up
         </button>
-        <button :class="{ active: activeBtn === 'Sign In' }" @click="activateBtn('Sign In')">
+        <button :class="{ active: activeBtn === 'Sign In' }" @click="$emit('activateBtn', 'Sign In')">
             Sign In
         </button>
     </div>
