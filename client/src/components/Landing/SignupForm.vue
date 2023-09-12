@@ -2,6 +2,7 @@
 import { reactive } from 'vue';
 import { useVuelidate } from '@vuelidate/core'
 import { required, email } from '@vuelidate/validators'
+import axios from 'axios'
 
 import InputField from './InputField.vue';
 
@@ -19,14 +20,25 @@ const rules = {
 }
 
 const v$ = useVuelidate(rules, state)
+
+const submitForm = async () => {
+    try {
+        const res = await axios.post('http://localhost:5000/api/signup', state)
+        if (res) {
+            console.log(res)
+        }
+    } catch (err) {
+        console.error(err)
+    }
+}
 </script>
 
 <template>
-    <form class="flex-1 flex flex-col items-center gap-6 w-full">
+    <form class="flex-1 flex flex-col items-center gap-6 w-full" @submit.prevent="submitForm">
         <h3 class="text-2xl text-white font-semibold">Let's get you started!</h3>
         <InputField 
-            input-id="full-name"
-            input-name="full-name"
+            input-id="fullname"
+            input-name="fullname"
             input-type="text"
             :input-errors="v$.fullname.$errors"
             v-model="v$.fullname.$model"

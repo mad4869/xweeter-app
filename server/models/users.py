@@ -1,6 +1,16 @@
 from datetime import datetime
 
-from .. import db, bcrypt
+from .. import db, bcrypt, mc
+
+BUCKET = "xweeter"
+
+
+def get_default_pfp():
+    return mc.presigned_get_object(BUCKET, "default_pfp.jpg")
+
+
+def get_default_header():
+    return mc.presigned_get_object(BUCKET, "default_header.png")
 
 
 class Users(db.Model):
@@ -11,10 +21,37 @@ class Users(db.Model):
     email = db.Column(db.String(100), nullable=False, unique=True)
     password_hash = db.Column(db.String(100), nullable=False)
     bio = db.Column(db.Text())
-    role = db.Column(db.String(50), nullable=False)
-    profile_pic = db.Column(db.Text())
-    header_pic = db.Column(db.Text())
+    role = db.Column(db.String(50), nullable=False, default="user")
+    profile_pic = db.Column(db.Text(), default=get_default_pfp())
+    header_pic = db.Column(db.Text(), default=get_default_header())
     created_at = db.Column(db.DateTime(), nullable=False, default=datetime.now())
+    updated_at = db.Column(db.DateTime())
+    xweets = db.Relationship(
+        "Xweets", back_populates="users", lazy=True, cascade="all, delete-orphan"
+    )
+    followed = db.Relationship(
+        "Followings",
+        foreign_keys="[Followings.followed_id]",
+        back_populates="followed",
+        lazy=True,
+        cascade="all, delete-orphan",
+    )
+    follower = db.Relationship(
+        "Followings",
+        foreign_keys="[Followings.follower_id]",
+        back_populates="follower",
+        lazy=True,
+        cascade="all, delete-orphan",
+    )
+    replies = db.Relationship(
+        "Replies", back_populates="users", lazy=True, cascade="all, delete-orphan"
+    )
+    rexweets = db.Relationship(
+        "Rexweets", back_populates="users", lazy=True, cascade="all, delete-orphan"
+    )
+    likes = db.Relationship(
+        "Likes", back_populates="users", lazy=True, cascade="all, delete-orphan"
+    )
 
     def serialize(self):
         return {
@@ -27,6 +64,7 @@ class Users(db.Model):
             "profile_pic": self.profile_pic,
             "header_pic": self.header_pic,
             "created_at": self.created_at,
+            "updated_at": self.updated_at,
         }
 
     @property

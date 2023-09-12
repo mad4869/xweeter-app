@@ -1,6 +1,13 @@
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_bcrypt import Bcrypt
+from flask_cors import CORS
+from minio import Minio
+from os import environ, path
+from dotenv import load_dotenv
+
+basedir = path.dirname(__file__)
+load_dotenv(path.join(path.dirname(basedir), ".env"))
 
 # Database engine
 db = SQLAlchemy()
@@ -10,3 +17,14 @@ migrate = Migrate()
 
 # Password hash generator
 bcrypt = Bcrypt()
+
+# CORS
+cors = CORS()
+
+# Object storage
+mc = Minio(
+    "localhost:9000",
+    access_key=environ.get("MINIO_ACCESS_KEY"),
+    secret_key=environ.get("MINIO_SECRET_KEY"),
+    secure=False,
+)

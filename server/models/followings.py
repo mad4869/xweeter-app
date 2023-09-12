@@ -9,6 +9,13 @@ class Followings(db.Model):
     followed_id = db.Column(db.Integer(), db.ForeignKey("users.user_id"))
     follower_id = db.Column(db.Integer(), db.ForeignKey("users.user_id"))
     created_at = db.Column(db.DateTime(), nullable=False, default=datetime.now())
+    updated_at = db.Column(db.DateTime())
+    followed = db.Relationship(
+        "Users", foreign_keys=[followed_id], back_populates="followed"
+    )
+    follower = db.Relationship(
+        "Users", foreign_keys=[follower_id], back_populates="follower"
+    )
 
     def serialize(self):
         return {
@@ -16,6 +23,7 @@ class Followings(db.Model):
             "followed_id": self.followed_id,
             "follower_id": self.follower_id,
             "created_at": self.created_at,
+            "updated_at": self.updated_at,
         }
 
     def __repr__(self):

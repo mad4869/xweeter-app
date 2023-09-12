@@ -10,6 +10,9 @@ class Replies(db.Model):
     xweet_id = db.Column(db.Integer(), db.ForeignKey("xweets.xweet_id"))
     body = db.Column(db.String(140), nullable=False)
     created_at = db.Column(db.DateTime(), nullable=False, default=datetime.now())
+    updated_at = db.Column(db.DateTime())
+    users = db.Relationship("Users", back_populates="replies")
+    xweets = db.Relationship("Xweets", back_populates="replies")
 
     def serialize(self):
         return {
@@ -18,6 +21,7 @@ class Replies(db.Model):
             "xweet_id": self.xweet_id,
             "body": self.body,
             "created_at": self.created_at,
+            "updated_at": self.updated_at,
         }
 
     def __repr__(self):
