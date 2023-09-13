@@ -13,7 +13,9 @@ const menus = [
         class="sticky top-0 grid grid-cols-4 place-items-center mx-auto px-20 py-4 bg-slate-900/90 backdrop-blur text-white border-b border-solid border-sky-600 shadow-md shadow-sky-600/50 z-10">
         <div class="col-span-1"></div>
         <div class="col-span-2 flex justify-center items-center">
-            <Logo size="sm" />
+            <router-link to="/home">
+                <Logo size="sm" />
+            </router-link>
         </div>
         <ul class="col-span-1 flex justify-center items-center gap-8">
             <router-link v-for="menu in menus" :key="menu.name" :to="menu.path"
