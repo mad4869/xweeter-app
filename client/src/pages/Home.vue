@@ -8,6 +8,7 @@ import Zweet from '../components/App/Zweet.vue';
 import NewZweet from '../components/Home/NewZweet.vue';
 import Profile from '../components/Home/Profile.vue';
 import Sep from '../components/Home/Sep.vue';
+import getCookie from '../utils/getCookie'
 
 type Xweet = {
     xweet_id: number,
@@ -26,8 +27,15 @@ type Response = {
 }
 
 const queryXweets = async (): Promise<Response | undefined> => {
+    const OPTIONS = {
+        credentials: 'same-origin',
+        headers: {
+            'X-CSRF-TOKEN': getCookie('csrf_access_token')
+        }
+    }
+
     try {
-        const { data } = await axios.get('http://localhost:5000/api/users/1/xweets')
+        const { data } = await axios.get('http://localhost:5000/api/users/1/xweets', OPTIONS)
         if (data) {
             return data
         }

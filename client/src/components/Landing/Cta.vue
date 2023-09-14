@@ -15,12 +15,26 @@ const activateBtn = (btn: "Sign Up" | "Sign In") => {
     <section
         class="col-start-2 flex flex-col justify-center items-center gap-6 px-4 pt-8 bg-white/10 backdrop-blur-lg rounded-lg shadow-md shadow-sky-800">
         <Toggle :activeBtn="activeBtn" @activateBtn="activateBtn" />
-        <component :is="activeBtn === 'Sign Up' ? SignupForm : SigninForm" />
+        <transition name="fade">
+            <keep-alive>
+                <component :is="activeBtn === 'Sign Up' ? SignupForm : SigninForm" />
+            </keep-alive>
+        </transition>
     </section>
 </template>
 
 <style scoped>
 input {
     @apply w-48
+}
+
+.fade-enter-active,
+.fade-leave-active {
+    transition: opacity 1s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+    opacity: 0;
 }
 </style>

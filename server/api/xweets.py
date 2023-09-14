@@ -1,8 +1,9 @@
 from flask import request, jsonify
+from flask_jwt_extended import jwt_required
 
 from . import api_bp
 from ..extensions import db
-from ..models import Xweet, User
+from ..models import Xweet, User, Hashtag
 
 
 @api_bp.route("/xweets", methods=["GET"], strict_slashes=False)
@@ -26,20 +27,28 @@ def access_xweet(xweet_id):
 @api_bp.route(
     "/users/<int:user_id>/xweets", methods=["GET", "POST"], strict_slashes=False
 )
+@jwt_required()
 def access_xweets_by_user(user_id):
     if request.method == "POST":
         data = request.get_json()
         body = data["body"]
+        media = data["media"]
+        hashtag_body = data["hashtag"]
 
-        xweet = Xweet(user_id=user_id, body=body)
+        xweet = Xweet(user_id=user_id, body=body, media=media)
+        hashtag = Hashtag(body=hashtag_body)
 
         try:
             db.session.add(xweet)
+            db.session.add(hashtag)
             db.session.commit()
         except:
             db.session.rollback()
 
-            return jsonify({"success": False, "message": "Failed to add the task"}), 500
+            return (
+                jsonify({"success": False, "message": "Failed to post the xweet"}),
+                500,
+            )
         else:
             return jsonify({"success": True, "data": xweet.serialize()}), 201
 

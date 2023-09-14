@@ -16,9 +16,14 @@ class Config:
     STATIC_FOLDER = "static"
     TEMPLATES_FOLDER = "templates"
 
-    SESSION_PERMANENT = True
-    PERMANENT_SESSION_LIFETIME = datetime.timedelta(days=7)
-
     # PostgreSQL Config
     SQLALCHEMY_DATABASE_URI = f"postgresql://{environ.get('POSTGRES_USER')}:{environ.get('POSTGRES_PASSWORD')}@{environ.get('POSTGRES_HOST')}:{environ.get('POSTGRES_PORT')}/{environ.get('POSTGRES_DB')}"
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+
+    # JWT
+    JWT_SECRET_KEY = environ.get("JWT_SECRET_KEY")
+    JWT_TOKEN_LOCATION = ["cookies"]
+    JWT_COOKIE_DOMAIN = "localhost"
+    JWT_COOKIE_SECURE = False
+    SESSION_COOKIE_SECURE = False
+    JWT_ACCESS_TOKEN_EXPIRES = datetime.timedelta(hours=2)

@@ -5,12 +5,21 @@ from flask_jwt_extended import (
     jwt_required,
     get_jwt,
     get_jwt_identity,
+    set_access_cookies,
+    unset_jwt_cookies,
 )
-from flask_login import login_user, logout_user
+from datetime import datetime, timezone, timedelta
+import logging
 
 from . import api_bp
 from ..extensions import db, jwt_manager
 from ..models import User, BlocklistToken
+
+logging.basicConfig(
+    filename="app.log",
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s",
+)
 
 
 @jwt_manager.token_in_blocklist_loader
@@ -21,6 +30,22 @@ def check_if_token_is_revoked(jwt_header, jwt_payload: dict) -> bool:
     ).scalar_one_or_none()
 
     return token is not None
+
+
+@api_bp.after_request
+def refresh_expiring_jwts(response):
+    try:
+        exp_timestamp = get_jwt()["exp"]
+        now = datetime.now(timezone.utc)
+        target_timestamp = datetime.timestamp(now + timedelta(minutes=30))
+
+        if target_timestamp > exp_timestamp:
+            access_token = create_access_token(identity=get_jwt_identity())
+            set_access_cookies(response, access_token)
+
+        return response
+    except (RuntimeError, KeyError):
+        return response
 
 
 @api_bp.route("/signup", methods=["POST"], strict_slashes=False)
@@ -49,7 +74,7 @@ def sign_up():
                 {
                     "success": True,
                     "message": "User registration is completed",
-                    "data": user.serialize(),
+                    "user": user.serialize(),
                 }
             ),
             201,
@@ -69,37 +94,36 @@ def sign_in():
     if not user_registered or not user_registered.password_auth(
         password_input=password
     ):
+        error_msg = "Username or password invalid!"
+        logging.error(
+            f"Failed login attempt for username: {username}, Error: {error_msg}"
+        )
+
         return (
-            jsonify({"success": False, "message": "Username or password invalid!"}),
+            jsonify({"success": False, "message": error_msg}),
             400,
         )
 
-    # If the user passes the validation process, log them in:
-    # 1. Put the user into the Flask session
-    login_user(user_registered)
-
-    # 2. Give the user access and refresh token
     access_token = create_access_token(identity=user_registered.user_id)
-    refresh_token = create_refresh_token(identity=user_registered.user_id)
 
-    return (
-        jsonify(
-            {
-                "success": True,
-                "message": "Login is successful!",
-                "access_token": access_token,
-                "refresh_token": refresh_token,
-            }
-        ),
-        201,
+    response = jsonify(
+        {
+            "success": True,
+            "message": "Login is successful!",
+            "user": {
+                "user_id": user_registered.user_id,
+                "username": user_registered.username,
+            },
+        }
     )
+    set_access_cookies(response, access_token)
+
+    return response, 201
 
 
 @api_bp.route("/signout", methods=["POST"], strict_slashes=False)
 @jwt_required()
 def sign_out():
-    logout_user()
-
     jwt = get_jwt()
     jti = jwt.get("jti")
 
@@ -113,14 +137,7 @@ def sign_out():
 
         return jsonify({"success": False, "message": "Failed to sign out"}), 500
     else:
-        return jsonify({"success": True, "message": "Sign out successful!"}), 200
+        response = jsonify({"success": True, "message": "Sign out successful!"})
+        unset_jwt_cookies(response)
 
-
-@api_bp.route("/refresh", methods=["POST"], strict_slashes=False)
-@jwt_required(refresh=True)
-def refresh_token():
-    current_user = get_jwt_identity()
-
-    access_token = {"access_token": create_access_token(identity=current_user)}
-
-    return jsonify(access_token), 201
+        return response, 200

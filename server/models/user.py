@@ -1,5 +1,4 @@
 from datetime import datetime
-from flask_login import UserMixin
 
 from .. import db, bcrypt, mc
 
@@ -14,7 +13,7 @@ def get_default_header():
     return mc.presigned_get_object(BUCKET, "default_header.png")
 
 
-class User(db.Model, UserMixin):
+class User(db.Model):
     __tablename__ = "users"
     user_id = db.Column(db.Integer(), primary_key=True)
     username = db.Column(db.String(50), nullable=False, unique=True)
@@ -67,9 +66,6 @@ class User(db.Model, UserMixin):
             "created_at": self.created_at,
             "updated_at": self.updated_at,
         }
-
-    def get_id(self):
-        return self.user_id
 
     @property
     def password(self):

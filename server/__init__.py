@@ -27,7 +27,6 @@ def create_app():
     migrate.init_app(app, db)
     bcrypt.init_app(app)
     cors.init_app(app)
-    login_manager.init_app(app)
     jwt_manager.init_app(app)
 
     return app

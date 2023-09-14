@@ -2,18 +2,12 @@
 import { reactive } from 'vue';
 import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
-import axios from 'axios'
 
 import InputField from './InputField.vue';
+import useAuth from '../../composables/auth'
+import router from '../../routes';
 
-type Response = {
-    message: string,
-    success: boolean,
-    access_token: string,
-    refresh_token: string
-}
-
-const state = reactive({
+const credentials = reactive({
     username: '',
     password: ''
 })
@@ -22,19 +16,16 @@ const rules = {
     password: { required }
 }
 
-const v$ = useVuelidate(rules, state)
+const v$ = useVuelidate(rules, credentials)
+
+const authStore = useAuth()
 
 const submitForm = async () => {
     try {
-        const { data } = await axios.post<Response | undefined>('http://localhost:5000/api/signin', state)
+        await authStore.signin(credentials)
 
-        if (data?.success) {
-            localStorage.setItem('access_token', data.access_token)
-            localStorage.setItem('refresh_token', data.refresh_token)
-
-            window.location.replace('/home')
-        } else {
-            console.error(data?.message)
+        if (authStore.getIsAuthenticated) {
+            router.push('/home')
         }
     } catch (err) {
         console.error(err)
