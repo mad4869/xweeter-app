@@ -28,30 +28,30 @@ class User(db.Model, UserMixin):
     created_at = db.Column(db.DateTime(), nullable=False, default=datetime.utcnow())
     updated_at = db.Column(db.DateTime())
     xweets = db.Relationship(
-        "Xweet", back_populates="xweets", lazy=True, cascade="all, delete-orphan"
+        "Xweet", backref="users", lazy=True, cascade="all, delete-orphan"
     )
     followed = db.Relationship(
         "Following",
         foreign_keys="[Following.followed_id]",
-        back_populates="followed",
+        backref="users_followed",
         lazy=True,
         cascade="all, delete-orphan",
     )
     follower = db.Relationship(
         "Following",
         foreign_keys="[Following.follower_id]",
-        back_populates="follower",
+        backref="users_follower",
         lazy=True,
         cascade="all, delete-orphan",
     )
     replies = db.Relationship(
-        "Reply", back_populates="replies", lazy=True, cascade="all, delete-orphan"
+        "Reply", backref="users", lazy=True, cascade="all, delete-orphan"
     )
     rexweets = db.Relationship(
-        "Rexweet", back_populates="rexweets", lazy=True, cascade="all, delete-orphan"
+        "Rexweet", backref="users", lazy=True, cascade="all, delete-orphan"
     )
     likes = db.Relationship(
-        "Like", back_populates="likes", lazy=True, cascade="all, delete-orphan"
+        "Like", backref="users", lazy=True, cascade="all, delete-orphan"
     )
 
     def serialize(self):
@@ -67,6 +67,9 @@ class User(db.Model, UserMixin):
             "created_at": self.created_at,
             "updated_at": self.updated_at,
         }
+
+    def get_id(self):
+        return self.user_id
 
     @property
     def password(self):

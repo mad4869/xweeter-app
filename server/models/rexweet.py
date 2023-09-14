@@ -10,8 +10,6 @@ class Rexweet(db.Model):
     xweet_id = db.Column(db.Integer(), db.ForeignKey("xweets.xweet_id"))
     created_at = db.Column(db.DateTime(), nullable=False, default=datetime.utcnow())
     updated_at = db.Column(db.DateTime())
-    users = db.Relationship("User", back_populates="rexweets")
-    xweets = db.Relationship("Xweet", back_populates="rexweets")
 
     def serialize(self):
         return {

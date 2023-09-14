@@ -11,8 +11,6 @@ class Reply(db.Model):
     body = db.Column(db.String(140), nullable=False)
     created_at = db.Column(db.DateTime(), nullable=False, default=datetime.utcnow())
     updated_at = db.Column(db.DateTime())
-    users = db.Relationship("User", back_populates="replies")
-    xweets = db.Relationship("Xweet", back_populates="replies")
 
     def serialize(self):
         return {

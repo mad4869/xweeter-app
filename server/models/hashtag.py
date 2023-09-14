@@ -9,7 +9,7 @@ class Hashtag(db.Model):
     xweets = db.Relationship(
         "Xweet",
         secondary=hashtag_xweet,
-        backref="hashtags",
+        backref=db.backref("hashtags", lazy="dynamic"),
         lazy="dynamic",
     )
 

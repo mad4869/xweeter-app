@@ -10,8 +10,6 @@ class Like(db.Model):
     xweet_id = db.Column(db.Integer(), db.ForeignKey("xweets.xweet_id"))
     created_at = db.Column(db.DateTime(), nullable=False, default=datetime.utcnow())
     updated_at = db.Column(db.DateTime())
-    users = db.Relationship("User", back_populates="likes")
-    xweets = db.Relationship("Xweet", back_populates="likes")
 
     def serialize(self):
         return {

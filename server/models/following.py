@@ -10,12 +10,6 @@ class Following(db.Model):
     follower_id = db.Column(db.Integer(), db.ForeignKey("users.user_id"))
     created_at = db.Column(db.DateTime(), nullable=False, default=datetime.utcnow())
     updated_at = db.Column(db.DateTime())
-    followed = db.Relationship(
-        "User", foreign_keys=[followed_id], back_populates="followed"
-    )
-    follower = db.Relationship(
-        "User", foreign_keys=[follower_id], back_populates="follower"
-    )
 
     def serialize(self):
         return {

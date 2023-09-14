@@ -1,6 +1,5 @@
 from datetime import datetime
 
-from .hashtag_xweet import hashtag_xweet
 from .. import db
 
 
@@ -12,21 +11,14 @@ class Xweet(db.Model):
     media = db.Column(db.Text())
     created_at = db.Column(db.DateTime(), nullable=False, default=datetime.utcnow())
     updated_at = db.Column(db.DateTime())
-    users = db.Relationship("Users", back_populates="xweets")
     replies = db.Relationship(
-        "Reply", back_populates="replies", lazy=True, cascade="all, delete-orphan"
+        "Reply", backref="xweets", lazy=True, cascade="all, delete-orphan"
     )
     rexweets = db.Relationship(
-        "Rexweet", back_populates="rexweets", lazy=True, cascade="all, delete-orphan"
+        "Rexweet", backref="xweets", lazy=True, cascade="all, delete-orphan"
     )
     likes = db.Relationship(
-        "Like", back_populates="likes", lazy=True, cascade="all, delete-orphan"
-    )
-    hashtags = db.Relationship(
-        "Hashtag",
-        secondary=hashtag_xweet,
-        backref="xweets",
-        lazy="dynamic",
+        "Like", backref="xweets", lazy=True, cascade="all, delete-orphan"
     )
 
     def serialize(self):
