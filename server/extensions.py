@@ -2,6 +2,8 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_bcrypt import Bcrypt
 from flask_cors import CORS
+from flask_login import LoginManager
+from flask_jwt_extended import JWTManager
 from minio import Minio
 from os import environ, path
 from dotenv import load_dotenv
@@ -20,6 +22,10 @@ bcrypt = Bcrypt()
 
 # CORS
 cors = CORS()
+
+# User auth manager
+login_manager = LoginManager()
+jwt_manager = JWTManager()
 
 # Object storage
 mc = Minio(

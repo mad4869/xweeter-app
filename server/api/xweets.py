@@ -2,12 +2,12 @@ from flask import request, jsonify
 
 from . import api_bp
 from ..extensions import db
-from ..models import Xweets, Users
+from ..models import Xweet, User
 
 
 @api_bp.route("/xweets", methods=["GET"], strict_slashes=False)
 def get_xweets():
-    xweets = db.session.execute(db.select(Xweets)).scalars()
+    xweets = db.session.execute(db.select(Xweet)).scalars()
     data = [xweet.serialize() for xweet in xweets]
 
     return jsonify({"success": True, "data": data}), 200
@@ -16,7 +16,7 @@ def get_xweets():
 @api_bp.route("/xweets/<int:xweet_id>", methods=["GET"], strict_slashes=False)
 def access_xweet(xweet_id):
     xweet = db.session.execute(
-        db.select(Xweets).filter_by(xweet_id=xweet_id)
+        db.select(Xweet).filter(Xweet.xweet_id == xweet_id)
     ).scalar_one_or_none()
     data = xweet.serialize()
 
@@ -31,7 +31,7 @@ def access_xweets_by_user(user_id):
         data = request.get_json()
         body = data["body"]
 
-        xweet = Xweets(user_id=user_id, body=body)
+        xweet = Xweet(user_id=user_id, body=body)
 
         try:
             db.session.add(xweet)
@@ -44,10 +44,10 @@ def access_xweets_by_user(user_id):
             return jsonify({"success": True, "data": xweet.serialize()}), 201
 
     xweets = db.session.execute(
-        db.select(Xweets)
-        .join(Users, Xweets.user_id == Users.user_id)
-        .filter(Users.user_id == user_id)
-        .order_by(Xweets.created_at.desc())
+        db.select(Xweet)
+        .join(User, Xweet.user_id == User.user_id)
+        .filter(User.user_id == user_id)
+        .order_by(Xweet.created_at.desc())
     ).scalars()
     data = []
     for xweet in xweets:

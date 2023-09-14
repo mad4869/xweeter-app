@@ -3,16 +3,16 @@ from datetime import datetime
 from .. import db
 
 
-class Replies(db.Model):
+class Reply(db.Model):
     __tablename__ = "replies"
     reply_id = db.Column(db.Integer(), primary_key=True)
     user_id = db.Column(db.Integer(), db.ForeignKey("users.user_id"))
     xweet_id = db.Column(db.Integer(), db.ForeignKey("xweets.xweet_id"))
     body = db.Column(db.String(140), nullable=False)
-    created_at = db.Column(db.DateTime(), nullable=False, default=datetime.now())
+    created_at = db.Column(db.DateTime(), nullable=False, default=datetime.utcnow())
     updated_at = db.Column(db.DateTime())
-    users = db.Relationship("Users", back_populates="replies")
-    xweets = db.Relationship("Xweets", back_populates="replies")
+    users = db.Relationship("User", back_populates="replies")
+    xweets = db.Relationship("Xweet", back_populates="replies")
 
     def serialize(self):
         return {

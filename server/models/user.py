@@ -1,4 +1,5 @@
 from datetime import datetime
+from flask_login import UserMixin
 
 from .. import db, bcrypt, mc
 
@@ -13,7 +14,7 @@ def get_default_header():
     return mc.presigned_get_object(BUCKET, "default_header.png")
 
 
-class Users(db.Model):
+class User(db.Model, UserMixin):
     __tablename__ = "users"
     user_id = db.Column(db.Integer(), primary_key=True)
     username = db.Column(db.String(50), nullable=False, unique=True)
@@ -24,33 +25,33 @@ class Users(db.Model):
     role = db.Column(db.String(50), nullable=False, default="user")
     profile_pic = db.Column(db.Text(), default=get_default_pfp())
     header_pic = db.Column(db.Text(), default=get_default_header())
-    created_at = db.Column(db.DateTime(), nullable=False, default=datetime.now())
+    created_at = db.Column(db.DateTime(), nullable=False, default=datetime.utcnow())
     updated_at = db.Column(db.DateTime())
     xweets = db.Relationship(
-        "Xweets", back_populates="users", lazy=True, cascade="all, delete-orphan"
+        "Xweet", back_populates="xweets", lazy=True, cascade="all, delete-orphan"
     )
     followed = db.Relationship(
-        "Followings",
-        foreign_keys="[Followings.followed_id]",
+        "Following",
+        foreign_keys="[Following.followed_id]",
         back_populates="followed",
         lazy=True,
         cascade="all, delete-orphan",
     )
     follower = db.Relationship(
-        "Followings",
-        foreign_keys="[Followings.follower_id]",
+        "Following",
+        foreign_keys="[Following.follower_id]",
         back_populates="follower",
         lazy=True,
         cascade="all, delete-orphan",
     )
     replies = db.Relationship(
-        "Replies", back_populates="users", lazy=True, cascade="all, delete-orphan"
+        "Reply", back_populates="replies", lazy=True, cascade="all, delete-orphan"
     )
     rexweets = db.Relationship(
-        "Rexweets", back_populates="users", lazy=True, cascade="all, delete-orphan"
+        "Rexweet", back_populates="rexweets", lazy=True, cascade="all, delete-orphan"
     )
     likes = db.Relationship(
-        "Likes", back_populates="users", lazy=True, cascade="all, delete-orphan"
+        "Like", back_populates="likes", lazy=True, cascade="all, delete-orphan"
     )
 
     def serialize(self):

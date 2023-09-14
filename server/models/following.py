@@ -3,18 +3,18 @@ from datetime import datetime
 from .. import db
 
 
-class Followings(db.Model):
+class Following(db.Model):
     __tablename__ = "followings"
     following_id = db.Column(db.Integer(), primary_key=True)
     followed_id = db.Column(db.Integer(), db.ForeignKey("users.user_id"))
     follower_id = db.Column(db.Integer(), db.ForeignKey("users.user_id"))
-    created_at = db.Column(db.DateTime(), nullable=False, default=datetime.now())
+    created_at = db.Column(db.DateTime(), nullable=False, default=datetime.utcnow())
     updated_at = db.Column(db.DateTime())
     followed = db.Relationship(
-        "Users", foreign_keys=[followed_id], back_populates="followed"
+        "User", foreign_keys=[followed_id], back_populates="followed"
     )
     follower = db.Relationship(
-        "Users", foreign_keys=[follower_id], back_populates="follower"
+        "User", foreign_keys=[follower_id], back_populates="follower"
     )
 
     def serialize(self):

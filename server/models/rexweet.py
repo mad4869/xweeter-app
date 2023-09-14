@@ -3,19 +3,19 @@ from datetime import datetime
 from .. import db
 
 
-class Likes(db.Model):
-    __tablename__ = "likes"
-    like_id = db.Column(db.Integer(), primary_key=True)
+class Rexweet(db.Model):
+    __tablename__ = "rexweets"
+    rexweet_id = db.Column(db.Integer(), primary_key=True)
     user_id = db.Column(db.Integer(), db.ForeignKey("users.user_id"))
     xweet_id = db.Column(db.Integer(), db.ForeignKey("xweets.xweet_id"))
-    created_at = db.Column(db.DateTime(), nullable=False, default=datetime.now())
+    created_at = db.Column(db.DateTime(), nullable=False, default=datetime.utcnow())
     updated_at = db.Column(db.DateTime())
-    users = db.Relationship("Users", back_populates="likes")
-    xweets = db.Relationship("Xweets", back_populates="likes")
+    users = db.Relationship("User", back_populates="rexweets")
+    xweets = db.Relationship("Xweet", back_populates="rexweets")
 
     def serialize(self):
         return {
-            "like_id": self.like_id,
+            "rexweet_id": self.rexweet_id,
             "user_id": self.user_id,
             "xweet_id": self.xweet_id,
             "created_at": self.created_at,
@@ -23,4 +23,4 @@ class Likes(db.Model):
         }
 
     def __repr__(self):
-        return f"{self.user_id} likes {self.xweet_id}"
+        return f"{self.user_id} rexweets {self.xweet_id}"
