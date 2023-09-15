@@ -6,22 +6,9 @@ import axios from 'axios'
 
 import InputField from './InputField.vue';
 import router from '../../routes';
-import useAuth from '../../composables/useAuth';
+import useAuth, { type User } from '../../composables/useAuth';
 
 const authStore = useAuth()
-
-type User = {
-    user_id: number,
-    username: string,
-    full_name: string,
-    email: string,
-    bio: string | null,
-    role: 'admin' | 'user',
-    profile_pic: string,
-    header_pic: string,
-    created_at: string,
-    updated_at: string | null
-}
 
 type Response = {
     user: User,
@@ -44,7 +31,7 @@ const rules = {
 
 const v$ = useVuelidate(rules, userData)
 
-const submitForm = async () => {
+const signupAndIn = async () => {
     try {
         const { data } = await axios.post<Response | undefined>('/api/signup', userData)
         if (data?.success) {
@@ -61,7 +48,7 @@ const submitForm = async () => {
 </script>
 
 <template>
-    <form class="flex-1 flex flex-col items-center gap-6 w-full" @submit.prevent="submitForm">
+    <form class="flex-1 flex flex-col items-center gap-6 w-full" @submit.prevent="signupAndIn">
         <h3 class="text-2xl text-white font-semibold">Let's get you started!</h3>
         <InputField input-id="fullname" input-name="fullname" input-type="text" :input-errors="v$.fullname.$errors"
             v-model="v$.fullname.$model" label-text="Full Name" icon="fa-solid fa-font" />

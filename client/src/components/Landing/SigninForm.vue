@@ -20,7 +20,7 @@ const rules = {
 
 const v$ = useVuelidate(rules, credentials)
 
-const submitForm = async () => {
+const signin = async () => {
     try {
         await authStore.signin(credentials)
 
@@ -34,7 +34,7 @@ const submitForm = async () => {
 </script>
 
 <template>
-    <form class="flex-1 flex flex-col items-center gap-6 w-full" @submit.prevent="submitForm">
+    <form class="flex-1 flex flex-col items-center gap-6 w-full" @submit.prevent="signin">
         <h3 class="text-2xl text-white font-semibold">Welcome back!</h3>
         <InputField input-id="username" input-name="username" input-type="text" :input-errors="v$.username.$errors"
             v-model="v$.username.$model" label-text="Username" icon="fa-solid fa-user" />
@@ -45,4 +45,4 @@ const submitForm = async () => {
             Sign In
         </button>
     </form>
-</template>../../composables/useAuth
+</template>

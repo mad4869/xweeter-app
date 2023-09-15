@@ -1,11 +1,21 @@
 <script setup lang="ts">
 import Logo from '../Logo.vue';
+import router from '../../../routes';
+import useAuth from '../../../composables/useAuth';
 
-const menus = [
-    { path: '/profile', name: 'Profile' },
-    { path: '/leaderboard', name: 'Leaderboard' },
-    { path: '/logout', name: 'Logout' },
-]
+const authStore = useAuth()
+
+const signout = async () => {
+    try {
+        await authStore.signout()
+
+        if (!authStore.getIsAuthenticated) {
+            router.push('/')
+        }
+    } catch (err) {
+        console.error(err)
+    }
+}
 </script>
 
 <template>
@@ -17,11 +27,22 @@ const menus = [
                 <Logo size="sm" />
             </router-link>
         </div>
-        <ul class="col-span-1 flex justify-center items-center gap-8">
-            <router-link v-for="menu in menus" :key="menu.name" :to="menu.path"
-                class="px-2 py-1 rounded-md cursor-pointer transition-colors ease-in hover:bg-sky-600/10 hover:backdrop-blur-md">
-                {{ menu.name }}
-            </router-link>
-        </ul>
+        <div class="col-span-1 flex justify-center items-center gap-8">
+            <span v-if="authStore.getIsAuthenticated" class="navbar-menu hover:bg-sky-600/10">
+                <router-link to="/profile">Profile</router-link>
+            </span>
+            <span v-if="authStore.getIsAuthenticated" class="navbar-menu hover:bg-sky-600/10">
+                <router-link to="/leaderboard">Leaderboard</router-link>
+            </span>
+            <button v-if="authStore.getIsAuthenticated" class="navbar-menu hover:bg-red-600/30" @click="signout">
+                Logout
+            </button>
+        </div>
     </nav>
 </template>
+
+<style scoped>
+.navbar-menu {
+    @apply px-2 py-1 rounded-md cursor-pointer transition-colors ease-in hover:backdrop-blur-md
+}
+</style>

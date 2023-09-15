@@ -2,22 +2,17 @@
 import useAuth from '../../composables/useAuth';
 
 const authStore = useAuth()
-
-const signedInUser = {
-    username: authStore.getSignedInUsername
-}
 </script>
 
 <template>
     <section class="flex-[2] flex flex-col justify-evenly items-center border border-solid border-sky-800 rounded-xl">
         <div class="flex justify-between items-center w-full px-8 pb-4 border-b border-solid border-sky-600/20">
             <div>
-                <span
-                    class="w-10 h-10 px-3 py-2 bg-white text-xs border border-solid border-sky-800 rounded-full text-center">A</span>
+                <img :src="authStore.getSignedInPfp" class="w-10 h-10 border border-solid border-sky-800 rounded-full" />
             </div>
             <div class="flex flex-col">
-                <span class="text-white font-bold">Budi Sudarsono</span>
-                <span class="text-sm text-sky-800">@{{ signedInUser.username }}</span>
+                <span class="text-white font-bold">{{ authStore.getSignedInFullname }}</span>
+                <span class="text-sm text-sky-800">@{{ authStore.getSignedInUsername }}</span>
             </div>
         </div>
         <div

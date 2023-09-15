@@ -2,6 +2,7 @@
 import axios from 'axios';
 
 import Zweet from '../../components/App/Zweet.vue';
+import useAuth from '../../composables/useAuth';
 
 type Xweet = {
     xweet_id: number,
@@ -19,9 +20,11 @@ type Response = {
     success: boolean
 }
 
+const authStore = useAuth()
+
 const queryXweets = async (): Promise<Response | undefined> => {
     try {
-        const { data } = await axios.get('http://localhost:5000/api/users/1/xweets')
+        const { data } = await axios.get(`api/users/${authStore.getSignedInUserId}/xweets`)
         if (data) {
             return data
         }

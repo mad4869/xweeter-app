@@ -87,11 +87,11 @@ def sign_in():
     username = data["username"]
     password = data["password"]
 
-    user_registered = db.session.execute(
+    registered_user = db.session.execute(
         db.select(User).filter(User.username == username)
     ).scalar_one_or_none()
 
-    if not user_registered or not user_registered.password_auth(
+    if not registered_user or not registered_user.password_auth(
         password_input=password
     ):
         error_msg = "Username or password invalid!"
@@ -104,16 +104,13 @@ def sign_in():
             400,
         )
 
-    access_token = create_access_token(identity=user_registered.user_id)
+    access_token = create_access_token(identity=registered_user.user_id)
 
     response = jsonify(
         {
             "success": True,
             "message": "Login is successful!",
-            "user": {
-                "user_id": user_registered.user_id,
-                "username": user_registered.username,
-            },
+            "user": registered_user.serialize(),
         }
     )
     set_access_cookies(response, access_token)
