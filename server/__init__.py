@@ -1,27 +1,17 @@
 from flask import Flask
 
 from .extensions import *
+from .models import *
+from .routes import routes
+from .config import Config
 
 
 def create_app():
-    from .config import Config
-    from .models import (
-        User,
-        Xweet,
-        Following,
-        Reply,
-        Like,
-        Rexweet,
-        Hashtag,
-        BlocklistToken,
-    )
-    from .api import api_bp
-
     app = Flask(__name__)
 
     app.config.from_object(Config)
 
-    app.register_blueprint(api_bp)
+    app.register_blueprint(routes)
 
     db.init_app(app)
     migrate.init_app(app, db)

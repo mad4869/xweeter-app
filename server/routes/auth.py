@@ -11,7 +11,7 @@ from flask_jwt_extended import (
 from datetime import datetime, timezone, timedelta
 import logging
 
-from . import api_bp
+from . import routes
 from ..extensions import db, jwt_manager
 from ..models import User, BlocklistToken
 
@@ -32,7 +32,7 @@ def check_if_token_is_revoked(jwt_header, jwt_payload: dict) -> bool:
     return token is not None
 
 
-@api_bp.after_request
+@routes.after_request
 def refresh_expiring_jwts(response):
     try:
         exp_timestamp = get_jwt()["exp"]
@@ -48,7 +48,7 @@ def refresh_expiring_jwts(response):
         return response
 
 
-@api_bp.route("/signup", methods=["POST"], strict_slashes=False)
+@routes.route("/signup", methods=["POST"], strict_slashes=False)
 def sign_up():
     data = request.get_json()
     username = data["username"]
@@ -81,7 +81,7 @@ def sign_up():
         )
 
 
-@api_bp.route("/signin", methods=["POST"], strict_slashes=False)
+@routes.route("/signin", methods=["POST"], strict_slashes=False)
 def sign_in():
     data = request.get_json()
     username = data["username"]
@@ -121,7 +121,7 @@ def sign_in():
     return response, 201
 
 
-@api_bp.route("/signout", methods=["POST"], strict_slashes=False)
+@routes.route("/signout", methods=["POST"], strict_slashes=False)
 @jwt_required()
 def sign_out():
     jwt = get_jwt()

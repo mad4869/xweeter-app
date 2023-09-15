@@ -18,7 +18,7 @@ type Xweet = {
     body: string,
     profile_pic: string,
     created_at: string,
-    updated_at: string
+    updated_at: string | null
 }
 
 type Response = {

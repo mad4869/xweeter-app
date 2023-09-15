@@ -1,12 +1,12 @@
 from flask import request, jsonify
 from flask_jwt_extended import jwt_required
 
-from . import api_bp
+from . import routes
 from ..extensions import db
 from ..models import Xweet, User, Hashtag
 
 
-@api_bp.route("/xweets", methods=["GET"], strict_slashes=False)
+@routes.route("/xweets", methods=["GET"], strict_slashes=False)
 def get_xweets():
     xweets = db.session.execute(db.select(Xweet)).scalars()
     data = [xweet.serialize() for xweet in xweets]
@@ -14,7 +14,7 @@ def get_xweets():
     return jsonify({"success": True, "data": data}), 200
 
 
-@api_bp.route("/xweets/<int:xweet_id>", methods=["GET"], strict_slashes=False)
+@routes.route("/xweets/<int:xweet_id>", methods=["GET"], strict_slashes=False)
 def access_xweet(xweet_id):
     xweet = db.session.execute(
         db.select(Xweet).filter(Xweet.xweet_id == xweet_id)
@@ -24,7 +24,7 @@ def access_xweet(xweet_id):
     return jsonify({"success": True, "data": data}), 200
 
 
-@api_bp.route(
+@routes.route(
     "/users/<int:user_id>/xweets", methods=["GET", "POST"], strict_slashes=False
 )
 @jwt_required()

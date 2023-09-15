@@ -4,8 +4,10 @@ import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
 
 import InputField from './InputField.vue';
-import useAuth from '../../composables/useAuth'
 import router from '../../routes';
+import useAuth from '../../composables/useAuth';
+
+const authStore = useAuth()
 
 const credentials = reactive({
     username: '',
@@ -18,14 +20,11 @@ const rules = {
 
 const v$ = useVuelidate(rules, credentials)
 
-const authStore = useAuth()
-
 const submitForm = async () => {
     try {
         await authStore.signin(credentials)
 
         if (authStore.getIsAuthenticated) {
-            console.log(authStore.getSignedInUsername)
             router.push('/home')
         }
     } catch (err) {
