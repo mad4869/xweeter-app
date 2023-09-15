@@ -16,7 +16,10 @@ type AuthResponse = {
     }
 }
 
-const BASE_URL = 'http://localhost:5000/api'
+const authService = axios.create({
+    withCredentials: true,
+    xsrfCookieName: 'csrf_access_token'
+});
 
 const useAuth = defineStore('auth', {
         state: () => ({
@@ -32,7 +35,7 @@ const useAuth = defineStore('auth', {
         actions: {
             async signin(credentials: { username: string, password: string }) {
                 try {
-                    const { data } = await axios.post<AuthResponse | undefined>(`${BASE_URL}/signin`, credentials)
+                    const { data } = await authService.post<AuthResponse | undefined>('/api/signin', credentials)
                     if (data?.success) {
                         this.isAuthenticated = true
                         this.signedInUserId = data.user.user_id
@@ -44,7 +47,7 @@ const useAuth = defineStore('auth', {
             },
             async signout() {
                 try {
-                    const { data } = await axios.post<AuthResponse | undefined>(`${BASE_URL}/signout`)
+                    const { data } = await authService.post<AuthResponse | undefined>('/api/signout')
                     if (data?.success) {
                         this.isAuthenticated = false
                         this.signedInUserId = null

@@ -5,8 +5,10 @@ import Toggle from './Toggle.vue';
 import SignupForm from './SignupForm.vue';
 import SigninForm from './SigninForm.vue';
 
-const activeBtn = ref<'Sign Up' | 'Sign In'>("Sign Up")
-const activateBtn = (btn: "Sign Up" | "Sign In") => {
+export type UserAuth = 'Sign Up' | 'Sign In'
+
+const activeBtn = ref<UserAuth>("Sign Up")
+const activateBtn = (btn: UserAuth) => {
     activeBtn.value = btn
 }
 </script>
@@ -15,11 +17,11 @@ const activateBtn = (btn: "Sign Up" | "Sign In") => {
     <section
         class="col-start-2 flex flex-col justify-center items-center gap-6 px-4 pt-8 bg-white/10 backdrop-blur-lg rounded-lg shadow-md shadow-sky-800">
         <Toggle :activeBtn="activeBtn" @activateBtn="activateBtn" />
-        <transition name="fade">
-            <keep-alive>
+        <Transition name="fade">
+            <KeepAlive>
                 <component :is="activeBtn === 'Sign Up' ? SignupForm : SigninForm" />
-            </keep-alive>
-        </transition>
+            </KeepAlive>
+        </Transition>
     </section>
 </template>
 
@@ -30,11 +32,11 @@ input {
 
 .fade-enter-active,
 .fade-leave-active {
-    transition: opacity 1s ease;
+    transition: transform 500ms ease-out;
 }
 
 .fade-enter-from,
 .fade-leave-to {
-    opacity: 0;
+    transform: translateY(1rem) scale(0);
 }
 </style>

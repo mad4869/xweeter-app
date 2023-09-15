@@ -25,5 +25,4 @@ class Config:
     JWT_TOKEN_LOCATION = ["cookies"]
     JWT_COOKIE_DOMAIN = "localhost"
     JWT_COOKIE_SECURE = False
-    SESSION_COOKIE_SECURE = False
     JWT_ACCESS_TOKEN_EXPIRES = datetime.timedelta(hours=2)

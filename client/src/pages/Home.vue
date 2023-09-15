@@ -35,7 +35,7 @@ const queryXweets = async (): Promise<Response | undefined> => {
     }
 
     try {
-        const { data } = await axios.get('http://localhost:5000/api/users/1/xweets', OPTIONS)
+        const { data } = await axios.get('/api/users/1/xweets', OPTIONS)
         if (data) {
             return data
         }

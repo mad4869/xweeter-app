@@ -4,7 +4,7 @@ import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
 
 import InputField from './InputField.vue';
-import useAuth from '../../composables/auth'
+import useAuth from '../../composables/useAuth'
 import router from '../../routes';
 
 const credentials = reactive({
@@ -25,6 +25,7 @@ const submitForm = async () => {
         await authStore.signin(credentials)
 
         if (authStore.getIsAuthenticated) {
+            console.log(authStore.getSignedInUsername)
             router.push('/home')
         }
     } catch (err) {
@@ -45,4 +46,4 @@ const submitForm = async () => {
             Sign In
         </button>
     </form>
-</template>
+</template>../../composables/useAuth

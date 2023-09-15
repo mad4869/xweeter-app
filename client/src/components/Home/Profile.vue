@@ -1,5 +1,11 @@
 <script setup lang="ts">
+import useAuth from '../../composables/useAuth';
 
+const authStore = useAuth()
+
+const signedInUser = {
+    username: authStore.getSignedInUsername
+}
 </script>
 
 <template>
@@ -11,7 +17,7 @@
             </div>
             <div class="flex flex-col">
                 <span class="text-white font-bold">Budi Sudarsono</span>
-                <span class="text-sm text-sky-800">@BudiSudarsono</span>
+                <span class="text-sm text-sky-800">@{{ signedInUser.username }}</span>
             </div>
         </div>
         <div

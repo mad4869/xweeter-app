@@ -1,9 +1,11 @@
 <script setup lang="ts">
+import { type UserAuth } from './Cta.vue'
+
 defineProps<{
-    activeBtn: 'Sign Up' | 'Sign In'
+    activeBtn: UserAuth
 }>()
 defineEmits<{
-    (e: 'activateBtn', btn: 'Sign Up' | 'Sign In'): void
+    (e: 'activateBtn', btn: UserAuth): void
 }>()
 </script>
 
