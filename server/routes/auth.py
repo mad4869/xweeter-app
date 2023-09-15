@@ -118,6 +118,27 @@ def sign_in():
     return response, 201
 
 
+@routes.route("/signed-in", methods=["GET"], strict_slashes=False)
+@jwt_required()
+def get_logged_in_user():
+    user_id = get_jwt_identity()
+    user = db.session.execute(
+        db.select(User).filter(User.user_id == user_id)
+    ).scalar_one_or_none()
+    data = user.serialize()
+
+    return (
+        jsonify(
+            {
+                "success": True,
+                "message": f"{data['username']} is signed in",
+                "user": data,
+            }
+        ),
+        200,
+    )
+
+
 @routes.route("/signout", methods=["POST"], strict_slashes=False)
 @jwt_required()
 def sign_out():

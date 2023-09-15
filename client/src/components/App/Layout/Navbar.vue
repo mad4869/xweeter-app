@@ -4,6 +4,7 @@ import router from '../../../routes';
 import useAuth from '../../../composables/useAuth';
 
 const authStore = useAuth()
+await authStore.getUser()
 
 const signout = async () => {
     try {

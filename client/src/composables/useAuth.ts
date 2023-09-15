@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import axios from 'axios'
+import getCookie from '../utils/getCookie'
 
 type AuthState = {
     isAuthenticated: boolean,
@@ -39,6 +40,13 @@ const authService = axios.create({
     xsrfCookieName: 'csrf_access_token'
 });
 
+const OPTIONS = {
+    credentials: 'same-origin',
+    headers: {
+        'X-CSRF-TOKEN': getCookie('csrf_access_token')
+    }
+}
+
 const useAuth = defineStore('auth', {
         state: () => ({
             isAuthenticated: false,
@@ -72,6 +80,16 @@ const useAuth = defineStore('auth', {
                     const { data } = await authService.post<AuthResponse | undefined>('/api/signin', credentials)
                     if (data?.success) {
                         this.isAuthenticated = true
+                    }
+                } catch (err) {
+                    console.error(err)
+                }
+            },
+            async getUser() {
+                try {
+                    const { data } = await authService.get<AuthResponse | undefined>('/api/signed-in')
+                    if (data?.success) {
+                        this.isAuthenticated = true
                         this.signedInUserId = data.user.user_id
                         this.signedInUsername = data.user.username
                         this.signedInFullname = data.user.full_name
@@ -89,7 +107,7 @@ const useAuth = defineStore('auth', {
             },
             async signout() {
                 try {
-                    const { data } = await authService.post<AuthResponse | undefined>('/api/signout')
+                    const { data } = await authService.post<AuthResponse | undefined>('/api/signout', '', OPTIONS)
                     if (data?.success) {
                         this.isAuthenticated = false
                         this.signedInUserId = undefined

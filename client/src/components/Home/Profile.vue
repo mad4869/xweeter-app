@@ -2,6 +2,7 @@
 import useAuth from '../../composables/useAuth';
 
 const authStore = useAuth()
+await authStore.getUser()
 </script>
 
 <template>

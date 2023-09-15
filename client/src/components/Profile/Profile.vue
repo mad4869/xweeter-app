@@ -21,6 +21,7 @@ type Response = {
 }
 
 const authStore = useAuth()
+await authStore.getUser()
 
 const queryXweets = async (): Promise<Response | undefined> => {
     try {
