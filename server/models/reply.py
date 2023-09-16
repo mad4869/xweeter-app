@@ -9,12 +9,13 @@ class Reply(db.Model):
     user_id = db.Column(db.Integer(), db.ForeignKey("users.user_id"))
     xweet_id = db.Column(db.Integer(), db.ForeignKey("xweets.xweet_id"))
     body = db.Column(db.String(140), nullable=False)
+    media = db.Column(db.Text())
     created_at = db.Column(db.DateTime(), nullable=False, default=datetime.utcnow())
     updated_at = db.Column(db.DateTime())
 
     def serialize(self):
         return {
-            "reply_id": self.like_id,
+            "reply_id": self.reply_id,
             "user_id": self.user_id,
             "xweet_id": self.xweet_id,
             "body": self.body,
