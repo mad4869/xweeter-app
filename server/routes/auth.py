@@ -9,17 +9,10 @@ from flask_jwt_extended import (
     unset_jwt_cookies,
 )
 from datetime import datetime, timezone, timedelta
-import logging
 
-from . import routes
+from . import routes, logging
 from ..extensions import db, jwt_manager
 from ..models import User, BlocklistToken
-
-logging.basicConfig(
-    filename="app.log",
-    level=logging.INFO,
-    format="%(asctime)s - %(levelname)s - %(message)s",
-)
 
 
 @jwt_manager.token_in_blocklist_loader

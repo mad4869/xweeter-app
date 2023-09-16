@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from .. import db, bcrypt, mc
+from .follow import follow
 
 BUCKET = "xweeter"
 
@@ -30,18 +31,12 @@ class User(db.Model):
         "Xweet", backref="users", lazy=True, cascade="all, delete-orphan"
     )
     followed = db.Relationship(
-        "Following",
-        foreign_keys="[Following.followed_id]",
-        backref="users_followed",
-        lazy=True,
-        cascade="all, delete-orphan",
-    )
-    follower = db.Relationship(
-        "Following",
-        foreign_keys="[Following.follower_id]",
-        backref="users_follower",
-        lazy=True,
-        cascade="all, delete-orphan",
+        "User",
+        secondary=follow,
+        primaryjoin=("User.user_id == follows.c.follower_id"),
+        secondaryjoin=("User.user_id == follows.c.followed_id"),
+        backref=db.backref("users", lazy="dynamic"),
+        lazy="dynamic",
     )
     replies = db.Relationship(
         "Reply", backref="users", lazy=True, cascade="all, delete-orphan"
@@ -63,13 +58,13 @@ class User(db.Model):
             "role": self.role,
             "profile_pic": self.profile_pic,
             "header_pic": self.header_pic,
-            "created_at": self.created_at,
-            "updated_at": self.updated_at,
+            "created_at": self.created_at.strftime("%Y-%m-%d %H:%M:%S"),
+            "updated_at": self.updated_at.strftime("%Y-%m-%d %H:%M:%S"),
         }
 
     @property
     def password(self):
-        return self.password
+        return self._password
 
     @password.setter
     def password(self, plain_text_password):

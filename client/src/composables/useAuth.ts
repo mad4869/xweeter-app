@@ -107,7 +107,7 @@ const useAuth = defineStore('auth', {
             },
             async signout() {
                 try {
-                    const { data } = await authService.post<AuthResponse | undefined>('/api/signout', '', OPTIONS)
+                    const { data } = await axios.post<AuthResponse | undefined>('/api/signout', '', OPTIONS)
                     if (data?.success) {
                         this.isAuthenticated = false
                         this.signedInUserId = undefined

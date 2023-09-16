@@ -1,8 +1,49 @@
 <script setup lang="ts">
+import axios from 'axios';
+
 import useAuth from '../../composables/useAuth';
+import getCookie from '../../utils/getCookie';
+
+type Following = {
+    following_id: number,
+    followed_id: number,
+    follower_id: number,
+    username: string,
+    full_name: string,
+    profile_pic: string,
+    bio: string | null,
+    created_at: string,
+    updated_at: string | null
+}
+
+type Response = {
+    success: boolean,
+    data: Following[]
+}
 
 const authStore = useAuth()
 await authStore.getUser()
+
+const queryFollow = async (): Promise<Response | undefined> => {
+    const OPTIONS = {
+        credentials: 'same-origin',
+        headers: {
+            'X-CSRF-TOKEN': getCookie('csrf_access_token')
+        }
+    }
+
+    try {
+        const { data } = await axios.get(`/api/users/${authStore.getSignedInUserId}/following`, OPTIONS)
+        if (data) {
+            console.log(data)
+            return data
+        }
+    } catch (err) {
+        console.error(err)
+    }
+}
+
+const { data } = (await queryFollow()) || { data: [] }
 </script>
 
 <template>
@@ -22,7 +63,7 @@ await authStore.getUser()
             <span>Zweets</span>
         </div>
         <div class="flex flex-col items-center w-full pb-4 text-white text-lg border-b border-solid border-sky-600/20">
-            <span><strong>700</strong> Followings</span>
+            <span><strong>{{ data.length }}</strong> Followings</span>
             <span><strong>650</strong> Followers</span>
         </div>
         <div>
