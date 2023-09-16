@@ -1,0 +1,73 @@
+from flask import request, jsonify
+from flask_jwt_extended import jwt_required
+from itertools import chain
+
+from . import routes
+from ..extensions import db
+from ..models import Xweet, User, Rexweet, follow
+
+
+@routes.route(
+    "/users/<int:user_id>/profile-timeline", methods=["GET"], strict_slashes=False
+)
+# @jwt_required()
+def get_user_timeline(user_id):
+    own_xweets = db.session.execute(
+        db.select(Xweet)
+        .join(User, Xweet.user_id == User.user_id)
+        .filter(User.user_id == user_id)
+        .order_by(Xweet.created_at.desc())
+    ).scalars()
+    own_xweets_data = [xweet.serialize() for xweet in own_xweets]
+
+    rexweets = db.session.execute(
+        db.select(Rexweet)
+        .join(Xweet, Rexweet.xweet_id == Xweet.xweet_id)
+        .join(User, Xweet.user_id == User.user_id)
+        .filter(Rexweet.user_id == user_id)
+        .order_by(Rexweet.created_at.desc())
+    ).scalars()
+    rexweets_data = []
+    for rexweet in rexweets:
+        rexweet_data = rexweet.serialize()
+        rexweet_data["body"] = rexweet.xweets.body
+        rexweet_data["media"] = rexweet.xweets.media
+        rexweet_data["og_user_id"] = rexweet.xweets.users.user_id
+        rexweet_data["og_username"] = rexweet.xweets.users.username
+        rexweet_data["og_full_name"] = rexweet.xweets.users.full_name
+        rexweet_data["og_profile_pic"] = rexweet.xweets.users.profile_pic
+        rexweets_data.append(rexweet_data)
+
+    timeline = list(chain(own_xweets_data, rexweets_data))
+    sorted_timeline = sorted(
+        timeline, key=lambda xweet: xweet["created_at"], reverse=True
+    )
+
+    return jsonify({"success": True, "data": sorted_timeline}), 200
+
+
+@routes.route("/users/<int:user_id>/timeline", methods=["GET"], strict_slashes=False)
+def get_timeline(user_id):
+    own_xweets = db.session.execute(
+        db.select(Xweet)
+        .join(User, Xweet.user_id == User.user_id)
+        .filter(User.user_id == user_id)
+        .order_by(Xweet.created_at.desc())
+    ).scalars()
+    own_xweets_data = [xweet.serialize() for xweet in own_xweets]
+
+    following_xweets = db.session.execute(
+        db.select(Xweet)
+        .join(User, Xweet.user_id == User.user_id)
+        .join(follow, User.user_id == follow.c.followed_id)
+        .filter(follow.c.follower_id == user_id)
+        .order_by(Xweet.created_at.desc())
+    ).scalars()
+    following_xweets_data = [xweet.serialize() for xweet in following_xweets]
+
+    timeline = list(chain(own_xweets_data, following_xweets_data))
+    sorted_timeline = sorted(
+        timeline, key=lambda xweet: xweet["created_at"], reverse=True
+    )
+
+    return jsonify({"success": True, "data": sorted_timeline}), 200

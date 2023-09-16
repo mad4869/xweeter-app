@@ -26,6 +26,7 @@ class Xweet(db.Model):
             "xweet_id": self.xweet_id,
             "user_id": self.user_id,
             "body": self.body,
+            "media": self.media,
             "created_at": self.created_at.strftime("%Y-%m-%d %H:%M:%S"),
             "updated_at": self.updated_at.strftime("%Y-%m-%d %H:%M:%S")
             if self.updated_at
