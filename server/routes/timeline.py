@@ -18,7 +18,13 @@ def get_user_timeline(user_id):
         .filter(User.user_id == user_id)
         .order_by(Xweet.created_at.desc())
     ).scalars()
-    own_xweets_data = [xweet.serialize() for xweet in own_xweets]
+    own_xweets_data = []
+    for own_xweet in own_xweets:
+        own_xweet_data = own_xweet.serialize()
+        own_xweet_data["username"] = own_xweet.users.username
+        own_xweet_data["full_name"] = own_xweet.users.full_name
+        own_xweet_data["profile_pic"] = own_xweet.users.profile_pic
+        own_xweets_data.append(own_xweet_data)
 
     rexweets = db.session.execute(
         db.select(Rexweet)
@@ -54,7 +60,13 @@ def get_timeline(user_id):
         .filter(User.user_id == user_id)
         .order_by(Xweet.created_at.desc())
     ).scalars()
-    own_xweets_data = [xweet.serialize() for xweet in own_xweets]
+    own_xweets_data = []
+    for own_xweet in own_xweets:
+        own_xweet_data = own_xweet.serialize()
+        own_xweet_data["username"] = own_xweet.users.username
+        own_xweet_data["full_name"] = own_xweet.users.full_name
+        own_xweet_data["profile_pic"] = own_xweet.users.profile_pic
+        own_xweets_data.append(own_xweet_data)
 
     following_xweets = db.session.execute(
         db.select(Xweet)
@@ -63,7 +75,13 @@ def get_timeline(user_id):
         .filter(follow.c.follower_id == user_id)
         .order_by(Xweet.created_at.desc())
     ).scalars()
-    following_xweets_data = [xweet.serialize() for xweet in following_xweets]
+    following_xweets_data = []
+    for following_xweet in following_xweets:
+        following_xweet_data = following_xweet.serialize()
+        following_xweet_data["username"] = following_xweet.users.username
+        following_xweet_data["full_name"] = following_xweet.users.full_name
+        following_xweet_data["profile_pic"] = following_xweet.users.profile_pic
+        following_xweets_data.append(following_xweet_data)
 
     timeline = list(chain(own_xweets_data, following_xweets_data))
     sorted_timeline = sorted(

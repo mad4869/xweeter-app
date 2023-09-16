@@ -1,31 +1,36 @@
 <script setup lang="ts">
-import axios from 'axios';
-
-import Zweet from '../../components/App/Zweet.vue';
+import Xweet from '../App/Xweet.vue';
 import useAuth from '../../composables/useAuth';
+import apiRequest from '../../utils/apiRequest';
 
-type Xweet = {
+type Xweets = {
     xweet_id: number,
     user_id: number,
-    full_name: string,
-    username: string,
+    rexweet_id?: number,
+    full_name?: string,
+    username?: string,
     body: string,
-    profile_pic: string,
+    media?: string,
+    profile_pic?: string,
     created_at: string,
-    updated_at: string
+    updated_at?: string,
+    og_user_id?: number,
+    og_username?: string,
+    og_full_name?: string,
+    og_profile_pic?: string
 }
 
 type Response = {
-    data: Xweet[],
+    data: Xweets[],
     success: boolean
 }
 
 const authStore = useAuth()
 await authStore.getUser()
 
-const queryXweets = async (): Promise<Response | undefined> => {
+const getProfileTimeline = async (): Promise<Response | undefined> => {
     try {
-        const { data } = await axios.get(`api/users/${authStore.getSignedInUserId}/xweets`)
+        const { data } = await apiRequest.get(`api/users/${authStore.getSignedInUserId}/profile-timeline`)
         if (data) {
             return data
         }
@@ -34,16 +39,20 @@ const queryXweets = async (): Promise<Response | undefined> => {
     }
 }
 
-const { data } = (await queryXweets()) || { data: [] }
+const { data } = (await getProfileTimeline()) || { data: [] }
 </script>
 
 <template>
     <section class="flex flex-col gap-4">
-        <Zweet v-for="xweet in data" :key="xweet.xweet_id" 
+        <Xweet v-for="xweet in data" :key="xweet.xweet_id" 
             :fullname="xweet.full_name" 
             :username="xweet.username"
             :body="xweet.body"
             :profilePic="xweet.profile_pic" 
-            :createdAt="xweet.created_at" />
+            :createdAt="xweet.created_at"
+            :isRexweet="xweet.rexweet_id !== undefined"
+            :og_username="xweet.og_username"
+            :og_fullname="xweet.og_full_name"
+            :og_profile_pic="xweet.og_profile_pic" />
     </section>
 </template>
