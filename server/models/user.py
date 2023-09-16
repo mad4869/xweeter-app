@@ -59,7 +59,9 @@ class User(db.Model):
             "profile_pic": self.profile_pic,
             "header_pic": self.header_pic,
             "created_at": self.created_at.strftime("%Y-%m-%d %H:%M:%S"),
-            "updated_at": self.updated_at.strftime("%Y-%m-%d %H:%M:%S"),
+            "updated_at": self.updated_at.strftime("%Y-%m-%d %H:%M:%S")
+            if self.updated_at
+            else self.updated_at,
         }
 
     @property

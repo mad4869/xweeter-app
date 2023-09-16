@@ -1,56 +1,48 @@
 <script setup lang="ts">
-import axios from 'axios';
-
 import useAuth from '../../composables/useAuth';
-import getCookie from '../../utils/getCookie';
+import apiRequest from '../../utils/apiRequest';
 
-type Following = {
-    following_id: number,
-    followed_id: number,
-    follower_id: number,
+type User = {
+    user_id: number,
     username: string,
     full_name: string,
-    profile_pic: string,
+    email: string,
     bio: string | null,
+    role: 'admin' | 'user',
+    profile_pic: string,
+    header_pic: string,
     created_at: string,
     updated_at: string | null
 }
 
 type Response = {
     success: boolean,
-    data: Following[]
+    data: User[]
 }
 
 const authStore = useAuth()
 await authStore.getUser()
 
-const queryFollow = async (): Promise<Response | undefined> => {
-    const OPTIONS = {
-        credentials: 'same-origin',
-        headers: {
-            'X-CSRF-TOKEN': getCookie('csrf_access_token')
-        }
-    }
-
+const queryFollow = async (): Promise<Response[] | undefined> => {
     try {
-        const { data } = await axios.get(`/api/users/${authStore.getSignedInUserId}/following`, OPTIONS)
-        if (data) {
-            console.log(data)
-            return data
+        const following = await apiRequest.get(`/api/users/${authStore.getSignedInUserId}/following`)
+        const followers = await apiRequest.get(`/api/users/${authStore.getSignedInUserId}/followers`)
+        if (following.data && followers.data) {
+            return [following.data, followers.data]
         }
     } catch (err) {
         console.error(err)
     }
 }
 
-const { data } = (await queryFollow()) || { data: [] }
+const data = (await queryFollow()) || []
 </script>
 
 <template>
     <section class="flex-[2] flex flex-col justify-evenly items-center border border-solid border-sky-800 rounded-xl">
-        <div class="flex justify-between items-center w-full px-8 pb-4 border-b border-solid border-sky-600/20">
+        <div class="flex justify-center items-center gap-4 w-full px-8 pb-4 border-b border-solid border-sky-600/20">
             <div>
-                <img :src="authStore.getSignedInPfp" class="w-10 h-10 border border-solid border-sky-800 rounded-full" />
+                <img :src="authStore.getSignedInPfp" class="w-12 h-12 border border-solid border-sky-800 rounded-full" />
             </div>
             <div class="flex flex-col">
                 <span class="text-white font-bold">{{ authStore.getSignedInFullname }}</span>
@@ -63,8 +55,8 @@ const { data } = (await queryFollow()) || { data: [] }
             <span>Zweets</span>
         </div>
         <div class="flex flex-col items-center w-full pb-4 text-white text-lg border-b border-solid border-sky-600/20">
-            <span><strong>{{ data.length }}</strong> Followings</span>
-            <span><strong>650</strong> Followers</span>
+            <span><strong>{{ data[0].data.length }}</strong> Followings</span>
+            <span><strong>{{ data[1].data.length }}</strong> Followers</span>
         </div>
         <div>
             <input type="button" value="New Zweet" class="px-4 py-2 bg-sky-600 text-white text-lg font-bold rounded-xl">

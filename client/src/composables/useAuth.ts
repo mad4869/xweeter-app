@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import axios from 'axios'
-import getCookie from '../utils/getCookie'
+import apiRequest from '../utils/apiRequest'
 
 type AuthState = {
     isAuthenticated: boolean,
@@ -39,13 +39,6 @@ const authService = axios.create({
     withCredentials: true,
     xsrfCookieName: 'csrf_access_token'
 });
-
-const OPTIONS = {
-    credentials: 'same-origin',
-    headers: {
-        'X-CSRF-TOKEN': getCookie('csrf_access_token')
-    }
-}
 
 const useAuth = defineStore('auth', {
         state: () => ({
@@ -107,7 +100,7 @@ const useAuth = defineStore('auth', {
             },
             async signout() {
                 try {
-                    const { data } = await axios.post<AuthResponse | undefined>('/api/signout', '', OPTIONS)
+                    const { data } = await apiRequest.post<AuthResponse | undefined>('/api/signout', '')
                     if (data?.success) {
                         this.isAuthenticated = false
                         this.signedInUserId = undefined

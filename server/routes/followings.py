@@ -16,9 +16,9 @@ def access_user_following(user_id):
 
     followings = db.session.execute(
         db.select(User)
-        .join(follow, User.user_id == follow.followed_id)
-        .filter(follow.follower_id == user_id)
-        .order_by(follow.created_at.desc())
+        .join(follow, User.user_id == follow.c.followed_id)
+        .filter(follow.c.follower_id == user_id)
+        .order_by(follow.c.created_at.desc())
     ).scalars()
     data = []
     for following in followings:
@@ -38,9 +38,9 @@ def access_user_followers(user_id):
 
     followers = db.session.execute(
         db.select(User)
-        .join(follow, User.user_id == follow.follower_id)
-        .filter(follow.followed_id == user_id)
-        .order_by(follow.created_at.desc())
+        .join(follow, User.user_id == follow.c.follower_id)
+        .filter(follow.c.followed_id == user_id)
+        .order_by(follow.c.created_at.desc())
     ).scalars()
     data = []
     for follower in followers:

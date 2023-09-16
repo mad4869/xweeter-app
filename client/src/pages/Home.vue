@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import axios from 'axios'
-
 import Layout from '../components/App/Layout/index.vue'
 import SettingBar from '../components/App/SettingBar.vue';
 import Suggestions from '../components/App/Suggestions.vue';
@@ -8,7 +6,7 @@ import Zweet from '../components/App/Zweet.vue';
 import NewZweet from '../components/Home/NewZweet.vue';
 import Profile from '../components/Home/Profile.vue';
 import Sep from '../components/Home/Sep.vue';
-import getCookie from '../utils/getCookie'
+import apiRequest from '../utils/apiRequest';
 
 type Xweet = {
     xweet_id: number,
@@ -27,15 +25,8 @@ type Response = {
 }
 
 const queryXweets = async (): Promise<Response | undefined> => {
-    const OPTIONS = {
-        credentials: 'same-origin',
-        headers: {
-            'X-CSRF-TOKEN': getCookie('csrf_access_token')
-        }
-    }
-
     try {
-        const { data } = await axios.get('/api/users/1/xweets', OPTIONS)
+        const { data } = await apiRequest.get('/api/users/1/xweets')
         if (data) {
             return data
         }

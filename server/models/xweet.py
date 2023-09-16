@@ -26,8 +26,10 @@ class Xweet(db.Model):
             "xweet_id": self.xweet_id,
             "user_id": self.user_id,
             "body": self.body,
-            "created_at": self.created_at,
-            "updated_at": self.updated_at,
+            "created_at": self.created_at.strftime("%Y-%m-%d %H:%M:%S"),
+            "updated_at": self.updated_at.strftime("%Y-%m-%d %H:%M:%S")
+            if self.updated_at
+            else self.updated_at,
         }
 
     def __repr__(self):

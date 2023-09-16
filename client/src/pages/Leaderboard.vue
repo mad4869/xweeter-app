@@ -1,9 +1,8 @@
 <script setup lang="ts">
-import axios from 'axios'
-
 import Layout from '../components/App/Layout/index.vue'
 import Title from '../components/Leaderboard/Title.vue';
 import Table from '../components/Leaderboard/Table.vue';
+import apiRequest from '../utils/apiRequest';
 
 type Xweet = {
     xweet_id: number,
@@ -23,7 +22,7 @@ type Response = {
 
 const queryXweets = async (): Promise<Response | undefined> => {
     try {
-        const { data } = await axios.get('http://localhost:5000/api/users/1/xweets')
+        const { data } = await apiRequest.get('/api/users/1/xweets')
         if (data) {
             return data
         }

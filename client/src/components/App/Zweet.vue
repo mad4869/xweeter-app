@@ -18,7 +18,7 @@ defineProps<{
         <div
             class="col-start-1 col-span-1 row-start-3 row-span-1 flex flex-col items-center border-r border-solid border-sky-600/20">
             <span class=" text-sky-600 font-semibold">{{ fullname }}</span>
-            <span class="text-sm text-sky-800">{{ username }}</span>
+            <span class="text-sm text-sky-800">@{{ username }}</span>
         </div>
         <div class="col-start-2 col-span-3 row-start-1 row-span-1 text-xs text-sky-900">
             {{ new Date(createdAt).toLocaleString() }}
