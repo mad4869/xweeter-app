@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
-import axios from 'axios'
-import apiRequest from '../utils/apiRequest'
+import { AxiosError } from 'axios'
+import { authService, sendReqCookie } from '../utils/axiosInstances'
 
 type AuthState = {
     isAuthenticated: boolean,
@@ -35,11 +35,6 @@ type AuthResponse = {
     user: User
 }
 
-const authService = axios.create({
-    withCredentials: true,
-    xsrfCookieName: 'csrf_access_token'
-});
-
 const useAuth = defineStore('auth', {
         state: () => ({
             isAuthenticated: false,
@@ -73,14 +68,39 @@ const useAuth = defineStore('auth', {
                     const { data } = await authService.post<AuthResponse | undefined>('/api/signin', credentials)
                     if (data?.success) {
                         this.isAuthenticated = true
+                        this.signedInUserId = data.user.user_id
+                        this.signedInUsername = data.user.username
+                        this.signedInFullname = data.user.full_name
+                        this.signedInEmail = data.user.email
+                        this.signedInBio = data.user.bio
+                        this.signedInRole = data.user.role
+                        this.signedInPfp = data.user.profile_pic
+                        this.signedInHeader = data.user.header_pic
+                        this.signedInJoindate = data.user.created_at
+                        this.signedInUpdate = data.user.updated_at
                     }
-                } catch (err) {
-                    console.error(err)
+                } catch (error) {
+                    const err = error as AxiosError
+                    console.error(err.message)
+
+                    if (err.response?.status === 401) {
+                        this.isAuthenticated = false
+                        this.signedInUserId = undefined
+                        this.signedInUsername = undefined
+                        this.signedInFullname = undefined
+                        this.signedInEmail = undefined
+                        this.signedInBio = undefined
+                        this.signedInRole = undefined
+                        this.signedInPfp = undefined
+                        this.signedInHeader = undefined
+                        this.signedInJoindate = undefined
+                        this.signedInUpdate = undefined
+                    }
                 }
             },
             async getUser() {
                 try {
-                    const { data } = await authService.get<AuthResponse | undefined>('/api/signed-in')
+                    const { data } = await sendReqCookie.get<AuthResponse | undefined>('/api/signed-in')
                     if (data?.success) {
                         this.isAuthenticated = true
                         this.signedInUserId = data.user.user_id
@@ -94,13 +114,28 @@ const useAuth = defineStore('auth', {
                         this.signedInJoindate = data.user.created_at
                         this.signedInUpdate = data.user.updated_at
                     }
-                } catch (err) {
-                    console.error(err)
+                } catch (error) {
+                    const err = error as AxiosError
+                    console.error(err.message)
+
+                    if (err.response?.status === 401) {
+                        this.isAuthenticated = false
+                        this.signedInUserId = undefined
+                        this.signedInUsername = undefined
+                        this.signedInFullname = undefined
+                        this.signedInEmail = undefined
+                        this.signedInBio = undefined
+                        this.signedInRole = undefined
+                        this.signedInPfp = undefined
+                        this.signedInHeader = undefined
+                        this.signedInJoindate = undefined
+                        this.signedInUpdate = undefined
+                    }
                 }
             },
             async signout() {
                 try {
-                    const { data } = await apiRequest.post<AuthResponse | undefined>('/api/signout', '')
+                    const { data } = await sendReqCookie.post<AuthResponse | undefined>('/api/signout', '')
                     if (data?.success) {
                         this.isAuthenticated = false
                         this.signedInUserId = undefined

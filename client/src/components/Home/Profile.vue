@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import useAuth from '../../composables/useAuth';
-import apiRequest from '../../utils/apiRequest';
+import { sendReqCookie } from '../../utils/axiosInstances';
 
 type User = {
     user_id: number,
@@ -25,10 +25,12 @@ await authStore.getUser()
 
 const queryFollow = async (): Promise<Response[] | undefined> => {
     try {
-        const following = await apiRequest.get(`/api/users/${authStore.getSignedInUserId}/following`)
-        const followers = await apiRequest.get(`/api/users/${authStore.getSignedInUserId}/followers`)
-        if (following.data && followers.data) {
-            return [following.data, followers.data]
+        if (authStore.getIsAuthenticated) {
+            const following = await sendReqCookie.get(`/api/users/${authStore.getSignedInUserId}/following`)
+            const followers = await sendReqCookie.get(`/api/users/${authStore.getSignedInUserId}/followers`)
+            if (following.data && followers.data) {
+                return [following.data, followers.data]
+            }
         }
     } catch (err) {
         console.error(err)

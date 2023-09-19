@@ -50,15 +50,40 @@ const signupAndIn = async () => {
 <template>
     <form class="flex-1 flex flex-col items-center gap-6 w-full" @submit.prevent="signupAndIn">
         <h3 class="text-2xl text-white font-semibold">Let's get you started!</h3>
-        <InputField input-id="fullname" input-name="fullname" input-type="text" :input-errors="v$.fullname.$errors"
-            v-model="v$.fullname.$model" label-text="Full Name" icon="fa-solid fa-font" />
-        <InputField input-id="username" input-name="username" input-type="text" :input-errors="v$.username.$errors"
-            v-model="v$.username.$model" label-text="Username" icon="fa-solid fa-user" />
-        <InputField input-id="email" input-name="email" input-type="text" :input-errors="v$.email.$errors"
-            v-model="v$.email.$model" label-text="Email Address" icon="fa-solid fa-envelope" />
-        <InputField input-id="password" input-name="password" input-type="password" :input-errors="v$.password.$errors"
-            v-model="v$.password.$model" label-text="Password" icon="fa-solid fa-lock" />
-        <button type="submit"
+        <InputField 
+            input-id="fullname" 
+            input-name="fullname" 
+            input-type="text" 
+            :input-errors="v$.fullname.$errors"
+            v-model="v$.fullname.$model" 
+            label-text="Full Name" 
+            icon="fa-solid fa-font" />
+        <InputField 
+            input-id="username" 
+            input-name="username" 
+            input-type="text" 
+            :input-errors="v$.username.$errors"
+            v-model="v$.username.$model" 
+            label-text="Username" 
+            icon="fa-solid fa-user" />
+        <InputField 
+            input-id="email" 
+            input-name="email" 
+            input-type="text" 
+            :input-errors="v$.email.$errors"
+            v-model="v$.email.$model" 
+            label-text="Email Address" 
+            icon="fa-solid fa-envelope" />
+        <InputField 
+            input-id="password" 
+            input-name="password" 
+            input-type="password" 
+            :input-errors="v$.password.$errors"
+            v-model="v$.password.$model" 
+            label-text="Password" 
+            icon="fa-solid fa-lock" />
+        <button 
+            type="submit"
             class="uppercase px-4 py-1 bg-sky-600 text-white rounded-md shadow-sm shadow-slate-900/50 hover:bg-sky-800 active:shadow-inner">
             Sign Up
         </button>

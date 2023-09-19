@@ -15,9 +15,9 @@ const activateBtn = (btn: UserAuth) => {
 
 <template>
     <section
-        class="col-start-2 flex flex-col justify-center items-center gap-6 px-4 pt-8 bg-white/10 backdrop-blur-lg rounded-lg shadow-md shadow-sky-800">
+        class="row-start-1 row-span-5 col-start-2 flex flex-col justify-center items-center gap-6 px-4 pt-8 bg-white/10 backdrop-blur-lg rounded-lg shadow-md shadow-sky-800">
         <Toggle :activeBtn="activeBtn" @activateBtn="activateBtn" />
-        <Transition name="fade">
+        <Transition name="fade" mode="out-in">
             <KeepAlive>
                 <component :is="activeBtn === 'Sign Up' ? SignupForm : SigninForm" />
             </KeepAlive>
@@ -32,11 +32,11 @@ input {
 
 .fade-enter-active,
 .fade-leave-active {
-    transition: transform 500ms ease-out;
+    @apply transition-all duration-300 ease-out
 }
 
 .fade-enter-from,
 .fade-leave-to {
-    transform: translateY(1rem) scale(0);
+    @apply translate-x-4 opacity-0
 }
 </style>

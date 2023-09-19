@@ -3,11 +3,11 @@ import Layout from '../components/App/Layout/index.vue'
 import SettingBar from '../components/App/SettingBar.vue';
 import Suggestions from '../components/App/Suggestions.vue';
 import Xweet from '../components/App/Xweet.vue';
-import NewZweet from '../components/Home/NewZweet.vue';
+import NewXweet from '../components/Home/NewXweet.vue';
 import Profile from '../components/Home/Profile.vue';
 import Sep from '../components/Home/Sep.vue';
 import useAuth from '../composables/useAuth';
-import apiRequest from '../utils/apiRequest';
+import { sendReqCookie, sendReqWoCookie } from '../utils/axiosInstances';
 
 type Xweets = {
     xweet_id: number,
@@ -27,13 +27,24 @@ type Response = {
 }
 
 const authStore = useAuth()
-await authStore.getUser()
+try {
+    await authStore.getUser()
+} catch (err) {
+    console.error(err)
+}
 
 const getTimeline = async (): Promise<Response | undefined> => {
     try {
-        const { data } = await apiRequest.get(`/api/users/${authStore.getSignedInUserId}/timeline`)
-        if (data) {
-            return data
+        if (authStore.getIsAuthenticated) {
+            const { data } = await sendReqCookie.get(`/api/users/${authStore.getSignedInUserId}/timeline`)
+            if (data) {
+                return data
+            }
+        } else {
+            const { data } = await sendReqWoCookie.get(`/api/timeline`)
+            if (data) {
+                return data
+            }
         }
     } catch (err) {
         console.error(err)
@@ -46,15 +57,15 @@ const { data } = (await getTimeline()) || { data: [] }
 <template>
     <Layout>
         <template v-slot:sidebarLeft>
-            <Profile />
+            <Profile v-if="authStore.getIsAuthenticated" />
             <SettingBar />
         </template>
-        <NewZweet />
+        <NewXweet v-if="authStore.getIsAuthenticated" />
         <Sep title="Timeline" />
         <Xweet v-for="xweet in data" :key="xweet.xweet_id" :fullname="xweet.full_name" :username="xweet.username"
             :body="xweet.body" :profilePic="xweet.profile_pic" :createdAt="xweet.created_at" :is-rexweet="false" />
         <template v-slot:sidebarRight>
-            <Suggestions />
+            <Suggestions v-if="authStore.getIsAuthenticated" />
         </template>
     </Layout>
 </template>

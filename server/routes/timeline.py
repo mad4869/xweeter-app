@@ -7,11 +7,29 @@ from ..extensions import db
 from ..models import Xweet, User, Rexweet, follow
 
 
+@routes.route("/timeline", methods=["GET"], strict_slashes=False)
+def get_timeline():
+    xweets = db.session.execute(
+        db.select(Xweet)
+        .join(User, Xweet.user_id == User.user_id)
+        .order_by(Xweet.created_at.desc())
+    ).scalars()
+    xweets_data = []
+    for xweet in xweets:
+        xweet_data = xweet.serialize()
+        xweet_data["username"] = xweet.users.username
+        xweet_data["full_name"] = xweet.users.full_name
+        xweet_data["profile_pic"] = xweet.users.profile_pic
+        xweets_data.append(xweet_data)
+
+    return jsonify({"success": True, "data": xweets_data}), 200
+
+
 @routes.route(
     "/users/<int:user_id>/profile-timeline", methods=["GET"], strict_slashes=False
 )
 # @jwt_required()
-def get_user_timeline(user_id):
+def get_profile_timeline(user_id):
     own_xweets = db.session.execute(
         db.select(Xweet)
         .join(User, Xweet.user_id == User.user_id)
@@ -53,7 +71,7 @@ def get_user_timeline(user_id):
 
 
 @routes.route("/users/<int:user_id>/timeline", methods=["GET"], strict_slashes=False)
-def get_timeline(user_id):
+def get_user_timeline(user_id):
     own_xweets = db.session.execute(
         db.select(Xweet)
         .join(User, Xweet.user_id == User.user_id)
