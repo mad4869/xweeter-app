@@ -1,0 +1,35 @@
+<script setup lang="ts">
+import { UserAuth } from '../../types/auth'
+
+defineProps<{
+    activeBtn: UserAuth
+}>()
+defineEmits<{
+    (e: 'activateBtn', btn: UserAuth): void
+}>()
+</script>
+
+<template>
+    <div class="flex items-center w-40 text-xs border border-solid border-sky-600 rounded-lg overflow-hidden">
+        <button 
+            :class="{ active: activeBtn === UserAuth.SignUp }" 
+            @click="$emit('activateBtn', UserAuth.SignUp)">
+            Sign Up
+        </button>
+        <button 
+            :class="{ active: activeBtn === UserAuth.SignIn }" 
+            @click="$emit('activateBtn', UserAuth.SignIn)">
+            Sign In
+        </button>
+    </div>
+</template>
+
+<style scoped>
+button {
+    @apply w-1/2 px-2 py-1 text-white
+}
+
+.active {
+    @apply bg-sky-600 font-medium
+}
+</style>

@@ -31,7 +31,7 @@ defineProps<{
                 <label 
                     :for="inputId"
                     class="absolute text-xs text-slate-400 transform origin-top-left translate-x-0 translate-y-0 scale-100 transition-transform pointer-events-none peer-focus:-translate-y-8 peer-focus:scale-90 peer-valid:-translate-y-8 peer-valid:scale-90"
-                    :class="inputErrors.length > 0 ? 'peer-focus:text-red-400 peer-valid:text-red-400' : 'peer-focus:text-sky-600 peer-valid:text-sky-600'">
+                    :class="inputErrors.length > 0 ? 'peer-focus:text-red-400 peer-valid:text-red-400' : 'peer-focus:text-sky-400 peer-valid:text-sky-400'">
                     {{ labelText }}
                 </label>
             </div>

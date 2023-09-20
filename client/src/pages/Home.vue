@@ -6,7 +6,11 @@ import Xweet from '../components/App/Xweet.vue';
 import NewXweet from '../components/Home/NewXweet.vue';
 import Profile from '../components/Home/Profile.vue';
 import Sep from '../components/Home/Sep.vue';
+import SigninForm from '../components/App/SigninForm.vue';
+// import SignupForm from '../components/App/SignupForm.vue';
+import Toggle from '../components/App/Toggle.vue';
 import useAuth from '../composables/useAuth';
+import { UserAuth } from '../types/auth';
 import { sendReqCookie, sendReqWoCookie } from '../utils/axiosInstances';
 
 type Xweets = {
@@ -57,6 +61,12 @@ const { data } = (await getTimeline()) || { data: [] }
 <template>
     <Layout>
         <template v-slot:sidebarLeft>
+            <section
+                class="flex-[2] flex flex-col justify-evenly items-center border border-solid border-sky-800 rounded-xl">
+                <Toggle v-if="!authStore.getIsAuthenticated" :active-btn="UserAuth.SignIn" @activate-btn="() => ''" />
+                <!-- <SignupForm :use-title="false" v-if="!authStore.getIsAuthenticated" /> -->
+                <SigninForm :use-title="false" v-if="!authStore.getIsAuthenticated" />
+            </section>
             <Profile v-if="authStore.getIsAuthenticated" />
             <SettingBar />
         </template>

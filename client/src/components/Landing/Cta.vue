@@ -1,13 +1,12 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 
-import Toggle from './Toggle.vue';
-import SignupForm from './SignupForm.vue';
-import SigninForm from './SigninForm.vue';
+import Toggle from '../../components/App/Toggle.vue';
+import SignupForm from '../../components/App/SignupForm.vue';
+import SigninForm from '../../components/App/SigninForm.vue';
+import { UserAuth } from '../../types/auth'
 
-export type UserAuth = 'Sign Up' | 'Sign In'
-
-const activeBtn = ref<UserAuth>("Sign Up")
+const activeBtn = ref<UserAuth>(UserAuth.SignUp)
 const activateBtn = (btn: UserAuth) => {
     activeBtn.value = btn
 }
@@ -15,11 +14,11 @@ const activateBtn = (btn: UserAuth) => {
 
 <template>
     <section
-        class="row-start-1 row-span-5 col-start-2 flex flex-col justify-center items-center gap-6 px-4 pt-8 bg-white/10 backdrop-blur-lg rounded-lg shadow-md shadow-sky-800">
+        class="row-start-1 row-span-5 col-start-2 flex flex-col justify-center items-center gap-2 px-4 py-4 bg-white/10 backdrop-blur-lg rounded-lg shadow-md shadow-sky-800">
         <Toggle :activeBtn="activeBtn" @activateBtn="activateBtn" />
         <Transition name="fade" mode="out-in">
             <KeepAlive>
-                <component :is="activeBtn === 'Sign Up' ? SignupForm : SigninForm" />
+                <component :is="activeBtn === UserAuth.SignUp ? SignupForm : SigninForm" />
             </KeepAlive>
         </Transition>
     </section>

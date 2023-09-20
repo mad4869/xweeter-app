@@ -4,6 +4,6 @@
 
 @layer base {
     body {
-        @apply bg-slate-900 scroll-smooth
+        @apply bg-slate-900 scroll-smooth dark:bg-slate-200
     }
 }
