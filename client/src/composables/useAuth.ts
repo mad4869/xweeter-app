@@ -13,7 +13,8 @@ type AuthState = {
     signedInPfp: string | undefined,
     signedInHeader: string | undefined,
     signedInJoindate: string | undefined,
-    signedInUpdate: string | undefined | null
+    signedInUpdate: string | undefined | null,
+    errorMsg: string | undefined
   }
 
 export type User = {
@@ -47,7 +48,8 @@ const useAuth = defineStore('auth', {
             signedInPfp: undefined,
             signedInHeader: undefined,
             signedInJoindate: undefined,
-            signedInUpdate: undefined
+            signedInUpdate: undefined,
+            errorMsg: undefined
         } as AuthState),
         getters: {
             getIsAuthenticated: state => state.isAuthenticated,
@@ -60,7 +62,8 @@ const useAuth = defineStore('auth', {
             getSignedInPfp: state => state.signedInPfp,
             getSignedInHeader: state => state.signedInHeader,
             getSignedInJoindate: state => state.signedInJoindate,
-            getSignedInUpdate: state => state.signedInUpdate
+            getSignedInUpdate: state => state.signedInUpdate,
+            getErrorMsg: state => state.errorMsg
         },
         actions: {
             async signin(credentials: { username: string, password: string }) {
@@ -78,23 +81,14 @@ const useAuth = defineStore('auth', {
                         this.signedInHeader = data.user.header_pic
                         this.signedInJoindate = data.user.created_at
                         this.signedInUpdate = data.user.updated_at
+                        this.errorMsg = undefined
                     }
                 } catch (error) {
                     const err = error as AxiosError
-                    console.error(err.message)
 
-                    if (err.response?.status === 401) {
-                        this.isAuthenticated = false
-                        this.signedInUserId = undefined
-                        this.signedInUsername = undefined
-                        this.signedInFullname = undefined
-                        this.signedInEmail = undefined
-                        this.signedInBio = undefined
-                        this.signedInRole = undefined
-                        this.signedInPfp = undefined
-                        this.signedInHeader = undefined
-                        this.signedInJoindate = undefined
-                        this.signedInUpdate = undefined
+                    if (err.response?.status === 400) {
+                        const data = err.response.data as AuthResponse
+                        this.errorMsg = data.message
                     }
                 }
             },

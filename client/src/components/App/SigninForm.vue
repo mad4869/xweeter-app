@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { reactive } from 'vue';
+import { reactive, ref } from 'vue';
 import { useVuelidate } from '@vuelidate/core'
 import { required, minLength } from '@vuelidate/validators'
 
@@ -27,28 +27,49 @@ const rules = {
 
 const v$ = useVuelidate(rules, credentials)
 
-const signin = async () => {
-    try {
-        await authStore.signin(credentials)
+const isError = ref(false)
 
-        if (authStore.getIsAuthenticated) {
-            router.push('/home')
-        }
-    } catch (err) {
-        console.error(err)
+const signin = async () => {
+    await authStore.signin(credentials)
+
+    if (authStore.getIsAuthenticated) {
+        router.push('/home')
+    } else {
+        isError.value = true
+        setInterval(() => {
+            isError.value = false
+        }, 3000)
     }
 }
 </script>
 
 <template>
-    <form class="flex-1 flex flex-col justify-center items-center gap-6 w-full" @submit.prevent="signin">
-        <h3 class="text-2xl text-white font-semibold" v-if="useTitle">Welcome back!</h3>
-        <InputField input-id="username" input-name="username" input-type="text" :input-errors="v$.username.$errors"
-            v-model="v$.username.$model" label-text="Username" icon="fa-solid fa-user" />
-        <InputField input-id="password" input-name="password" input-type="password" :input-errors="v$.password.$errors"
-            v-model="v$.password.$model" label-text="Password" icon="fa-solid fa-lock" />
-        <button type="submit"
-            class="uppercase px-4 py-1 bg-sky-600 text-white rounded-md shadow-sm shadow-slate-900/50 hover:bg-sky-800 active:shadow-inner">
+    <form 
+        class="flex-1 relative flex flex-col justify-center items-center gap-6 w-full" 
+        @submit.prevent="signin">
+        <h3 v-if="useTitle" class="text-2xl text-white font-semibold">Welcome back!</h3>
+        <InputField 
+            input-id="username" 
+            input-name="username" 
+            input-type="text" 
+            :input-errors="v$.username.$errors"
+            v-model="v$.username.$model" 
+            label-text="Username" 
+            icon="fa-solid fa-user" />
+        <InputField 
+            input-id="password" 
+            input-name="password" 
+            input-type="password" 
+            :input-errors="v$.password.$errors"
+            v-model="v$.password.$model" 
+            label-text="Password" 
+            icon="fa-solid fa-lock" />
+        <div v-if="isError" class="text-red-400 text-xs">{{ authStore.getErrorMsg }}</div>
+        <button 
+            type="submit"
+            class="uppercase px-4 py-1 bg-sky-600 text-white rounded-md shadow-sm shadow-slate-900/50 transition-colors duration-200 ease-in hover:bg-sky-800 active:shadow-inner disabled:bg-slate-400 disabled:text-slate-600 disabled:shadow-none disabled:cursor-not-allowed"
+            title="Sign In"
+            :disabled="v$.$invalid">
             Sign In
         </button>
     </form>
