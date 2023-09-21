@@ -15,9 +15,13 @@ const useTheme = defineStore('theme', {
     actions: {
         switchToLight() {
             this.theme = ThemeState.Light
+            localStorage.setItem('theme', 'light')
+            document.documentElement.classList.remove('dark')
         },
         resetToDark() {
             this.theme = ThemeState.Dark
+            localStorage.setItem('theme', 'dark')
+            document.documentElement.classList.add('dark')
         }
     }
 })

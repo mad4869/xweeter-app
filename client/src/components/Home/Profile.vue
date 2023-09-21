@@ -41,7 +41,7 @@ const data = (await queryFollow()) || []
 </script>
 
 <template>
-    <section class="flex-[2] flex flex-col justify-evenly items-center border border-solid border-sky-800 rounded-xl">
+    <section class="flex-[4] flex flex-col justify-evenly items-center border border-solid border-sky-800 rounded-xl">
         <div class="flex justify-center items-center gap-4 w-full px-8 pb-4 border-b border-solid border-sky-600/20">
             <div>
                 <img :src="authStore.getSignedInPfp" class="w-12 h-12 border border-solid border-sky-800 rounded-full" />

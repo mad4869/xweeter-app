@@ -14,7 +14,7 @@ const activateBtn = (btn: UserAuth) => {
 
 <template>
     <section
-        class="row-start-1 row-span-5 col-start-2 flex flex-col justify-center items-center gap-2 py-8 bg-white/10 backdrop-blur-lg rounded-lg shadow-lg shadow-sky-800">
+        class="row-start-1 row-span-5 col-start-2 flex flex-col justify-center items-center gap-2 px-32 py-8 bg-white/10 backdrop-blur-lg rounded-lg shadow-lg shadow-sky-800">
         <Toggle :activeBtn="activeBtn" @activateBtn="activateBtn" />
         <Transition name="fade" mode="out-in">
             <KeepAlive>
@@ -25,10 +25,6 @@ const activateBtn = (btn: UserAuth) => {
 </template>
 
 <style scoped>
-input {
-    @apply w-48
-}
-
 .fade-enter-active,
 .fade-leave-active {
     @apply transition-all duration-300 ease-out

@@ -27,4 +27,4 @@ type AuthResponseWoUser = {
     message: string,
 }
 
-export  { UserAuth, type AuthResponseUser, type AuthResponseWoUser }
+export { UserAuth, type AuthResponseUser, type AuthResponseWoUser }

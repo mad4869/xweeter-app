@@ -13,10 +13,10 @@ defineProps<{
 </script>
 
 <template>
-    <section class="flex flex-col gap-1">
+    <section class="flex flex-col gap-1 w-full">
         <div :class="inputErrors.length > 0 ? 'border-red-600' : 'border-sky-600'"
-            class="flex items-center px-2 py-1 border border-solid rounded-md">
-            <div class="relative flex justify-between items-center gap-1">
+            class="flex items-center w-full px-2 py-1 border border-solid rounded-md">
+            <div class="relative flex justify-between items-center gap-1 w-full">
                 <input 
                     :id="inputId" 
                     :name="inputName" 

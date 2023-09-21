@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { ref } from 'vue';
+
 import Layout from '../components/App/Layout/index.vue'
 import Setting from '../components/App/Setting.vue';
 import Suggestions from '../components/App/Suggestions.vue';
@@ -7,38 +9,18 @@ import NewXweet from '../components/Home/NewXweet.vue';
 import Profile from '../components/Home/Profile.vue';
 import Sep from '../components/Home/Sep.vue';
 import SigninForm from '../components/App/SigninForm.vue';
-// import SignupForm from '../components/App/SignupForm.vue';
+import SignupForm from '../components/App/SignupForm.vue';
 import Toggle from '../components/App/Toggle.vue';
+import Trending from '../components/App/Trending.vue';
 import useAuth from '../composables/useAuth';
 import { UserAuth } from '../types/auth';
+import { XweetResponse } from '../types/xweets';
 import { sendReqCookie, sendReqWoCookie } from '../utils/axiosInstances';
-import Trending from '../components/App/Trending.vue';
-
-type Xweets = {
-    xweet_id: number,
-    user_id: number,
-    full_name: string,
-    username: string,
-    body: string,
-    media?: string,
-    profile_pic: string,
-    created_at: string,
-    updated_at?: string
-}
-
-type Response = {
-    data: Xweets[],
-    success: boolean
-}
 
 const authStore = useAuth()
-try {
-    await authStore.getUser()
-} catch (err) {
-    console.error(err)
-}
+await authStore.getUser()
 
-const getTimeline = async (): Promise<Response | undefined> => {
+const getTimeline = async (): Promise<XweetResponse | undefined> => {
     try {
         if (authStore.getIsAuthenticated) {
             const { data } = await sendReqCookie.get(`/api/users/${authStore.getSignedInUserId}/timeline`)
@@ -57,27 +39,56 @@ const getTimeline = async (): Promise<Response | undefined> => {
 }
 
 const { data } = (await getTimeline()) || { data: [] }
+
+const activeBtn = ref<UserAuth>(UserAuth.SignUp)
+const activateBtn = (btn: UserAuth) => {
+    activeBtn.value = btn
+}
 </script>
 
 <template>
     <Layout>
-        <template v-slot:sidebarLeft>
+        <template #sidebarLeft>
             <section
-                class="flex-[2] flex flex-col justify-evenly items-center border border-solid border-sky-800 rounded-xl">
-                <Toggle v-if="!authStore.getIsAuthenticated" :active-btn="UserAuth.SignIn" @activate-btn="() => ''" />
-                <!-- <SignupForm :use-title="false" v-if="!authStore.getIsAuthenticated" /> -->
-                <SigninForm :use-title="false" v-if="!authStore.getIsAuthenticated" />
+                class="flex-[4] flex flex-col items-center px-2 py-2 border border-solid border-sky-800 rounded-xl"
+                v-if="!authStore.getIsAuthenticated">
+                <Toggle :active-btn="activeBtn" @activate-btn="activateBtn" />
+                <Transition name="fade" mode="out-in">
+                    <KeepAlive>
+                        <SignupForm :use-title="false" v-if="activeBtn === UserAuth.SignUp" />
+                        <SigninForm :use-title="false" v-else />
+                    </KeepAlive>
+                </Transition>
             </section>
             <Profile v-if="authStore.getIsAuthenticated" />
             <Setting />
         </template>
         <NewXweet v-if="authStore.getIsAuthenticated" />
         <Sep title="Timeline" />
-        <Xweet v-for="xweet in data" :key="xweet.xweet_id" :fullname="xweet.full_name" :username="xweet.username"
-            :body="xweet.body" :profilePic="xweet.profile_pic" :createdAt="xweet.created_at" :is-rexweet="false" />
-        <template v-slot:sidebarRight>
+        <Xweet 
+            v-for="xweet in data" 
+            :key="xweet.xweet_id" 
+            :fullname="xweet.full_name" 
+            :username="xweet.username"
+            :body="xweet.body" 
+            :profilePic="xweet.profile_pic" 
+            :createdAt="xweet.created_at" 
+            :is-rexweet="false" />
+        <template #sidebarRight>
             <Suggestions v-if="authStore.getIsAuthenticated" />
             <Trending />
         </template>
     </Layout>
 </template>
+
+<style scoped>
+.fade-enter-active,
+.fade-leave-active {
+    @apply transition-all duration-300 ease-out
+}
+
+.fade-enter-from,
+.fade-leave-to {
+    @apply translate-x-4 opacity-0
+}
+</style>

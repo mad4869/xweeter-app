@@ -93,7 +93,6 @@ const useAuth = defineStore('auth', {
                     }
                 } catch (error) {
                     const err = error as AxiosError
-                    console.error(err.message)
 
                     if (err.response?.status === 401) {
                         this.isAuthenticated = false
@@ -107,6 +106,9 @@ const useAuth = defineStore('auth', {
                         this.signedInHeader = undefined
                         this.signedInJoindate = undefined
                         this.signedInUpdate = undefined
+
+                        const data = err.response.data as AuthResponseWoUser
+                        this.errorMsg = data.message
                     }
                 }
             },
