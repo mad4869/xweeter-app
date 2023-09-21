@@ -3,7 +3,7 @@ from flask_jwt_extended import jwt_required
 
 from . import routes
 from ..extensions import db
-from ..models import Xweet, User, Hashtag
+from ..models import Xweet, User, Hashtag, hashtag_xweet
 
 
 @routes.route("/xweets", methods=["GET"], strict_slashes=False)
@@ -31,7 +31,7 @@ def access_xweet(xweet_id):
 def access_xweets_by_user(user_id):
     if request.method == "POST":
         data = request.get_json()
-        body = data.get("body", "")
+        body = data.get("body")
 
         if "media" not in data and "hashtag" not in data:
             xweet = Xweet(user_id=user_id, body=body)
@@ -48,6 +48,37 @@ def access_xweets_by_user(user_id):
                 )
             else:
                 return jsonify({"success": True, "data": xweet.serialize()}), 201
+
+        tag = data.get("hashtag")
+
+        xweet = Xweet(user_id=user_id, body=body)
+        hashtag = Hashtag(body=tag)
+
+        try:
+            db.session.add(xweet)
+            db.session.add(hashtag)
+            db.session.commit()
+
+            db.session.execute(
+                hashtag_xweet.insert().values(
+                    xweet_id=xweet.xweet_id, hashtag_id=hashtag.hashtag_id
+                )
+            )
+            db.session.commit()
+        except Exception as err:
+            db.session.rollback()
+
+            return (
+                jsonify(
+                    {
+                        "success": False,
+                        "message": f"Error occured during the process: {str(err)}",
+                    }
+                ),
+                500,
+            )
+        else:
+            return jsonify({"success": True, "data": xweet.serialize()}), 201
 
     xweets = db.session.execute(
         db.select(Xweet)
