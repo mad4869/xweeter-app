@@ -53,18 +53,7 @@ const useAuth = defineStore('auth', {
                 try {
                     const { data } = await authService.post<AuthResponseUser | undefined>('/api/signin', credentials)
                     if (data?.success) {
-                        this.isAuthenticated = true
-                        this.signedInUserId = data.user.user_id
-                        this.signedInUsername = data.user.username
-                        this.signedInFullname = data.user.full_name
-                        this.signedInEmail = data.user.email
-                        this.signedInBio = data.user.bio
-                        this.signedInRole = data.user.role
-                        this.signedInPfp = data.user.profile_pic
-                        this.signedInHeader = data.user.header_pic
-                        this.signedInJoindate = data.user.created_at
-                        this.signedInUpdate = data.user.updated_at
-                        this.errorMsg = undefined
+                        window.location.reload()
                     }
                 } catch (error) {
                     const err = error as AxiosError

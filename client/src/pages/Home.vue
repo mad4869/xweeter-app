@@ -50,7 +50,7 @@ const activateBtn = (btn: UserAuth) => {
     <Layout>
         <template #sidebarLeft>
             <section
-                class="flex-[4] flex flex-col items-center px-2 py-2 border border-solid border-sky-800 rounded-xl"
+                class="flex-[4] flex flex-col items-center px-2 pt-4 border border-solid border-sky-800 rounded-xl"
                 v-if="!authStore.getIsAuthenticated">
                 <Toggle :active-btn="activeBtn" @activate-btn="activateBtn" />
                 <Transition name="fade" mode="out-in">
