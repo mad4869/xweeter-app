@@ -2,6 +2,8 @@ import { defineStore } from 'pinia'
 import { AxiosError } from 'axios'
 import { authService, sendReqCookie } from '../utils/axiosInstances'
 
+import { AuthResponseUser, AuthResponseWoUser } from '../types/auth'
+
 type AuthState = {
     isAuthenticated: boolean,
     signedInUserId: number | undefined,
@@ -16,25 +18,6 @@ type AuthState = {
     signedInUpdate: string | undefined | null,
     errorMsg: string | undefined
   }
-
-export type User = {
-    user_id: number,
-    username: string,
-    full_name: string,
-    email: string,
-    bio: string | null,
-    role: 'admin' | 'user',
-    profile_pic: string,
-    header_pic: string,
-    created_at: string,
-    updated_at: string | null
-}
-
-type AuthResponse = {
-    success: boolean
-    message: string,
-    user: User
-}
 
 const useAuth = defineStore('auth', {
         state: () => ({
@@ -68,7 +51,7 @@ const useAuth = defineStore('auth', {
         actions: {
             async signin(credentials: { username: string, password: string }) {
                 try {
-                    const { data } = await authService.post<AuthResponse | undefined>('/api/signin', credentials)
+                    const { data } = await authService.post<AuthResponseUser | undefined>('/api/signin', credentials)
                     if (data?.success) {
                         this.isAuthenticated = true
                         this.signedInUserId = data.user.user_id
@@ -87,14 +70,14 @@ const useAuth = defineStore('auth', {
                     const err = error as AxiosError
 
                     if (err.response?.status === 400) {
-                        const data = err.response.data as AuthResponse
+                        const data = err.response.data as AuthResponseWoUser
                         this.errorMsg = data.message
                     }
                 }
             },
             async getUser() {
                 try {
-                    const { data } = await sendReqCookie.get<AuthResponse | undefined>('/api/signed-in')
+                    const { data } = await sendReqCookie.get<AuthResponseUser | undefined>('/api/signed-in')
                     if (data?.success) {
                         this.isAuthenticated = true
                         this.signedInUserId = data.user.user_id
@@ -129,7 +112,7 @@ const useAuth = defineStore('auth', {
             },
             async signout() {
                 try {
-                    const { data } = await sendReqCookie.post<AuthResponse | undefined>('/api/signout', '')
+                    const { data } = await sendReqCookie.post<AuthResponseUser | undefined>('/api/signout', '')
                     if (data?.success) {
                         this.isAuthenticated = false
                         this.signedInUserId = undefined

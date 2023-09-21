@@ -49,6 +49,23 @@ def sign_up():
     email = data["email"]
     password = data["password"]
 
+    registered_username = db.session.execute(
+        db.select(User).filter(User.username == username)
+    ).scalar_one_or_none()
+
+    registered_email = db.session.execute(
+        db.select(User).filter(User.email == email)
+    ).scalar_one_or_none()
+
+    if registered_username or registered_email:
+        error_msg = "Username or email already registered!"
+        logging.error(f"Failed to register: {username}-{email}, Error: {error_msg}")
+
+        return (
+            jsonify({"success": False, "message": error_msg}),
+            400,
+        )
+
     user = User(username=username, full_name=full_name, email=email, password=password)
 
     try:

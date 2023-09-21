@@ -1,12 +1,14 @@
 <script setup lang="ts">
-import { computed, reactive } from 'vue';
+import { computed, reactive, ref } from 'vue';
 import { useVuelidate } from '@vuelidate/core'
 import { required, email, sameAs, minLength } from '@vuelidate/validators'
-import axios from 'axios'
+import { AxiosError } from 'axios';
 
 import InputField from './InputField.vue';
 import router from '../../routes';
-import useAuth, { type User } from '../../composables/useAuth';
+import useAuth from '../../composables/useAuth';
+import { AuthResponseUser, AuthResponseWoUser } from '../../types/auth'
+import { sendReqWoCookie } from '../../utils/axiosInstances';
 
 defineProps({
     useTitle: {
@@ -16,12 +18,6 @@ defineProps({
 })
 
 const authStore = useAuth()
-
-type Response = {
-    user: User,
-    message: string,
-    success: boolean
-}
 
 const userData = reactive({
     username: '',
@@ -43,18 +39,36 @@ const rules = {
 
 const v$ = useVuelidate(rules, userData)
 
+const isError = ref(false)
+const errorMsg = ref('')
+
 const signupAndIn = async () => {
     try {
-        const { data } = await axios.post<Response | undefined>('/api/signup', userData)
+        const { data } = await sendReqWoCookie.post<AuthResponseUser | undefined>('/api/signup', userData)
         if (data?.success) {
             await authStore.signin({ username: userData.username, password: userData.password })
 
             if (authStore.getIsAuthenticated) {
                 router.push('/home')
+            } else {
+                isError.value = true
+                setInterval(() => {
+                    isError.value = false
+                }, 3000)
             }
         }
-    } catch (err) {
-        console.error(err)
+    } catch (error) {
+        const err = error as AxiosError
+
+        if (err.response?.status === 400) {
+            isError.value = true
+            const data = err.response.data as AuthResponseWoUser
+            errorMsg.value = data.message
+            setInterval(() => {
+                isError.value = false
+                errorMsg.value = ''
+            }, 3000)
+        }
     }
 }
 </script>
@@ -104,6 +118,7 @@ const signupAndIn = async () => {
             v-model="v$.confirmPassword.$model" 
             label-text="Confirm Password"
             icon="fa-solid fa-lock" />
+        <div v-if="isError" class="text-red-400 text-xs">{{ errorMsg }}</div>
         <button 
             type="submit"
             class="uppercase px-4 py-1 bg-sky-600 text-white rounded-md shadow-sm shadow-slate-900/50 transition-colors duration-200 ease-in hover:bg-sky-800 active:shadow-inner disabled:bg-slate-400 disabled:text-slate-600 disabled:shadow-none disabled:cursor-not-allowed"
