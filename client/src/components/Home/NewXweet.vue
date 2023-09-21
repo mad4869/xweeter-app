@@ -32,10 +32,16 @@ const charCount = computed(() => chars.value.length)
                     accept="image/jpeg, image/png" 
                     multiple class="hidden">
             </label>
+            <div 
+                class="text-red-400 transition-opacity duration-200" 
+                :class="charCount > MAX_CHARS ? 'opacity-100' : 'opacity-0'">
+                Your xweet exceeds the maximum number of characters
+            </div>
             <input 
                 type="submit" 
                 value="Xweet"
-                class="px-4 py-1 bg-sky-600 text-white font-semibold rounded-md cursor-pointer">
+                class="px-4 py-1 bg-sky-600 text-white font-semibold rounded-md transition-colors duration-200 cursor-pointer disabled:bg-slate-200 disabled:cursor-not-allowed"
+                :disabled="charCount > MAX_CHARS">
         </div>
     </section>
 </template>
