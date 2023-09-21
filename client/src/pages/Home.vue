@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import Layout from '../components/App/Layout/index.vue'
-import SettingBar from '../components/App/SettingBar.vue';
+import Setting from '../components/App/Setting.vue';
 import Suggestions from '../components/App/Suggestions.vue';
 import Xweet from '../components/App/Xweet.vue';
 import NewXweet from '../components/Home/NewXweet.vue';
@@ -12,6 +12,7 @@ import Toggle from '../components/App/Toggle.vue';
 import useAuth from '../composables/useAuth';
 import { UserAuth } from '../types/auth';
 import { sendReqCookie, sendReqWoCookie } from '../utils/axiosInstances';
+import Trending from '../components/App/Trending.vue';
 
 type Xweets = {
     xweet_id: number,
@@ -68,7 +69,7 @@ const { data } = (await getTimeline()) || { data: [] }
                 <SigninForm :use-title="false" v-if="!authStore.getIsAuthenticated" />
             </section>
             <Profile v-if="authStore.getIsAuthenticated" />
-            <SettingBar />
+            <Setting />
         </template>
         <NewXweet v-if="authStore.getIsAuthenticated" />
         <Sep title="Timeline" />
@@ -76,6 +77,7 @@ const { data } = (await getTimeline()) || { data: [] }
             :body="xweet.body" :profilePic="xweet.profile_pic" :createdAt="xweet.created_at" :is-rexweet="false" />
         <template v-slot:sidebarRight>
             <Suggestions v-if="authStore.getIsAuthenticated" />
+            <Trending />
         </template>
     </Layout>
 </template>
