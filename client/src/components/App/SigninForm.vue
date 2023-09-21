@@ -28,9 +28,14 @@ const rules = {
 const v$ = useVuelidate(rules, credentials)
 
 const isError = ref(false)
+const isLoading = ref(false)
 
 const signin = async () => {
+    isLoading.value = true
+    
     await authStore.signin(credentials)
+    
+    isLoading.value = false
 
     if (authStore.getIsAuthenticated) {
         router.push('/home')
@@ -67,10 +72,11 @@ const signin = async () => {
         <div v-if="isError" class="text-red-400 text-xs">{{ authStore.getErrorMsg }}</div>
         <button 
             type="submit"
-            class="uppercase px-4 py-1 bg-sky-600 text-white rounded-md shadow-sm shadow-slate-900/50 transition-colors duration-200 ease-in hover:bg-sky-800 active:shadow-inner disabled:bg-slate-400 disabled:text-slate-600 disabled:shadow-none disabled:cursor-not-allowed"
+            class="uppercase w-24 py-1 bg-sky-600 text-white rounded-md shadow-sm shadow-slate-900/50 transition-colors duration-200 ease-in hover:bg-sky-800 active:shadow-inner disabled:bg-slate-400 disabled:text-slate-600 disabled:shadow-none disabled:cursor-not-allowed"
             title="Sign In"
             :disabled="v$.$invalid">
-            Sign In
+            <font-awesome-icon icon="fa-solid fa-spinner" spin-pulse v-if="isLoading" />
+            {{ !isLoading ? 'Sign In' : '' }}
         </button>
     </form>
 </template>

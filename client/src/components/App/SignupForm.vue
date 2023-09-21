@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, reactive, ref } from 'vue';
 import { useVuelidate } from '@vuelidate/core'
-import { required, email, sameAs, minLength } from '@vuelidate/validators'
+import { required, email, sameAs, minLength, helpers } from '@vuelidate/validators'
 import { AxiosError } from 'axios';
 
 import InputField from './InputField.vue';
@@ -34,19 +34,28 @@ const rules = {
     fullname: { required },
     email: { required, email },
     password: { required, minLength: minLength(6) },
-    confirmPassword: { required, sameAsPassword: sameAs(password) }
+    confirmPassword: { 
+        required, 
+        sameAsPassword: helpers.withMessage('This should match the password', sameAs(password)) 
+    }
 }
 
 const v$ = useVuelidate(rules, userData)
 
 const isError = ref(false)
 const errorMsg = ref('')
+const isLoading = ref(false)
 
 const signupAndIn = async () => {
+    isLoading.value = true
+
     try {
         const { data } = await sendReqWoCookie.post<AuthResponseUser | undefined>('/api/signup', userData)
+
         if (data?.success) {
             await authStore.signin({ username: userData.username, password: userData.password })
+
+            isLoading.value = false
 
             if (authStore.getIsAuthenticated) {
                 router.push('/home')
@@ -61,9 +70,12 @@ const signupAndIn = async () => {
         const err = error as AxiosError
 
         if (err.response?.status === 400) {
+            isLoading.value = false
             isError.value = true
+
             const data = err.response.data as AuthResponseWoUser
             errorMsg.value = data.message
+
             setInterval(() => {
                 isError.value = false
                 errorMsg.value = ''
@@ -121,10 +133,11 @@ const signupAndIn = async () => {
         <div v-if="isError" class="text-red-400 text-xs">{{ errorMsg }}</div>
         <button 
             type="submit"
-            class="uppercase px-4 py-1 bg-sky-600 text-white rounded-md shadow-sm shadow-slate-900/50 transition-colors duration-200 ease-in hover:bg-sky-800 active:shadow-inner disabled:bg-slate-400 disabled:text-slate-600 disabled:shadow-none disabled:cursor-not-allowed"
+            class="uppercase w-24 py-1 bg-sky-600 text-white rounded-md shadow-sm shadow-slate-900/50 transition-colors duration-200 ease-in hover:bg-sky-800 active:shadow-inner disabled:bg-slate-400 disabled:text-slate-600 disabled:shadow-none disabled:cursor-not-allowed"
             title="Sign Up"
             :disabled="v$.$invalid">
-            Sign Up
+            <font-awesome-icon icon="fa-solid fa-spinner" spin-pulse v-if="isLoading" />
+            {{ !isLoading ? 'Sign Up' : '' }}
         </button>
     </form>
 </template>
