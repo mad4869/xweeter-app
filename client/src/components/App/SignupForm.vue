@@ -5,9 +5,8 @@ import { required, email, sameAs, minLength, helpers } from '@vuelidate/validato
 import { AxiosError } from 'axios';
 
 import InputField from './InputField.vue';
-import router from '../../routes';
 import useAuth from '../../composables/useAuth';
-import { AuthResponseUser, AuthResponseWoUser } from '../../types/auth'
+import { AuthResponse, AuthResponseWoUser } from '../../types/auth'
 import { sendReqWoCookie } from '../../utils/axiosInstances';
 
 defineProps({
@@ -50,19 +49,20 @@ const signupAndIn = async () => {
     isLoading.value = true
 
     try {
-        const { data } = await sendReqWoCookie.post<AuthResponseUser | undefined>('/api/signup', userData)
+        const { data } = await sendReqWoCookie.post<AuthResponse | undefined>('/api/signup', userData)
 
         if (data?.success) {
             await authStore.signin({ username: userData.username, password: userData.password })
 
             isLoading.value = false
 
-            if (authStore.getIsAuthenticated) {
-                router.push('/home')
-            } else {
+            if (!authStore.getIsAuthenticated) {
                 isError.value = true
+                errorMsg.value = 'Error occured during sign in process. Please try again.'
+
                 setInterval(() => {
                     isError.value = false
+                    errorMsg.value = ''
                 }, 3000)
             }
         }

@@ -6,7 +6,7 @@ defineProps<{
 </script>
 
 <template>
-    <table class="table-auto border-separate text-white text-center">
+    <table class="table-auto border-separate text-sky-800 text-center dark:text-white">
         <thead class="bg-slate-700">
             <tr>
                 <th>Users</th>

@@ -4,7 +4,6 @@ import { useVuelidate } from '@vuelidate/core'
 import { required, minLength } from '@vuelidate/validators'
 
 import InputField from './InputField.vue';
-import router from '../../routes';
 import useAuth from '../../composables/useAuth';
 
 defineProps({
@@ -37,9 +36,7 @@ const signin = async () => {
     
     isLoading.value = false
 
-    if (authStore.getIsAuthenticated) {
-        router.push('/home')
-    } else {
+    if (!authStore.getIsAuthenticated) {
         isError.value = true
         setInterval(() => {
             isError.value = false

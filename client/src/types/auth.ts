@@ -3,7 +3,7 @@ enum UserAuth {
     SignIn
 }
 
-type User = {
+type Users = {
     user_id: number,
     username: string,
     full_name: string,
@@ -16,15 +16,27 @@ type User = {
     updated_at: string | null
 }
 
-type AuthResponseUser = {
+type AuthResponse = {
     success: boolean
     message: string,
-    user: User
+    user: Users
 }
 
-type AuthResponseWoUser = {
-    success: boolean
-    message: string,
+type AuthResponseWoUser = Omit<AuthResponse, 'user'>
+
+type AuthState = {
+    isAuthenticated: boolean,
+    signedInUserId: number | undefined,
+    signedInUsername: string | undefined
+    signedInFullname: string | undefined,
+    signedInEmail: string | undefined,
+    signedInBio: string | undefined | null,
+    signedInRole: 'admin' | 'user' | undefined,
+    signedInPfp: string | undefined,
+    signedInHeader: string | undefined,
+    signedInJoindate: string | undefined,
+    signedInUpdate: string | undefined | null,
+    errorMsg: string | undefined
 }
 
-export { UserAuth, type AuthResponseUser, type AuthResponseWoUser }
+export { UserAuth, type Users, type AuthResponse, type AuthResponseWoUser, type AuthState }

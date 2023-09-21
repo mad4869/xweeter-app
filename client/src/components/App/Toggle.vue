@@ -10,7 +10,8 @@ defineEmits<{
 </script>
 
 <template>
-    <div class="flex items-center w-40 text-xs border border-solid border-sky-600 rounded-lg overflow-hidden">
+    <div 
+        class="flex items-center w-40 text-xs border border-solid border-sky-600 rounded-lg overflow-hidden">
         <button 
             :class="{ active: activeBtn === UserAuth.SignUp }" 
             @click="$emit('activateBtn', UserAuth.SignUp)">
@@ -26,10 +27,10 @@ defineEmits<{
 
 <style scoped>
 button {
-    @apply w-1/2 px-2 py-1 text-white
+    @apply w-1/2 px-2 py-1 text-sky-600 dark:text-white
 }
 
 .active {
-    @apply bg-sky-600 font-medium
+    @apply bg-sky-600 font-medium text-white
 }
 </style>
