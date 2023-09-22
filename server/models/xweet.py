@@ -9,7 +9,7 @@ class Xweet(db.Model):
     user_id = db.Column(db.Integer(), db.ForeignKey("users.user_id"))
     body = db.Column(db.String(140), nullable=False)
     media = db.Column(db.Text())
-    created_at = db.Column(db.DateTime(), nullable=False, default=datetime.utcnow())
+    created_at = db.Column(db.DateTime(), nullable=False, default=datetime.now())
     updated_at = db.Column(db.DateTime())
     replies = db.Relationship(
         "Reply", backref="xweets", lazy=True, cascade="all, delete-orphan"

@@ -10,6 +10,6 @@ follow = db.Table(
     db.Column(
         "follower_id", db.Integer(), db.ForeignKey("users.user_id"), primary_key=True
     ),
-    db.Column("created_at", db.DateTime(), nullable=False, default=datetime.utcnow()),
+    db.Column("created_at", db.DateTime(), nullable=False, default=datetime.now()),
     db.Column("updated_at", db.DateTime()),
 )

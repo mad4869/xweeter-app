@@ -25,7 +25,7 @@ class User(db.Model):
     role = db.Column(db.String(50), nullable=False, default="user")
     profile_pic = db.Column(db.Text(), default=get_default_pfp())
     header_pic = db.Column(db.Text(), default=get_default_header())
-    created_at = db.Column(db.DateTime(), nullable=False, default=datetime.utcnow())
+    created_at = db.Column(db.DateTime(), nullable=False, default=datetime.now())
     updated_at = db.Column(db.DateTime())
     xweets = db.Relationship(
         "Xweet", backref="users", lazy=True, cascade="all, delete-orphan"
