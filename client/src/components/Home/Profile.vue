@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import useAuth from '../../composables/useAuth';
 import { sendReqCookie } from '../../utils/axiosInstances';
-import { XweetResponse } from '../../types/xweets';
+import { XweetsResponse } from '../../types/xweets';
 import { FollowResponse } from '../../types/follows'
 
 const authStore = useAuth()
 
-const getXweets = async (): Promise<XweetResponse | undefined> => {
+const getXweets = async (): Promise<XweetsResponse | undefined> => {
     try {
         if (authStore.getIsAuthenticated) {
             const { data } = await sendReqCookie.get(`/api/users/${authStore.getSignedInUserId}/xweets`)
@@ -58,7 +58,7 @@ const followData = (await getFollow()) || []
         <div
             class="flex justify-center items-center gap-2 w-full pb-4 text-sky-800 text-lg border-b border-solid border-sky-600/20 dark:text-white">
             <span class="font-bold">{{ xweetData.length }}</span>
-            <span>Zweets</span>
+            <span>Xweets</span>
         </div>
         <div 
             class="flex flex-col items-center w-full pb-4 text-sky-800 text-lg border-b border-solid border-sky-600/20 dark:text-white">
@@ -66,7 +66,10 @@ const followData = (await getFollow()) || []
             <span><strong>{{ followData[1].data.length }}</strong> Followers</span>
         </div>
         <div>
-            <input type="button" value="New Zweet" class="px-4 py-2 bg-sky-600 text-white text-lg font-bold rounded-xl">
+            <input 
+                type="button" 
+                value="New Xweet" 
+                class="px-4 py-2 bg-sky-600 text-white text-lg font-bold rounded-xl">
         </div>
     </section>
 </template>

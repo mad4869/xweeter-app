@@ -14,13 +14,13 @@ import Toggle from '../components/App/Toggle.vue';
 import Trending from '../components/App/Trending.vue';
 import useAuth from '../composables/useAuth';
 import { UserAuth } from '../types/auth';
-import { XweetResponse } from '../types/xweets';
+import { XweetsResponse } from '../types/xweets';
 import { sendReqCookie, sendReqWoCookie } from '../utils/axiosInstances';
 
 const authStore = useAuth()
 await authStore.getUser()
 
-const getTimeline = async (): Promise<XweetResponse | undefined> => {
+const getTimeline = async (): Promise<XweetsResponse | undefined> => {
     try {
         if (authStore.getIsAuthenticated) {
             const { data } = await sendReqCookie.get(`/api/users/${authStore.getSignedInUserId}/timeline`)
@@ -70,7 +70,8 @@ const activateBtn = (btn: UserAuth) => {
             :key="xweet.xweet_id" 
             :fullname="xweet.full_name" 
             :username="xweet.username"
-            :body="xweet.body" 
+            :body="xweet.body"
+            :media="xweet.media" 
             :profilePic="xweet.profile_pic" 
             :createdAt="xweet.created_at" 
             :is-rexweet="false" />

@@ -11,8 +11,13 @@ type Xweets = {
 }
 
 type XweetResponse = {
+    data: Xweets,
+    success: boolean
+}
+
+type XweetsResponse = {
     data: Xweets[],
     success: boolean
 }
 
-export { type XweetResponse }
+export { type XweetResponse, type XweetsResponse }
