@@ -31,8 +31,19 @@ defineProps<{
             <span class=" text-sky-600 font-semibold">{{ !isRexweet ? fullname : og_fullname }}</span>
             <span class="text-sm text-sky-800">@{{ !isRexweet ? username : og_username }}</span>
         </div>
-        <div class="col-start-2 col-span-3 row-start-1 row-span-1 text-xs text-sky-900">
-            {{ new Date(createdAt).toLocaleString() }}
+        <div 
+            class="col-start-2 col-span-3 row-start-1 row-span-1 flex justify-between items-center text-xs text-sky-900">
+            <span>{{ new Date(createdAt).toLocaleString() }}</span>
+            <span class="flex justify-center items-center gap-2">
+                <font-awesome-icon 
+                    icon="fa-solid fa-retweet" 
+                    class="text-sm transition-transform cursor-pointer hover:text-sky-600 hover:scale-105"
+                    title="Rexweet" />
+                <font-awesome-icon 
+                    icon="fa-regular fa-heart"
+                    class="text-sm transition-transform cursor-pointer hover:text-sky-600 hover:scale-105"
+                    title="Like" />
+            </span>
         </div>
         <div 
             class="col-start-2 col-span-3 flex flex-col gap-2 text-sky-800 dark:text-white"

@@ -1,10 +1,28 @@
 from flask import request, jsonify
 from flask_jwt_extended import jwt_required
+from flask_socketio import emit
 from itertools import chain
 
 from . import routes
-from ..extensions import db
+from ..extensions import db, socket
 from ..models import Xweet, User, Rexweet, follow
+
+
+@socket.on("timeline")
+def update_timeline(user_id):
+    xweet = db.session.execute(
+        db.select(Xweet)
+        .join(User, Xweet.user_id == User.user_id)
+        .filter(User.user_id == user_id)
+        .order_by(Xweet.created_at.desc())
+        .limit(1)
+    ).scalar_one_or_none()
+    xweet_data = xweet.serialize()
+    xweet_data["username"] = xweet.users.username
+    xweet_data["full_name"] = xweet.users.full_name
+    xweet_data["profile_pic"] = xweet.users.profile_pic
+
+    emit("timeline", xweet_data, broadcast=True)
 
 
 @routes.route("/timeline", methods=["GET"], strict_slashes=False)

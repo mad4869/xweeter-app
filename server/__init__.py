@@ -18,6 +18,7 @@ def create_app():
     bcrypt.init_app(app)
     cors.init_app(app)
     jwt_manager.init_app(app)
+    socket.init_app(app)
 
     return app
 

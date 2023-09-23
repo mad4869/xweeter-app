@@ -20,4 +20,4 @@ type XweetsResponse = {
     success: boolean
 }
 
-export { type XweetResponse, type XweetsResponse }
+export { type Xweets, type XweetResponse, type XweetsResponse }

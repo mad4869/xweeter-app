@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, reactive } from 'vue';
 
 import Layout from '../components/App/Layout/index.vue'
 import Setting from '../components/App/Setting.vue';
@@ -14,7 +14,8 @@ import Toggle from '../components/App/Toggle.vue';
 import Trending from '../components/App/Trending.vue';
 import useAuth from '../composables/useAuth';
 import { UserAuth } from '../types/auth';
-import { XweetsResponse } from '../types/xweets';
+import { Xweets, XweetsResponse } from '../types/xweets';
+import socket from '../utils/socket';
 import { sendReqCookie, sendReqWoCookie } from '../utils/axiosInstances';
 
 const authStore = useAuth()
@@ -39,6 +40,11 @@ const getTimeline = async (): Promise<XweetsResponse | undefined> => {
 }
 
 const { data } = (await getTimeline()) || { data: [] }
+
+const timeline = reactive<Xweets[]>(data)
+socket.on('timeline', (xweet) => {
+    timeline.unshift(xweet)
+})
 
 const activeBtn = ref<UserAuth>(UserAuth.SignUp)
 const activateBtn = (btn: UserAuth) => {
@@ -66,7 +72,7 @@ const activateBtn = (btn: UserAuth) => {
         <NewXweet v-if="authStore.getIsAuthenticated" />
         <Sep title="Timeline" />
         <Xweet 
-            v-for="xweet in data" 
+            v-for="xweet in timeline" 
             :key="xweet.xweet_id" 
             :fullname="xweet.full_name" 
             :username="xweet.username"

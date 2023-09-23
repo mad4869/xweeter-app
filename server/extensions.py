@@ -3,6 +3,7 @@ from flask_migrate import Migrate
 from flask_bcrypt import Bcrypt
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
+from flask_socketio import SocketIO
 from minio import Minio
 from os import environ, path
 from dotenv import load_dotenv
@@ -32,3 +33,6 @@ mc = Minio(
     secret_key=environ.get("MINIO_SECRET_KEY"),
     secure=False,
 )
+
+# Websocket
+socket = SocketIO(cors_allowed_origins="http://localhost:5173")

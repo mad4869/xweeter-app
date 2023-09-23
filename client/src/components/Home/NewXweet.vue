@@ -2,8 +2,9 @@
 import { computed, ref } from 'vue';
 
 import useAuth from '../../composables/useAuth';
+import socket from '../../utils/socket';
 import { sendReqCookie } from '../../utils/axiosInstances';
-import { XweetResponse } from '../../types/xweets' 
+import { XweetResponse } from '../../types/xweets'
 
 const authStore = useAuth()
 
@@ -36,13 +37,15 @@ const addXweet = async () => {
         )
 
         if (data?.success) {
+            socket.emit('timeline', authStore.getSignedInUserId)
+
             isLoading.value = false
             isSuccess.value = true
             body.value = ''
             fileUrl.value = ''
 
             setInterval(() => {
-            isSuccess.value = false
+                isSuccess.value = false
             }, 3000)
         }
     } catch (error) {
@@ -73,14 +76,9 @@ const manageFile = (e: Event) => {
 </script>
 
 <template>
-    <section 
-        class="px-12 flex flex-col justify-between items-center border border-solid border-sky-800 rounded-xl group">
+    <section class="px-12 flex flex-col justify-between items-center border border-solid border-sky-800 rounded-xl group">
         <span class="w-full py-4 text-2xl text-sky-950 dark:text-white">New Xweet</span>
-        <textarea 
-            name="new-tweet" 
-            id="new-tweet" 
-            placeholder="Tell them what have you been up to..." 
-            spellcheck="false"
+        <textarea name="new-tweet" id="new-tweet" placeholder="Tell them what have you been up to..." spellcheck="false"
             v-model="body"
             class="w-full h-10 px-4 py-2 bg-sky-200 rounded-lg caret-sky-800 resize-none transition-[height] duration-300 ease-out placeholder:text-sky-400 focus:h-32 focus:outline-none dark:bg-slate-200 dark:placeholder:text-slate-400"
             :class="charCount > MAX_CHARS ? 'text-red-600 focus-visible:outline-red-600' : 'text-slate-700 focus-visible:outline-sky-600'">
@@ -88,16 +86,11 @@ const manageFile = (e: Event) => {
         <div class="w-full py-4 flex justify-between items-start">
             <div class="flex items-center gap-1 h-full">
                 <label for="add-image" title="Add image to your xweet">
-                    <span 
+                    <span
                         class="px-2 py-1 bg-slate-800/50 text-xs text-white rounded-md cursor-pointer hover:bg-slate-800 dark:bg-slate-400/50 dark:hover:bg-slate-400">
                         Add Image
                     </span>
-                    <input 
-                        type="file" 
-                        id="add-image" 
-                        alt="Add Image" 
-                        accept="image/jpeg, image/png" 
-                        class="hidden"
+                    <input type="file" id="add-image" alt="Add Image" accept="image/jpeg, image/png" class="hidden"
                         @change="manageFile">
                 </label>
                 <img :src="fileUrl" class="w-8 h-8 object-scale-down" v-if="fileUrl" />
@@ -108,30 +101,18 @@ const manageFile = (e: Event) => {
                     /
                     <span class="text-sky-800 dark:text-sky-600">{{ MAX_CHARS }}</span>
                 </p>
-                <p 
-                    class="text-red-600 opacity-0 fade-in dark:text-red-400" 
-                    v-if="charCount > MAX_CHARS">
+                <p class="text-red-600 opacity-0 fade-in dark:text-red-400" v-if="charCount > MAX_CHARS">
                     Your xweet exceeds the maximum number of characters
                 </p>
-                <p 
-                    class="text-sky-800 font-bold opacity-0 fade-in dark:text-sky-600"
-                    v-if="isSuccess">
+                <p class="text-sky-800 font-bold opacity-0 fade-in dark:text-sky-600" v-if="isSuccess">
                     You posted a new xweet!
                 </p>
             </div>
             <div class="flex items-center gap-2">
-                <font-awesome-icon 
-                    icon="fa-solid fa-spinner" 
-                    spin-pulse 
-                    class="text-white" 
-                    v-if="isLoading" />
-                <input 
-                    type="button" 
-                    value="Xweet"
+                <font-awesome-icon icon="fa-solid fa-spinner" spin-pulse class="text-white" v-if="isLoading" />
+                <input type="button" value="Xweet"
                     class="px-4 py-1 bg-sky-600 text-white font-semibold rounded-md transition-colors duration-200 cursor-pointer hover:bg-sky-800 active:shadow-inner disabled:bg-slate-200 disabled:cursor-not-allowed"
-                    :disabled="charCount > MAX_CHARS || isLoading"
-                    title="Add new xweet"
-                    @click.prevent="addXweet">
+                    :disabled="charCount > MAX_CHARS || isLoading" title="Add new xweet" @click.prevent="addXweet">
             </div>
         </div>
     </section>
@@ -146,6 +127,7 @@ const manageFile = (e: Event) => {
     from {
         opacity: 0;
     }
+
     to {
         opacity: 100;
     }

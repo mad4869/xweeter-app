@@ -1,4 +1,5 @@
 from . import app
+from .extensions import socket
 
 if __name__ == "__main__":
-    app.run()
+    socket.run(app)

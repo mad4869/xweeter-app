@@ -24,7 +24,7 @@ defineProps<{
                     :type="inputType" 
                     :value="modelValue"
                     @input="$emit('update:modelValue', ($event.target as HTMLInputElement).value)"
-                    class="bg-transparent text-sky-800 peer focus:outline-none dark:text-white" 
+                    class="bg-transparent text-white peer focus:outline-none" 
                     required>
                 <font-awesome-icon 
                     :icon="icon" 
@@ -32,7 +32,7 @@ defineProps<{
                 <label 
                     :for="inputId"
                     class="absolute text-xs text-sky-600 transform origin-top-left translate-x-0 translate-y-0 scale-100 transition-transform pointer-events-none peer-focus:-translate-y-6 peer-focus:scale-90 peer-valid:-translate-y-6 peer-valid:scale-90"
-                    :class="inputErrors.length > 0 ? 'peer-focus:text-red-600 peer-valid:text-red-600 dark:peer-focus:text-red-400 dark:peer-valid:text-red-400' : 'peer-focus:text-sky-800 peer-valid:text-sky-800 dark:peer-focus:text-sky-400 dark:peer-valid:text-sky-400'">
+                    :class="inputErrors.length > 0 ? 'peer-focus:text-red-600 peer-valid:text-red-600 dark:peer-focus:text-red-400 dark:peer-valid:text-red-400' : 'peer-focus:text-white peer-valid:text-white dark:peer-focus:text-sky-400 dark:peer-valid:text-sky-400'">
                     {{ labelText }}
                 </label>
             </div>

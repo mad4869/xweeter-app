@@ -2,7 +2,6 @@ from flask import request, jsonify
 from flask_jwt_extended import jwt_required
 from minio.error import S3Error
 import base64
-import io
 
 from . import routes
 from ..extensions import db, mc
@@ -37,9 +36,10 @@ def access_xweets_by_user(user_id):
     if request.method == "POST":
         data = request.get_json()
         body = data.get("body")
+        media = data.get("media")
         hashtags = data.get("hashtags")
 
-        if "media" not in data and len(hashtags) == 0:
+        if not media and len(hashtags) == 0:
             xweet = Xweet(user_id=user_id, body=body)
 
             try:
