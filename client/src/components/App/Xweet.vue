@@ -2,8 +2,14 @@
 import { ref } from 'vue';
 
 import ImageViewer from './ImageViewer.vue';
+import useAuth from '../../composables/useAuth';
+import { sendReqCookie } from '../../utils/axiosInstances';
+import { RexweetResponse } from '../../types/rexweets';
+import { LikeResponse } from '../../types/likes'
 
-defineProps<{
+const { id, user_id } = defineProps<{
+    id: number,
+    user_id: number,
     fullname?: string,
     username?: string,
     body: string,
@@ -16,7 +22,11 @@ defineProps<{
     og_profile_pic?: string
 }>()
 
+const authStore = useAuth()
+
 const isImageEnlarged = ref(false)
+const isRexweeted = ref(false)
+const isLiked = ref(false)
 
 const enlargeImage = () => {
     isImageEnlarged.value = true
@@ -25,6 +35,42 @@ const enlargeImage = () => {
 const handleClickOutside = (isClickedOutside: boolean) => {
     if (isClickedOutside) {
         isImageEnlarged.value = false
+    }
+}
+
+const rexweet = async () => {
+    isRexweeted.value = true
+
+    try {
+        const { data } = await sendReqCookie.post<RexweetResponse | undefined>(
+            `/api/xweets/${id}/rexweets`, { user_id }
+        )
+
+        if (data?.success) {
+            console.log('Success!')
+        }
+    } catch (err) {
+        isRexweeted.value = false
+
+        console.error(err)
+    }
+}
+
+const like = async () => {
+    isLiked.value = true
+
+    try {
+        const { data } = await sendReqCookie.post<LikeResponse | undefined>(
+            `/api/xweets/${id}/likes`, { user_id }
+        )
+
+        if (data?.success) {
+            console.log('Success!')
+        }
+    } catch (err) {
+        isLiked.value = false
+
+        console.error(err)
     }
 }
 </script>
@@ -52,13 +98,23 @@ const handleClickOutside = (isClickedOutside: boolean) => {
             <span>{{ new Date(createdAt).toLocaleString() }}</span>
             <span class="flex justify-center items-center gap-2">
                 <font-awesome-icon 
+                    v-if="authStore.getIsAuthenticated"
                     icon="fa-solid fa-retweet" 
                     class="text-sm transition-transform cursor-pointer hover:text-sky-600 hover:scale-105"
-                    title="Rexweet" />
+                    :class="isRexweeted ? 'text-sky-600 scale-105' : ''"
+                    title="Rexweet"
+                    @click="rexweet" />
                 <font-awesome-icon 
+                    v-if="authStore.getIsAuthenticated && !isLiked"
                     icon="fa-regular fa-heart"
                     class="text-sm transition-transform cursor-pointer hover:text-sky-600 hover:scale-105"
-                    title="Like" />
+                    title="Like"
+                    @click="like" />
+                <font-awesome-icon
+                    v-if="authStore.getIsAuthenticated && isLiked"
+                    icon="fa-solid fa-heart"
+                    class="text-sm transition-transform cursor-pointer text-sky-600 scale-105"
+                    title="Unlike" />
             </span>
         </div>
         <div 

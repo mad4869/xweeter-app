@@ -73,7 +73,9 @@ const activateBtn = (btn: UserAuth) => {
         <Sep title="Timeline" />
         <Xweet 
             v-for="xweet in timeline" 
-            :key="xweet.xweet_id" 
+            :key="xweet.xweet_id"
+            :id="xweet.xweet_id"
+            :user_id="xweet.user_id" 
             :fullname="xweet.full_name" 
             :username="xweet.username"
             :body="xweet.body"

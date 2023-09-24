@@ -48,12 +48,14 @@ const addXweet = async () => {
                 isSuccess.value = false
             }, 3000)
         }
-    } catch (error) {
+    } catch (err) {
         isError.value = true
 
         setInterval(() => {
             isError.value = false
         }, 3000)
+
+        console.error(err)
     }
 }
 
