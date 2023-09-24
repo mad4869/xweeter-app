@@ -1,4 +1,8 @@
 <script setup lang="ts">
+import { ref } from 'vue';
+
+import ImageViewer from './ImageViewer.vue';
+
 defineProps<{
     fullname?: string,
     username?: string,
@@ -11,6 +15,18 @@ defineProps<{
     og_fullname?: string,
     og_profile_pic?: string
 }>()
+
+const isImageEnlarged = ref(false)
+
+const enlargeImage = () => {
+    isImageEnlarged.value = true
+}
+
+const handleClickOutside = (isClickedOutside: boolean) => {
+    if (isClickedOutside) {
+        isImageEnlarged.value = false
+    }
+}
 </script>
 
 <template>
@@ -52,11 +68,21 @@ defineProps<{
             <div class="flex-shrink-0">
                 <img 
                     :src="media" 
-                    class="max-h-40 cursor-zoom-in" 
+                    v-if="media"
                     alt="Media" 
+                    class="max-h-60 cursor-zoom-in" 
                     loading="lazy"
-                    v-if="media">
+                    @click="enlargeImage">
             </div>
         </div>
     </section>
+    <ImageViewer 
+        v-if="isImageEnlarged" 
+        :username="username!"
+        :fullname="fullname!"
+        :body="body"
+        :profile-pic="profilePic!"
+        :file-url="media!" 
+        @clicked-outside="handleClickOutside"
+        />
 </template>
