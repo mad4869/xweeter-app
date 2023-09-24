@@ -7,7 +7,7 @@ import { sendReqCookie } from '../../utils/axiosInstances';
 import { RexweetResponse } from '../../types/rexweets';
 import { LikeResponse } from '../../types/likes'
 
-const { id, user_id } = defineProps<{
+const { id, user_id, rexweeted, liked } = defineProps<{
     id: number,
     user_id: number,
     fullname?: string,
@@ -16,17 +16,20 @@ const { id, user_id } = defineProps<{
     media?: string,
     profilePic?: string,
     createdAt: string,
-    isRexweet: boolean,
     og_username?: string,
     og_fullname?: string,
-    og_profile_pic?: string
+    og_profile_pic?: string,
+    isRexweet: boolean,
+    isOwn: boolean,
+    rexweeted: boolean,
+    liked: boolean
 }>()
 
 const authStore = useAuth()
 
 const isImageEnlarged = ref(false)
-const isRexweeted = ref(false)
-const isLiked = ref(false)
+const isRexweeted = ref(rexweeted)
+const isLiked = ref(liked)
 
 const enlargeImage = () => {
     isImageEnlarged.value = true
@@ -98,7 +101,7 @@ const like = async () => {
             <span>{{ new Date(createdAt).toLocaleString() }}</span>
             <span class="flex justify-center items-center gap-2">
                 <font-awesome-icon 
-                    v-if="authStore.getIsAuthenticated"
+                    v-if="authStore.getIsAuthenticated && !isOwn"
                     icon="fa-solid fa-retweet" 
                     class="text-sm transition-transform cursor-pointer hover:text-sky-600 hover:scale-105"
                     :class="isRexweeted ? 'text-sky-600 scale-105' : ''"
@@ -108,13 +111,19 @@ const like = async () => {
                     v-if="authStore.getIsAuthenticated && !isLiked"
                     icon="fa-regular fa-heart"
                     class="text-sm transition-transform cursor-pointer hover:text-sky-600 hover:scale-105"
-                    title="Like"
+                    title="Like Xweet"
                     @click="like" />
                 <font-awesome-icon
                     v-if="authStore.getIsAuthenticated && isLiked"
                     icon="fa-solid fa-heart"
                     class="text-sm transition-transform cursor-pointer text-sky-600 scale-105"
-                    title="Unlike" />
+                    title="Unlike Xweet" />
+                <font-awesome-icon
+                    v-if="authStore.getIsAuthenticated && isOwn"
+                    icon="fa-regular fa-trash-can"
+                    class="text-sm transition-transform cursor-pointer hover:text-red-600 hover:scale-105"
+                    title="Delete Xweet"
+                    />
             </span>
         </div>
         <div 
@@ -139,6 +148,8 @@ const like = async () => {
         :body="body"
         :profile-pic="profilePic!"
         :file-url="media!" 
+        :is-own="isOwn"
+        :is-liked="isLiked"
         @clicked-outside="handleClickOutside"
         />
 </template>

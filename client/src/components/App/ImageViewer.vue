@@ -2,15 +2,21 @@
 import { ref } from 'vue';
 import { onClickOutside } from '@vueuse/core';
 
+import useAuth from '../../composables/useAuth';
+
 defineProps<{
     username: string,
     fullname: string,
     profilePic: string,
     body: string,
     fileUrl: string,
+    isOwn: boolean,
+    isLiked: boolean
 }>()
 
 const emit = defineEmits()
+
+const authStore = useAuth()
 
 const imgRef = ref<HTMLImageElement | null>(null)
 const isClickedOutside = ref(false)
@@ -47,13 +53,25 @@ onClickOutside(imgRef, () => {
                     </div>
                     <div class="flex justify-center items-center gap-2">
                         <font-awesome-icon 
+                            v-if="authStore.getIsAuthenticated && !isOwn"
                             icon="fa-solid fa-retweet" 
                             class="text-sm transition-transform cursor-pointer hover:text-sky-600 hover:scale-105"
                             title="Rexweet" />
                         <font-awesome-icon 
+                            v-if="authStore.getIsAuthenticated && !isLiked"
                             icon="fa-regular fa-heart"
                             class="text-sm transition-transform cursor-pointer hover:text-sky-600 hover:scale-105"
-                            title="Like" />
+                            title="Like Xweet" />
+                        <font-awesome-icon
+                            v-if="authStore.getIsAuthenticated && isLiked"
+                            icon="fa-solid fa-heart"
+                            class="text-sm transition-transform cursor-pointer text-sky-600 scale-105"
+                            title="Unlike Xweet" />
+                        <font-awesome-icon
+                            v-if="authStore.getIsAuthenticated && isOwn"
+                            icon="fa-regular fa-trash-can"
+                            class="text-sm transition-transform cursor-pointer hover:text-red-600 hover:scale-105"
+                            title="Delete Xweet"/>
                     </div>
                 </div>
                 <span class="w-full">{{ body }}</span>

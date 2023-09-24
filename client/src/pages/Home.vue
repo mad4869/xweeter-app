@@ -15,6 +15,7 @@ import Trending from '../components/App/Trending.vue';
 import useAuth from '../composables/useAuth';
 import { UserAuth } from '../types/auth';
 import { Xweets, XweetsResponse } from '../types/xweets';
+import { LikesFullResponse } from '../types/likes'
 import socket from '../utils/socket';
 import { sendReqCookie, sendReqWoCookie } from '../utils/axiosInstances';
 
@@ -39,11 +40,31 @@ const getTimeline = async (): Promise<XweetsResponse | undefined> => {
     }
 }
 
-const { data } = (await getTimeline()) || { data: [] }
+const getLikes = async (): Promise<LikesFullResponse | undefined> => {
+    try {
+        if (!authStore.getIsAuthenticated) {
+            return
+        }
 
-const timeline = reactive<Xweets[]>(data)
+        const { data } = await sendReqCookie.get(`/api/users/${authStore.getSignedInUserId}/likes`)
+        if (data) {
+            return data
+        }
+    } catch (err) {
+        console.error(err)
+    }
+}
+
+const timelineData = (await getTimeline()) || { data: [] }
+const timeline = reactive<Xweets[]>(timelineData.data)
 socket.on('timeline', (xweet) => {
     timeline.unshift(xweet)
+})
+
+const likes = reactive<number[]>([])
+const likesData = (await getLikes()) || { data: [] }
+likesData.data.forEach(like => {
+    likes.push(like.xweet_id)
 })
 
 const activeBtn = ref<UserAuth>(UserAuth.SignUp)
@@ -82,7 +103,10 @@ const activateBtn = (btn: UserAuth) => {
             :media="xweet.media" 
             :profilePic="xweet.profile_pic" 
             :createdAt="xweet.created_at" 
-            :is-rexweet="false" />
+            :is-rexweet="false"
+            :is-own="xweet.user_id === authStore.getSignedInUserId"
+            :rexweeted="false"
+            :liked="likes.includes(xweet.xweet_id)" />
         <template #sidebarRight>
             <Suggestions v-if="authStore.getIsAuthenticated" />
             <Trending />
