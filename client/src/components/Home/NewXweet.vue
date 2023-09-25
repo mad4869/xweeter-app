@@ -75,10 +75,14 @@ const manageFile = (e: Event) => {
         reader.readAsDataURL(file)
     }
 }
+
+const removeFile = () => {
+    fileUrl.value = ''
+}
 </script>
 
 <template>
-    <section class="px-12 flex flex-col justify-between items-center border border-solid border-sky-800 rounded-xl group">
+    <section class="px-12 flex flex-col justify-between items-center border border-solid border-sky-800 rounded-xl">
         <span class="w-full py-4 text-2xl text-sky-950 dark:text-white">New Xweet</span>
         <textarea name="new-tweet" id="new-tweet" placeholder="Tell them what have you been up to..." spellcheck="false"
             v-model="body"
@@ -86,16 +90,29 @@ const manageFile = (e: Event) => {
             :class="charCount > MAX_CHARS ? 'text-red-600 focus-visible:outline-red-600' : 'text-slate-700 focus-visible:outline-sky-600'">
         </textarea>
         <div class="w-full py-4 flex justify-between items-start">
-            <div class="flex items-center gap-1 h-full">
+            <div class="flex items-center gap-2 h-full">
                 <label for="add-image" title="Add image to your xweet">
                     <span
-                        class="px-2 py-1 bg-slate-800/50 text-xs text-white rounded-md cursor-pointer hover:bg-slate-800 dark:bg-slate-400/50 dark:hover:bg-slate-400">
-                        Add Image
+                        class="flex items-center gap-2 px-2 py-1 bg-sky-800/50 text-xs text-white rounded-md transition-colors cursor-pointer hover:bg-sky-800 dark:bg-sky-400/50 dark:hover:bg-sky-400">
+                        <font-awesome-icon icon="fa-solid fa-images" />
+                        <h6>Image</h6>
                     </span>
-                    <input type="file" id="add-image" alt="Add Image" accept="image/jpeg, image/png" class="hidden"
+                    <input 
+                        type="file" 
+                        id="add-image" 
+                        alt="Add Image" 
+                        accept="image/jpeg, image/png" 
+                        class="hidden"
                         @change="manageFile">
                 </label>
-                <img :src="fileUrl" class="w-8 h-8 object-scale-down" v-if="fileUrl" />
+                <div v-if="fileUrl" class="relative group">
+                    <img :src="fileUrl" class="w-8 h-8 object-scale-down" />
+                    <font-awesome-icon 
+                        icon="fa-regular fa-circle-xmark" 
+                        title="Remove the image"
+                        class="absolute -top-1 -right-1 text-xs text-sky-800 cursor-pointer dark:text-white hidden group-hover:block"
+                        @click.prevent="removeFile" />
+                </div>
             </div>
             <div class="flex items-center h-full dark:text-white">
                 <p class="text-xs" v-if="charCount <= MAX_CHARS && !isSuccess && !isLoading">
@@ -113,8 +130,10 @@ const manageFile = (e: Event) => {
             <div class="flex items-center gap-2">
                 <font-awesome-icon icon="fa-solid fa-spinner" spin-pulse class="text-white" v-if="isLoading" />
                 <input type="button" value="Xweet"
-                    class="px-4 py-1 bg-sky-600 text-white font-semibold rounded-md transition-colors duration-200 cursor-pointer hover:bg-sky-800 active:shadow-inner disabled:bg-slate-200 disabled:cursor-not-allowed"
-                    :disabled="charCount > MAX_CHARS || isLoading" title="Add new xweet" @click.prevent="addXweet">
+                    class="px-4 py-1 bg-sky-600 text-white font-semibold rounded-md transition-colors duration-200 cursor-pointer hover:bg-sky-800 active:shadow-inner disabled:bg-slate-800 disabled:text-slate-600 disabled:cursor-not-allowed"
+                    :disabled="charCount > MAX_CHARS || (charCount === 0 && !fileUrl) || isLoading" 
+                    title="Add new xweet" 
+                    @mousedown.prevent="addXweet">
             </div>
         </div>
     </section>

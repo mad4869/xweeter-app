@@ -2,8 +2,8 @@
 import User from './User.vue';
 
 const users = [
-    { fullname: 'Kazusa Okuyama', username: '@kazusa', lastZweet: 'Lets go' },
-    { fullname: 'Kazusa Okuyama', username: '@kazusa', lastZweet: 'Lets go' },
+    { fullname: 'Kazusa Okuyama', username: '@kazusa', lastXweet: 'Let\'s go!' },
+    { fullname: 'Tsukasa Senpai', username: '@tsukasa', lastXweet: 'Ikuyo!' },
 ]
 </script>
 
@@ -14,13 +14,13 @@ const users = [
             <span class="text-white font-semibold">Who to Follow</span>
             <font-awesome-icon icon="fa-regular fa-user" class="text-white" />
         </div>
-        <div class="overflow-scroll">
+        <div class="flex flex-col justify-center gap-2 overflow-scroll">
             <User 
                 v-for="(user, index) in users" 
                 :key="index" 
                 :fullname="user.fullname" 
                 :username="user.username"
-                :last-zweet="user.lastZweet" />
+                :last-xweet="user.lastXweet" />
         </div>
     </section>
 </template>

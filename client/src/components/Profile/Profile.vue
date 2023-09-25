@@ -26,7 +26,6 @@ type Response = {
 }
 
 const authStore = useAuth()
-await authStore.getUser()
 
 const getProfileTimeline = async (): Promise<Response | undefined> => {
     try {
@@ -48,9 +47,22 @@ const { data } = (await getProfileTimeline()) || { data: [] }
 
 <template>
     <section class="flex flex-col gap-4">
-        <Xweet v-for="xweet in data" :key="xweet.xweet_id" :fullname="xweet.full_name" :username="xweet.username"
-            :body="xweet.body" :profilePic="xweet.profile_pic" :createdAt="xweet.created_at"
-            :isRexweet="xweet.rexweet_id !== undefined" :og_username="xweet.og_username" :og_fullname="xweet.og_full_name"
-            :og_profile_pic="xweet.og_profile_pic" />
+        <Xweet 
+            v-for="xweet in data" 
+            :key="xweet.xweet_id" 
+            :id="xweet.xweet_id"
+            :user_id="xweet.user_id"
+            :fullname="xweet.full_name" 
+            :username="xweet.username"
+            :body="xweet.body" 
+            :profilePic="xweet.profile_pic" 
+            :createdAt="xweet.created_at"
+            :isRexweet="xweet.rexweet_id !== undefined" 
+            :og_username="xweet.og_username" 
+            :og_fullname="xweet.og_full_name"
+            :og_profile_pic="xweet.og_profile_pic"
+            :isOwn="true"
+            :rexweeted="false"
+            :liked="false" />
     </section>
 </template>

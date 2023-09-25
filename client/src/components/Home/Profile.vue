@@ -40,9 +40,9 @@ const followData = (await getFollow()) || []
 
 <template>
     <section 
-        class="flex-[4] flex flex-col justify-evenly items-center border border-solid border-sky-800 rounded-xl">
+        class="flex-[4] grid grid-rows-4 border border-solid border-sky-800 rounded-xl">
         <div 
-            class="flex justify-center items-center gap-4 w-full px-8 pb-4 border-b border-solid border-sky-600/20">
+            class="row-start-1 flex justify-center items-center gap-4 w-full border-b border-solid border-sky-600/20">
             <div>
                 <img :src="authStore.getSignedInPfp" class="w-12 h-12 border border-solid border-sky-800 rounded-full" />
             </div>
@@ -56,20 +56,28 @@ const followData = (await getFollow()) || []
             </div>
         </div>
         <div
-            class="flex justify-center items-center gap-2 w-full pb-4 text-sky-800 text-lg border-b border-solid border-sky-600/20 dark:text-white">
-            <span class="font-bold">{{ xweetData.length }}</span>
+            class="row-start-2 flex flex-col justify-center items-center gap-1 w-full text-sky-800 text-lg border-b border-solid border-sky-600/20 dark:text-white">
+            <strong class="text-3xl">{{ xweetData.length }}</strong>
             <span>Xweets</span>
         </div>
         <div 
-            class="flex flex-col items-center w-full pb-4 text-sky-800 text-lg border-b border-solid border-sky-600/20 dark:text-white">
-            <span><strong>{{ followData[0].data.length }}</strong> Followings</span>
-            <span><strong>{{ followData[1].data.length }}</strong> Followers</span>
+            class="row-start-3 flex flex-col justify-center items-center w-full text-sky-800 text-lg border-b border-solid border-sky-600/20 dark:text-white">
+            <div class="flex justify-center items-center gap-2 w-full">
+                <strong class="flex-1 text-right">{{ followData[0].data.length }}</strong>
+                <span class="flex-[2]">Followings</span>
+            </div>
+            <div class="flex justify-center items-center gap-2 w-full">
+                <strong class="flex-1 text-right">{{ followData[1].data.length }}</strong>
+                <span class="flex-[2]">Followers</span>
+            </div>
         </div>
-        <div>
-            <input 
-                type="button" 
-                value="New Xweet" 
-                class="px-4 py-2 bg-sky-600 text-white text-lg font-bold rounded-xl">
+        <div class="row-start-4 flex justify-center items-center">
+            <button  
+                title="Add New Xweet"
+                class="flex items-center gap-2 px-4 py-2 bg-sky-600 text-white text-lg font-bold rounded-xl transition-colors cursor-pointer hover:bg-sky-800">
+                <font-awesome-icon icon="fa-solid fa-feather" />
+                <span>New Xweet</span>
+            </button>
         </div>
     </section>
 </template>

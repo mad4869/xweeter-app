@@ -2,6 +2,9 @@ from flask import request, jsonify
 from flask_jwt_extended import jwt_required
 from minio.error import S3Error
 import base64
+import io
+import uuid
+import imghdr
 
 from . import routes
 from ..extensions import db, mc
@@ -58,7 +61,9 @@ def access_xweets_by_user(user_id):
             media_url = data.get("media")
             media_data = base64.b64decode(media_url.split(",")[1])
             media_stream = io.BytesIO(media_data)
-            OBJECT_NAME = "media_testing.jpg"
+            media_id = uuid.uuid4()
+            media_ext = imghdr.what(media_stream)
+            OBJECT_NAME = f"{media_id}.{media_ext}"
 
             try:
                 mc.put_object(BUCKET, OBJECT_NAME, media_stream, len(media_data))

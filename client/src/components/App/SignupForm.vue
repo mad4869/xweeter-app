@@ -133,7 +133,7 @@ const signupAndIn = async () => {
         <div v-if="isError" class="text-red-400 text-xs">{{ errorMsg }}</div>
         <button 
             type="submit"
-            class="uppercase w-24 py-1 bg-sky-600 text-white rounded-md shadow-sm shadow-slate-900/50 transition-colors duration-200 ease-in hover:bg-sky-800 active:shadow-inner disabled:bg-slate-400 disabled:text-slate-600 disabled:shadow-none disabled:cursor-not-allowed"
+            class="uppercase w-24 py-1 bg-sky-600 text-white rounded-md shadow-sm shadow-slate-900/50 transition-colors duration-200 ease-in hover:bg-sky-800 active:shadow-inner disabled:bg-slate-800 disabled:text-slate-600 disabled:shadow-none disabled:cursor-not-allowed"
             title="Sign Up"
             :disabled="v$.$invalid">
             <font-awesome-icon icon="fa-solid fa-spinner" spin-pulse v-if="isLoading" />

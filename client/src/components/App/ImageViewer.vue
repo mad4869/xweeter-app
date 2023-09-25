@@ -51,7 +51,7 @@ onClickOutside(imgRef, () => {
                         <span class="font-bold">{{ fullname }}</span>
                         <span>@{{ username }}</span>
                     </div>
-                    <div class="flex justify-center items-center gap-2">
+                    <div class="flex justify-center items-center gap-4">
                         <font-awesome-icon 
                             v-if="authStore.getIsAuthenticated && !isOwn"
                             icon="fa-solid fa-retweet" 

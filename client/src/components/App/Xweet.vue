@@ -1,13 +1,15 @@
 <script setup lang="ts">
 import { ref } from 'vue';
+import { RouterLink } from 'vue-router';
 
 import ImageViewer from './ImageViewer.vue';
 import useAuth from '../../composables/useAuth';
 import { sendReqCookie } from '../../utils/axiosInstances';
 import { RexweetResponse } from '../../types/rexweets';
 import { LikeResponse } from '../../types/likes'
+import useRenderXweet from '../../composables/useRenderXweet';
 
-const { id, user_id, rexweeted, liked } = defineProps<{
+const { id, body, user_id, createdAt, rexweeted, liked } = defineProps<{
     id: number,
     user_id: number,
     fullname?: string,
@@ -26,6 +28,40 @@ const { id, user_id, rexweeted, liked } = defineProps<{
 }>()
 
 const authStore = useAuth()
+
+const currentDate = new Date()
+const xweetDate = new Date(createdAt)
+const deltaDate = currentDate.getTime() - xweetDate.getTime()
+
+const seconds = Math.floor(deltaDate / 1000)
+const minutes = Math.floor(seconds / 60)
+const hours = Math.floor(minutes / 60)
+const days = Math.floor(hours / 24)
+const months = Math.floor(days / 30)
+const years = Math.floor(months / 12)
+
+const xweetAge = ref('')
+
+switch(true) {
+    case years > 0:
+        xweetAge.value = `${years} year${years !== 1 ? 's' : ''} ago`
+        break
+    case months > 0:
+        xweetAge.value = `${months} month${months !== 1 ? 's' : ''} ago`
+        break
+    case days > 0:
+        xweetAge.value = `${days} day${days !== 1 ? 's' : ''} ago`
+        break
+    case hours > 0:
+        xweetAge.value = `${hours} hour${hours !== 1 ? 's' : ''} ago`;
+        break;
+    case minutes > 0:
+        xweetAge.value = `${minutes} minute${minutes !== 1 ? 's' : ''} ago`;
+        break;
+    default:
+        xweetAge.value = `${seconds} second${seconds !== 1 ? 's' : ''} ago`;
+        break;
+}
 
 const isImageEnlarged = ref(false)
 const isRexweeted = ref(rexweeted)
@@ -76,68 +112,84 @@ const like = async () => {
         console.error(err)
     }
 }
+
+const xweet = useRenderXweet(body)
 </script>
 
 <template>
     <section
-        class="px-4 py-2 grid grid-cols-4 gap-x-4 bg-sky-600/10 backdrop-blur-lg border border-solid border-sky-800 rounded-xl"
-        :class="media ? 'grid-rows-[8]' : 'grid-rows-3'">
+        class="px-4 py-4 flex justify-center items-center gap-4 bg-sky-600/10 backdrop-blur-lg border border-solid border-sky-800 rounded-xl">
         <div
-            class="col-start-1 col-span-1 flex justify-center items-center border-r border-solid border-sky-600/20"
-            :class="media ? 'row-start-1 row-span-4' : 'row-start-1 row-span-2'">
+            class="flex-1 flex flex-col items-center gap-2 h-full px-4 border-r border-solid border-sky-600/20">
             <img 
                 :src="!isRexweet ? profilePic : og_profile_pic"
                 class="w-10 h-10 border border-solid border-sky-800 rounded-full" 
                 loading="lazy" />
+            <div class="flex flex-col justify-center items-center text-center">
+                <p class=" text-sky-600 font-semibold">{{ !isRexweet ? fullname : og_fullname }}</p>
+                <p class="text-sm text-sky-800">@{{ !isRexweet ? username : og_username }}</p>
+            </div>
         </div>
-        <div
-            class="col-start-1 col-span-1 flex flex-col items-center border-r border-solid border-sky-600/20"
-            :class="media ? 'row-start-5 row-span-3' : 'row-start-3 row-span-1'">
-            <span class=" text-sky-600 font-semibold">{{ !isRexweet ? fullname : og_fullname }}</span>
-            <span class="text-sm text-sky-800">@{{ !isRexweet ? username : og_username }}</span>
-        </div>
-        <div 
-            class="col-start-2 col-span-3 row-start-1 row-span-1 flex justify-between items-center text-xs text-sky-900">
-            <span>{{ new Date(createdAt).toLocaleString() }}</span>
-            <span class="flex justify-center items-center gap-2">
-                <font-awesome-icon 
-                    v-if="authStore.getIsAuthenticated && !isOwn"
-                    icon="fa-solid fa-retweet" 
-                    class="text-sm transition-transform cursor-pointer hover:text-sky-600 hover:scale-105"
-                    :class="isRexweeted ? 'text-sky-600 scale-105' : ''"
-                    title="Rexweet"
-                    @click="rexweet" />
-                <font-awesome-icon 
-                    v-if="authStore.getIsAuthenticated && !isLiked"
-                    icon="fa-regular fa-heart"
-                    class="text-sm transition-transform cursor-pointer hover:text-sky-600 hover:scale-105"
-                    title="Like Xweet"
-                    @click="like" />
-                <font-awesome-icon
-                    v-if="authStore.getIsAuthenticated && isLiked"
-                    icon="fa-solid fa-heart"
-                    class="text-sm transition-transform cursor-pointer text-sky-600 scale-105"
-                    title="Unlike Xweet" />
-                <font-awesome-icon
-                    v-if="authStore.getIsAuthenticated && isOwn"
-                    icon="fa-regular fa-trash-can"
-                    class="text-sm transition-transform cursor-pointer hover:text-red-600 hover:scale-105"
-                    title="Delete Xweet"
-                    />
-            </span>
-        </div>
-        <div 
-            class="col-start-2 col-span-3 flex flex-col gap-2 text-sky-800 dark:text-white"
-            :class="media ? 'row-start-3 row-span-5' : 'row-start-2 row-span-2'">
-            <p>{{ body }}</p>
-            <div class="flex-shrink-0">
-                <img 
-                    :src="media" 
-                    v-if="media"
-                    alt="Media" 
-                    class="max-h-60 cursor-zoom-in" 
-                    loading="lazy"
-                    @click="enlargeImage">
+        <div class="flex flex-col gap-2 w-4/5 h-full">
+            <div 
+                class="flex justify-between items-center text-xs text-sky-900">
+                <span :title="createdAt">{{ xweetAge }}</span>
+                <span class="flex justify-center items-center gap-4">
+                    <font-awesome-icon 
+                        v-if="authStore.getIsAuthenticated && !isOwn"
+                        icon="fa-solid fa-retweet" 
+                        class="text-sm transition-transform cursor-pointer hover:text-sky-600 hover:scale-105"
+                        :class="isRexweeted ? 'text-sky-600 scale-105' : ''"
+                        title="Rexweet"
+                        @click="rexweet" />
+                    <font-awesome-icon 
+                        v-if="authStore.getIsAuthenticated && !isLiked"
+                        icon="fa-regular fa-heart"
+                        class="text-sm transition-transform cursor-pointer hover:text-sky-600 hover:scale-105"
+                        title="Like Xweet"
+                        @click="like" />
+                    <font-awesome-icon
+                        v-if="authStore.getIsAuthenticated && isLiked"
+                        icon="fa-solid fa-heart"
+                        class="text-sm transition-transform cursor-pointer text-sky-600 scale-105"
+                        title="Unlike Xweet" />
+                    <font-awesome-icon
+                        v-if="authStore.getIsAuthenticated && isOwn"
+                        icon="fa-regular fa-pen-to-square"
+                        class="text-sm transition-transform cursor-pointer hover:text-sky-600 hover:scale-105"
+                        title="Edit Xweet"
+                        />
+                    <font-awesome-icon
+                        v-if="authStore.getIsAuthenticated && isOwn"
+                        icon="fa-regular fa-trash-can"
+                        class="text-sm transition-transform cursor-pointer hover:text-red-600 hover:scale-105"
+                        title="Delete Xweet"
+                        />
+                </span>
+            </div>
+            <div 
+                class="flex flex-col gap-2 text-sky-800 dark:text-white"
+                :class="media ? 'row-start-3 row-span-6' : 'row-start-3 row-span-2'">
+                <div class="break-words">
+                    <template v-for="(word, index) in xweet">
+                        <component 
+                            :is="word.type" 
+                            :to="word.to" 
+                            :class="word.type === RouterLink ? 'text-sky-600 hover:text-sky-400' : ''">
+                            {{ word.text }}
+                        </component>
+                        <span v-if="index < xweet.length - 1" v-html="`&nbsp;`" />
+                    </template>
+                </div>
+                <div class="flex-shrink-0">
+                    <img 
+                        :src="media" 
+                        v-if="media"
+                        alt="Media" 
+                        class="max-h-60 cursor-zoom-in" 
+                        loading="lazy"
+                        @click="enlargeImage">
+                </div>
             </div>
         </div>
     </section>
