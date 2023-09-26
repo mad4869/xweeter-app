@@ -1,15 +1,17 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import { RouterLink } from 'vue-router';
 
 import ImageViewer from './ImageViewer.vue';
+import EditXweet from './EditXweet.vue';
 import useAuth from '../../composables/useAuth';
 import { sendReqCookie } from '../../utils/axiosInstances';
 import { RexweetResponse } from '../../types/rexweets';
 import { LikeResponse } from '../../types/likes'
 import useRenderXweet from '../../composables/useRenderXweet';
+import { XweetResponse } from '../../types/xweets';
 
-const { id, body, user_id, createdAt, rexweeted, liked } = defineProps<{
+const { id, body, user_id, createdAt, updatedAt, rexweeted, liked } = defineProps<{
     id: number,
     user_id: number,
     fullname?: string,
@@ -18,6 +20,7 @@ const { id, body, user_id, createdAt, rexweeted, liked } = defineProps<{
     media?: string,
     profilePic?: string,
     createdAt: string,
+    updatedAt?: string,
     og_username?: string,
     og_fullname?: string,
     og_profile_pic?: string,
@@ -26,6 +29,8 @@ const { id, body, user_id, createdAt, rexweeted, liked } = defineProps<{
     rexweeted: boolean,
     liked: boolean
 }>()
+
+const emit = defineEmits(['delete-from-timeline'])
 
 const authStore = useAuth()
 
@@ -66,6 +71,7 @@ switch(true) {
 const isImageEnlarged = ref(false)
 const isRexweeted = ref(rexweeted)
 const isLiked = ref(liked)
+const isEditable = ref(false)
 
 const enlargeImage = () => {
     isImageEnlarged.value = true
@@ -95,6 +101,10 @@ const rexweet = async () => {
     }
 }
 
+const switchEditable = () => {
+    isEditable.value = !isEditable.value
+}
+
 const like = async () => {
     isLiked.value = true
 
@@ -113,7 +123,31 @@ const like = async () => {
     }
 }
 
-const xweet = useRenderXweet(body)
+const xweet = ref(body)
+const xweetText = computed(() => useRenderXweet(xweet.value))
+const updatedDate = ref(updatedAt)
+
+const handleUpdateXweet = (newBody: string, updateDate: string, isSuccess: boolean) => {
+    if (isSuccess) {
+        xweet.value = newBody
+        updatedDate.value = updateDate
+        isEditable.value = false
+    }
+}
+
+const deleteXweet = async () => {
+    try {
+        const { data } = await sendReqCookie.delete<XweetResponse | undefined>(
+            `/api/users/${authStore.getSignedInUserId}/xweets/${id}`
+        )
+
+        if (data?.success) {
+            emit('delete-from-timeline', data.data.xweet_id)
+        }
+    } catch (err) {
+        console.error(err)
+    }
+}
 </script>
 
 <template>
@@ -133,45 +167,57 @@ const xweet = useRenderXweet(body)
         <div class="flex flex-col gap-2 w-4/5 h-full">
             <div 
                 class="flex justify-between items-center text-xs text-sky-900">
-                <span :title="createdAt">{{ xweetAge }}</span>
-                <span class="flex justify-center items-center gap-4">
+                <p class="flex items-center gap-1">
+                    <span class="cursor-help" :title="createdAt">{{ xweetAge }}</span>
+                    <em v-if="updatedDate">- Updated at {{ updatedDate }}</em>
+                </p>
+                <span class="flex justify-center items-center gap-4 text-sm">
                     <font-awesome-icon 
                         v-if="authStore.getIsAuthenticated && !isOwn"
                         icon="fa-solid fa-retweet" 
-                        class="text-sm transition-transform cursor-pointer hover:text-sky-600 hover:scale-105"
+                        class="transition-transform cursor-pointer hover:text-sky-600 hover:scale-105"
                         :class="isRexweeted ? 'text-sky-600 scale-105' : ''"
                         title="Rexweet"
                         @click="rexweet" />
                     <font-awesome-icon 
                         v-if="authStore.getIsAuthenticated && !isLiked"
                         icon="fa-regular fa-heart"
-                        class="text-sm transition-transform cursor-pointer hover:text-sky-600 hover:scale-105"
+                        class="transition-transform cursor-pointer hover:text-sky-600 hover:scale-105"
                         title="Like Xweet"
                         @click="like" />
                     <font-awesome-icon
                         v-if="authStore.getIsAuthenticated && isLiked"
                         icon="fa-solid fa-heart"
-                        class="text-sm transition-transform cursor-pointer text-sky-600 scale-105"
+                        class="cursor-pointer text-sky-600 scale-105"
                         title="Unlike Xweet" />
                     <font-awesome-icon
-                        v-if="authStore.getIsAuthenticated && isOwn"
+                        v-if="authStore.getIsAuthenticated && isOwn && !isEditable"
                         icon="fa-regular fa-pen-to-square"
-                        class="text-sm transition-transform cursor-pointer hover:text-sky-600 hover:scale-105"
+                        class="transition-transform cursor-pointer hover:text-sky-600 hover:scale-105"
                         title="Edit Xweet"
+                        @click.prevent="switchEditable"
                         />
+                    <font-awesome-icon
+                        v-if="authStore.getIsAuthenticated && isOwn && isEditable"
+                        icon="fa-solid fa-pen-to-square"
+                        class="cursor-pointer text-sky-600 scale-105"
+                        title="Cancel"
+                        @click.prevent="switchEditable" />
                     <font-awesome-icon
                         v-if="authStore.getIsAuthenticated && isOwn"
                         icon="fa-regular fa-trash-can"
-                        class="text-sm transition-transform cursor-pointer hover:text-red-600 hover:scale-105"
+                        class="transition-transform cursor-pointer hover:text-red-600 hover:scale-105"
                         title="Delete Xweet"
+                        @click.prevent="deleteXweet"
                         />
                 </span>
             </div>
             <div 
                 class="flex flex-col gap-2 text-sky-800 dark:text-white"
                 :class="media ? 'row-start-3 row-span-6' : 'row-start-3 row-span-2'">
-                <div class="break-words">
-                    <template v-for="(word, index) in xweet">
+                <!-- <Transition mode="out-in"> -->
+                <div v-if="!isEditable" class="break-words">
+                    <template v-for="(word, index) in xweetText">
                         <component 
                             :is="word.type" 
                             :to="word.to" 
@@ -181,7 +227,7 @@ const xweet = useRenderXweet(body)
                         <span v-if="index < xweet.length - 1" v-html="`&nbsp;`" />
                     </template>
                 </div>
-                <div class="flex-shrink-0">
+                <div v-if="!isEditable" class="flex-shrink-0">
                     <img 
                         :src="media" 
                         v-if="media"
@@ -190,6 +236,8 @@ const xweet = useRenderXweet(body)
                         loading="lazy"
                         @click="enlargeImage">
                 </div>
+                <EditXweet ref="xweetEditor" :show="isEditable" :xweet_id="id" :body="body" :file-url="media" @update-xweet="handleUpdateXweet" />
+                <!-- </Transition> -->
             </div>
         </div>
     </section>

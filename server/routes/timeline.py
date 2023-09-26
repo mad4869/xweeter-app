@@ -8,8 +8,8 @@ from ..extensions import db, socket
 from ..models import Xweet, User, Rexweet, follow
 
 
-@socket.on("timeline")
-def update_timeline(user_id):
+@socket.on("add_to_timeline")
+def add_to_timeline(user_id):
     xweet = db.session.execute(
         db.select(Xweet)
         .join(User, Xweet.user_id == User.user_id)
@@ -22,7 +22,7 @@ def update_timeline(user_id):
     xweet_data["full_name"] = xweet.users.full_name
     xweet_data["profile_pic"] = xweet.users.profile_pic
 
-    emit("timeline", xweet_data, broadcast=True)
+    emit("add_to_timeline", xweet_data, broadcast=True)
 
 
 @routes.route("/timeline", methods=["GET"], strict_slashes=False)

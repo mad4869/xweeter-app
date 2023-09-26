@@ -57,9 +57,14 @@ const getLikes = async (): Promise<LikesFullResponse | undefined> => {
 
 const timelineData = (await getTimeline()) || { data: [] }
 const timeline = reactive<Xweets[]>(timelineData.data)
-socket.on('timeline', (xweet) => {
+socket.on('add_to_timeline', (xweet) => {
     timeline.unshift(xweet)
 })
+const deleteXweet = (xweet_id: number) => {
+    const newTimeline = timeline.filter(xweet => xweet.xweet_id !== xweet_id)
+    timeline.length = 0
+    timeline.push(...newTimeline)
+}
 
 const likes = reactive<number[]>([])
 const likesData = (await getLikes()) || { data: [] }
@@ -76,8 +81,7 @@ const activateBtn = (btn: UserAuth) => {
 <template>
     <Layout>
         <template #sidebarLeft>
-            <section
-                class="flex-[4] flex flex-col items-center px-2 pt-4 border border-solid border-sky-800 rounded-xl"
+            <section class="flex-[4] flex flex-col items-center px-2 pt-4 border border-solid border-sky-800 rounded-xl"
                 v-if="!authStore.getIsAuthenticated">
                 <Toggle :active-btn="activeBtn" @activate-btn="activateBtn" />
                 <Transition name="fade" mode="out-in">
@@ -92,21 +96,22 @@ const activateBtn = (btn: UserAuth) => {
         </template>
         <NewXweet v-if="authStore.getIsAuthenticated" />
         <Sep title="Timeline" />
-        <Xweet 
-            v-for="xweet in timeline" 
-            :key="xweet.xweet_id"
-            :id="xweet.xweet_id"
-            :user_id="xweet.user_id" 
+        <Xweet v-for="xweet in timeline" 
+            :key="xweet.xweet_id" 
+            :id="xweet.xweet_id" 
+            :user_id="xweet.user_id"
             :fullname="xweet.full_name" 
-            :username="xweet.username"
-            :body="xweet.body"
-            :media="xweet.media" 
+            :username="xweet.username" 
+            :body="xweet.body" 
+            :media="xweet.media"
             :profilePic="xweet.profile_pic" 
             :createdAt="xweet.created_at" 
+            :updated-at="xweet.updated_at" 
             :is-rexweet="false"
-            :is-own="xweet.user_id === authStore.getSignedInUserId"
+            :is-own="xweet.user_id === authStore.getSignedInUserId" 
             :rexweeted="false"
-            :liked="likes.includes(xweet.xweet_id)" />
+            :liked="likes.includes(xweet.xweet_id)"
+            @delete-from-timeline="deleteXweet" />
         <template #sidebarRight>
             <Suggestions v-if="authStore.getIsAuthenticated" />
             <Trending />

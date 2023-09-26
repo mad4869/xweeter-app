@@ -1,6 +1,7 @@
 from flask import request, jsonify
 from flask_jwt_extended import jwt_required
 from minio.error import S3Error
+from datetime import datetime
 import base64
 import io
 import uuid
@@ -151,3 +152,61 @@ def access_xweets_by_user(user_id):
         data.append(serial)
 
     return jsonify({"success": True, "data": data}), 200
+
+
+@routes.route(
+    "/users/<int:user_id>/xweets/<int:xweet_id>",
+    methods=["GET", "PUT", "DELETE"],
+    strict_slashes=False,
+)
+def access_xweet_by_user(user_id, xweet_id):
+    xweet = db.session.execute(
+        db.select(Xweet).filter(Xweet.xweet_id == xweet_id)
+    ).scalar_one_or_none()
+
+    if xweet is None:
+        return (
+            jsonify({"success": False, "message": "Xweet not found"}),
+            404,
+        )
+
+    if request.method == "PUT":
+        data = request.get_json()
+        body = data.get("body")
+        media = data.get("media")
+        hashtags = data.get("hashtags")
+
+        if not media and len(hashtags) == 0:
+            try:
+                xweet.body = body
+                xweet.updated_at = datetime.now()
+
+                db.session.commit()
+            except:
+                db.session.rollback()
+
+                return (
+                    jsonify({"success": False, "message": "Failed to edit the xweet"}),
+                    500,
+                )
+            else:
+                return jsonify({"success": True, "data": xweet.serialize()}), 201
+
+    elif request.method == "DELETE":
+        try:
+            db.session.delete(xweet)
+            db.session.commit()
+        except:
+            db.session.rollback()
+
+            return (
+                jsonify({"success": False, "message": "Failed to delete the xweet"}),
+                500,
+            )
+        else:
+            return (
+                jsonify({"success": True, "data": xweet.serialize()}),
+                201,
+            )
+
+    return jsonify({"success": True, "data": xweet.serialize()}), 200

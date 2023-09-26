@@ -1,51 +1,59 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
+import { TransitionRoot } from '@headlessui/vue';
 
 import useAuth from '../../composables/useAuth';
-import socket from '../../utils/socket';
+
 import { sendReqCookie } from '../../utils/axiosInstances';
 import { XweetResponse } from '../../types/xweets'
+
+const { xweet_id, body, fileUrl } = defineProps<{
+    show: boolean,
+    xweet_id: number,
+    body: string
+    fileUrl?: string
+}>()
+
+const emit = defineEmits()
 
 const authStore = useAuth()
 
 const MAX_CHARS = 140
 
-const body = ref('')
-const charCount = computed(() => body.value.length)
+const newBody = ref(body)
+const charCount = computed(() => newBody.value.length)
 const hashtags = computed(() => {
-    const words = body.value.split(' ');
+    const words = newBody.value.split(' ');
     return words.filter(word => word.startsWith('#')).map(word => word.replace('#', ''));
 })
+
+const textareaRef = ref<HTMLTextAreaElement | null>(null)
 
 const isLoading = ref(false)
 const isError = ref(false)
 const isSuccess = ref(false)
-const fileUrl = ref('')
+const newFileUrl = ref(fileUrl)
 
 const payload = computed(() => ({
-    body: body.value,
-    media: fileUrl.value,
+    body: newBody.value,
+    media: newFileUrl.value,
     hashtags: hashtags.value
 }))
 
-const addXweet = async () => {
+const editXweet = async () => {
     isLoading.value = true
 
     try {
-        const { data } = await sendReqCookie.post<XweetResponse | undefined>(
-            `/api/users/${authStore.getSignedInUserId}/xweets`, payload.value
+        const { data } = await sendReqCookie.put<XweetResponse | undefined>(
+            `/api/users/${authStore.getSignedInUserId}/xweets/${xweet_id}`, payload.value
         )
 
         if (data?.success) {
-            socket.emit('add_to_timeline', authStore.getSignedInUserId)
-
             isLoading.value = false
             isSuccess.value = true
-            body.value = ''
-            fileUrl.value = ''
-
+            
             setInterval(() => {
-                isSuccess.value = false
+                emit('update-xweet', data.data.body, data.data.updated_at, isSuccess.value)
             }, 3000)
         }
     } catch (err) {
@@ -59,7 +67,7 @@ const addXweet = async () => {
     }
 }
 
-const addFile = (e: Event) => {
+const manageFile = (e: Event) => {
     const target = e.target as HTMLInputElement
     const file = target.files?.[0]
 
@@ -68,7 +76,7 @@ const addFile = (e: Event) => {
 
         reader.onload = (e: ProgressEvent<FileReader>) => {
             if (e.target instanceof FileReader) {
-                fileUrl.value = e.target.result as string
+                newFileUrl.value = e.target.result as string
             }
         }
 
@@ -77,25 +85,38 @@ const addFile = (e: Event) => {
 }
 
 const removeFile = () => {
-    fileUrl.value = ''
+    newFileUrl.value = ''
 }
+
+onMounted(() => {
+    textareaRef.value?.focus()
+})
 </script>
 
 <template>
-    <section class="flex flex-col justify-between items-center px-12 border border-solid border-sky-800 rounded-xl">
-        <span class="w-full py-4 text-2xl text-sky-950 dark:text-white">New Xweet</span>
-        <textarea 
-            name="new-xweet" 
-            id="new-xweet" 
+    <TransitionRoot
+        :show="show" 
+        as="section" 
+        class="flex flex-col justify-between items-center h-full"
+        enter="transition-opacity duration-200"
+        enter-from="opacity-0"
+        enter-to="opacity-100"
+        leave="transition-opacity duration-150"
+        leave-from="opacity-100"
+        leave-to="opacity-0">
+        <textarea
+            ref="textareaRef" 
+            name="edit-xweet" 
+            id="edit-xweet" 
             placeholder="What's on your mind..." 
             spellcheck="false"
-            v-model="body"
+            v-model="newBody"
             class="w-full h-10 px-4 py-2 bg-sky-200 rounded-lg caret-sky-800 resize-none transition-[height] duration-300 ease-out placeholder:text-sky-400 focus:h-32 focus:outline-none dark:bg-slate-200 dark:placeholder:text-slate-400"
             :class="charCount > MAX_CHARS ? 'text-red-600 focus-visible:outline-red-600' : 'text-slate-700 focus-visible:outline-sky-600'">
         </textarea>
         <div class="w-full py-4 flex justify-between items-start">
             <div class="flex items-center gap-2 h-full">
-                <label for="add-image" title="Add image to your xweet">
+                <label for="edit-image" title="Edit image in your xweet">
                     <span
                         class="flex items-center gap-2 px-2 py-1 bg-sky-800/50 text-xs text-white rounded-md transition-colors cursor-pointer hover:bg-sky-800 dark:bg-sky-400/50 dark:hover:bg-sky-400">
                         <font-awesome-icon icon="fa-solid fa-images" />
@@ -103,14 +124,14 @@ const removeFile = () => {
                     </span>
                     <input 
                         type="file" 
-                        id="add-image" 
-                        alt="Add Image" 
+                        id="edit-image" 
+                        alt="Edit Image" 
                         accept="image/jpeg, image/png" 
                         class="hidden"
-                        @change="addFile">
+                        @change="manageFile">
                 </label>
-                <div v-if="fileUrl" class="relative group">
-                    <img :src="fileUrl" class="w-8 h-8 object-scale-down" />
+                <div v-if="newFileUrl" class="relative group">
+                    <img :src="newFileUrl" class="w-8 h-8 object-scale-down" />
                     <font-awesome-icon 
                         icon="fa-regular fa-circle-xmark" 
                         title="Remove the image"
@@ -124,40 +145,42 @@ const removeFile = () => {
                     /
                     <span class="text-sky-800 dark:text-sky-600">{{ MAX_CHARS }}</span>
                 </p>
-                <p class="text-red-600 opacity-0 fade-in dark:text-red-400" v-if="charCount > MAX_CHARS">
+                <TransitionRoot 
+                    :show="charCount > MAX_CHARS"
+                    as="p"
+                    class="text-red-600 dark:text-red-400"
+                    enter="transition-opacity duration-200"
+                    enter-from="opacity-0"
+                    enter-to="opacity-100"
+                    leave="transition-opacity duration-150"
+                    leave-from="opacity-100"
+                    leave-to="opacity-0">
                     Your xweet exceeds the maximum number of characters
-                </p>
-                <p class="text-sky-800 font-bold opacity-0 fade-in dark:text-sky-600" v-if="isSuccess">
-                    You posted a new xweet!
-                </p>
+                </TransitionRoot>
+                <TransitionRoot 
+                    :show="isSuccess"
+                    as="p"
+                    class="text-sky-800 font-bold opacity-0 dark:text-sky-600"
+                    enter="transition-opacity duration-200"
+                    enter-from="opacity-0"
+                    enter-to="opacity-100"
+                    leave="transition-opacity duration-150"
+                    leave-from="opacity-100"
+                    leave-to="opacity-0">
+                    You have fixed your xweet!
+                </TransitionRoot>
             </div>
             <div class="flex items-center gap-2 h-full">
                 <font-awesome-icon 
                     v-if="isLoading"
                     icon="fa-solid fa-spinner" spin-pulse 
                     class="text-white" />
-                <input type="button" value="Xweet"
+                <input type="button" value="Fix Xweet"
                     class="px-4 py-1 bg-sky-600 text-white font-semibold rounded-md transition-colors duration-200 cursor-pointer hover:bg-sky-800 active:shadow-inner disabled:bg-slate-800 disabled:text-slate-600 disabled:cursor-not-allowed"
-                    :disabled="charCount > MAX_CHARS || (charCount === 0 && !fileUrl) || isLoading" 
+                    :disabled="charCount > MAX_CHARS || (charCount === 0 && !newFileUrl) || isLoading" 
                     title="Add new xweet" 
-                    @mousedown.prevent="addXweet">
+                    @mousedown.prevent="editXweet">
             </div>
         </div>
-    </section>
+    </TransitionRoot>
 </template>
-
-<style scoped>
-.fade-in {
-    animation: fade-in 200ms ease-in forwards;
-}
-
-@keyframes fade-in {
-    from {
-        opacity: 0;
-    }
-
-    to {
-        opacity: 100;
-    }
-}
-</style>
