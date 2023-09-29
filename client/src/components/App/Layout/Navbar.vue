@@ -35,7 +35,7 @@ const signout = async () => {
         </div>
         <div class="col-span-1 flex justify-center items-center gap-4">
             <span v-if="authStore.getIsAuthenticated" class="navbar-menu hover:bg-sky-600/10">
-                <router-link to="/profile" title="View your profile">Profile</router-link>
+                <router-link :to="`/users/${authStore.getSignedInUserId}`" title="View your profile">Profile</router-link>
             </span>
             <span v-if="authStore.getIsAuthenticated" class="navbar-menu hover:bg-sky-600/10">
                 <router-link to="/leaderboard" title="View leaderboard">Leaderboard</router-link>
@@ -59,4 +59,4 @@ const signout = async () => {
 .navbar-menu {
     @apply px-2 py-1 rounded-md cursor-pointer transition-colors ease-in hover:backdrop-blur-md
 }
-</style>../../../pages/routes
+</style>

@@ -12,10 +12,12 @@ import SigninForm from '../components/App/SigninForm.vue';
 import SignupForm from '../components/App/SignupForm.vue';
 import Toggle from '../components/App/Toggle.vue';
 import Trending from '../components/App/Trending.vue';
+import Popup from '../components/App/Popup.vue'
 import useAuth from '../composables/useAuth';
 import { UserAuth } from '../types/auth';
 import { Xweets, XweetsResponse } from '../types/xweets';
 import { LikesFullResponse } from '../types/likes'
+import { UpdateTimeline } from '../types/timeline';
 import socket from '../utils/socket';
 import { sendReqCookie, sendReqWoCookie } from '../utils/axiosInstances';
 
@@ -56,14 +58,23 @@ const getLikes = async (): Promise<LikesFullResponse | undefined> => {
 }
 
 const timelineData = (await getTimeline()) || { data: [] }
-const timeline = reactive<Xweets[]>(timelineData.data)
+const initialTimeline = [...timelineData.data]
+const timeline = reactive<Xweets[]>(initialTimeline)
 socket.on('add_to_timeline', (xweet) => {
     timeline.unshift(xweet)
 })
-const deleteXweet = (xweet_id: number) => {
-    const newTimeline = timeline.filter(xweet => xweet.xweet_id !== xweet_id)
-    timeline.length = 0
-    timeline.push(...newTimeline)
+const updateTimeline = (event: UpdateTimeline, xweet_id?: number) => {
+    if (event === UpdateTimeline.Delete) {
+        const index = timeline.findIndex(xweet => xweet.xweet_id === xweet_id)
+        if (index !== -1) {
+            timeline.splice(index, 1)
+        }
+    }
+
+    if (event === UpdateTimeline.Restore) {
+        timeline.length = 0
+        timeline.push(...initialTimeline)
+    }
 }
 
 const likes = reactive<number[]>([])
@@ -76,13 +87,33 @@ const activeBtn = ref<UserAuth>(UserAuth.SignUp)
 const activateBtn = (btn: UserAuth) => {
     activeBtn.value = btn
 }
+
+const notification = reactive<{
+    isNotified: boolean,
+    category: 'success' | 'error' | undefined
+}>({
+    isNotified: false,
+    category: undefined
+})
+
+const showNotice = (category: 'success' | 'error') => {
+    console.log(category)
+    notification.isNotified = true
+    notification.category = category
+
+    setTimeout(() => {
+        notification.isNotified = false
+        notification.category = undefined
+    }, 3000)
+}
 </script>
 
 <template>
     <Layout>
         <template #sidebarLeft>
-            <section class="flex-[4] flex flex-col items-center px-2 pt-4 border border-solid border-sky-800 rounded-xl"
-                v-if="!authStore.getIsAuthenticated">
+            <section 
+                v-if="!authStore.getIsAuthenticated"
+                class="flex-[4] flex flex-col items-center px-2 pt-4 border border-solid border-sky-800 rounded-xl">
                 <Toggle :active-btn="activeBtn" @activate-btn="activateBtn" />
                 <Transition name="fade" mode="out-in">
                     <KeepAlive>
@@ -99,7 +130,7 @@ const activateBtn = (btn: UserAuth) => {
         <Xweet v-for="xweet in timeline" 
             :key="xweet.xweet_id" 
             :id="xweet.xweet_id" 
-            :user_id="xweet.user_id"
+            :userId="xweet.user_id"
             :fullname="xweet.full_name" 
             :username="xweet.username" 
             :body="xweet.body" 
@@ -111,7 +142,9 @@ const activateBtn = (btn: UserAuth) => {
             :is-own="xweet.user_id === authStore.getSignedInUserId" 
             :rexweeted="false"
             :liked="likes.includes(xweet.xweet_id)"
-            @delete-from-timeline="deleteXweet" />
+            @update-timeline="updateTimeline"
+            @show-notice="showNotice" />
+        <Popup :show="notification.isNotified" message="Success!" :category="notification.category" />
         <template #sidebarRight>
             <Suggestions v-if="authStore.getIsAuthenticated" />
             <Trending />

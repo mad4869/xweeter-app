@@ -10,10 +10,11 @@ import { RexweetResponse } from '../../types/rexweets';
 import { LikeResponse } from '../../types/likes'
 import useRenderXweet from '../../composables/useRenderXweet';
 import { XweetResponse } from '../../types/xweets';
+import { UpdateTimeline } from '../../types/timeline';
 
-const { id, body, user_id, createdAt, updatedAt, rexweeted, liked } = defineProps<{
+const { id, body, userId, createdAt, updatedAt, rexweeted, liked } = defineProps<{
     id: number,
-    user_id: number,
+    userId: number,
     fullname?: string,
     username?: string,
     body: string,
@@ -30,7 +31,10 @@ const { id, body, user_id, createdAt, updatedAt, rexweeted, liked } = defineProp
     liked: boolean
 }>()
 
-const emit = defineEmits(['delete-from-timeline'])
+const emit = defineEmits<{
+    (e: 'update-timeline', event: UpdateTimeline, xweet_id?: number): void
+    (e: 'show-notice', category: 'success' | 'error'): void
+}>()
 
 const authStore = useAuth()
 
@@ -88,7 +92,7 @@ const rexweet = async () => {
 
     try {
         const { data } = await sendReqCookie.post<RexweetResponse | undefined>(
-            `/api/xweets/${id}/rexweets`, { user_id }
+            `/api/xweets/${id}/rexweets`, { userId }
         )
 
         if (data?.success) {
@@ -110,7 +114,7 @@ const like = async () => {
 
     try {
         const { data } = await sendReqCookie.post<LikeResponse | undefined>(
-            `/api/xweets/${id}/likes`, { user_id }
+            `/api/xweets/${id}/likes`, { userId }
         )
 
         if (data?.success) {
@@ -127,24 +131,29 @@ const xweet = ref(body)
 const xweetText = computed(() => useRenderXweet(xweet.value))
 const updatedDate = ref(updatedAt)
 
-const handleUpdateXweet = (newBody: string, updateDate: string, isSuccess: boolean) => {
-    if (isSuccess) {
-        xweet.value = newBody
-        updatedDate.value = updateDate
-        isEditable.value = false
-    }
+const handleUpdateXweet = (newBody: string, updateDate?: string) => {
+    xweet.value = newBody
+    updatedDate.value = updateDate
+    isEditable.value = false
 }
 
 const deleteXweet = async () => {
+    emit('update-timeline', UpdateTimeline.Delete, id)
+
     try {
         const { data } = await sendReqCookie.delete<XweetResponse | undefined>(
             `/api/users/${authStore.getSignedInUserId}/xweets/${id}`
         )
 
         if (data?.success) {
-            emit('delete-from-timeline', data.data.xweet_id)
+            emit('show-notice', 'success')
+        } else {
+            emit('show-notice', 'error')
         }
     } catch (err) {
+        emit('update-timeline', UpdateTimeline.Restore)
+        emit('show-notice', 'error')
+
         console.error(err)
     }
 }
@@ -236,7 +245,13 @@ const deleteXweet = async () => {
                         loading="lazy"
                         @click="enlargeImage">
                 </div>
-                <EditXweet ref="xweetEditor" :show="isEditable" :xweet_id="id" :body="body" :file-url="media" @update-xweet="handleUpdateXweet" />
+                <EditXweet 
+                    ref="xweetEditor" 
+                    :show="isEditable" 
+                    :xweet_id="id" 
+                    :body="body" 
+                    :file-url="media" 
+                    @update-xweet="handleUpdateXweet" />
                 <!-- </Transition> -->
             </div>
         </div>

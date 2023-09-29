@@ -4,6 +4,7 @@ import Home from '../pages/Home.vue'
 import Landing from '../pages/Landing.vue'
 import Profile from '../pages/Profile.vue'
 import Leaderboard from '../pages/Leaderboard.vue'
+import Trending from '../pages/Trending.vue'
 import useAuth from '../composables/useAuth'
 
 const routes = [
@@ -21,8 +22,9 @@ const routes = [
         }
     }},
     { path: '/home', component: Home },
-    { path: '/profile', component: Profile },
-    { path: '/leaderboard', component: Leaderboard }
+    { path: '/users/:id', component: Profile },
+    { path: '/leaderboard', component: Leaderboard },
+    { path: '/trending', component: Trending }
 ]
 
 const router = createRouter({

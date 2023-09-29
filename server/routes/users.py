@@ -36,23 +36,48 @@ def access_user(user_id):
         # updated_full_name = updated_data.get("fullname")
         # updated_email = updated_data.get("email")
         # updated_bio = updated_data.get("bio")
-        updated_profile_pic = updated_data.get("profile_pic")
-        # updated_header_pic = updated_data.get("header_pic")
+        # updated_profile_pic = updated_data.get("profile_pic")
+        updated_header_pic = updated_data.get("header_pic")
 
-        if updated_profile_pic:
-            new_profile_pic_data = base64.b64decode(updated_profile_pic.split(",")[1])
-            new_profile_pic_stream = io.BytesIO(new_profile_pic_data)
-            new_profile_pic_ext = imghdr.what(new_profile_pic_stream)
-            PROFILE_PIC_NAME = f"{user_id}_profile_pic.{new_profile_pic_ext}"
+        # if updated_profile_pic:
+        #     new_profile_pic_data = base64.b64decode(updated_profile_pic.split(",")[1])
+        #     new_profile_pic_stream = io.BytesIO(new_profile_pic_data)
+        #     new_profile_pic_ext = imghdr.what(new_profile_pic_stream)
+        #     PROFILE_PIC_NAME = f"{user_id}_profile_pic.{new_profile_pic_ext}"
+
+        #     try:
+        #         mc.put_object(
+        #             BUCKET,
+        #             PROFILE_PIC_NAME,
+        #             new_profile_pic_stream,
+        #             len(new_profile_pic_data),
+        #         )
+        #         updated_profile_pic = mc.presigned_get_object(BUCKET, PROFILE_PIC_NAME)
+        #     except S3Error as err:
+        #         return (
+        #             jsonify(
+        #                 {
+        #                     "success": False,
+        #                     "message": f"Error occured during the process: {str(err)}",
+        #                 }
+        #             ),
+        #             500,
+        #         )
+
+        if updated_header_pic:
+            new_header_pic_data = base64.b64decode(updated_header_pic.split(",")[1])
+            new_header_pic_stream = io.BytesIO(new_header_pic_data)
+            new_header_pic_ext = imghdr.what(new_header_pic_stream)
+            HEADER_PIC_NAME = f"{user_id}_header_pic.{new_header_pic_ext}"
 
             try:
                 mc.put_object(
                     BUCKET,
-                    PROFILE_PIC_NAME,
-                    new_profile_pic_stream,
-                    len(new_profile_pic_data),
+                    HEADER_PIC_NAME,
+                    new_header_pic_stream,
+                    len(new_header_pic_data),
                 )
-                updated_profile_pic = mc.presigned_get_object(BUCKET, PROFILE_PIC_NAME)
+                updated_header_pic = mc.presigned_get_object(BUCKET, HEADER_PIC_NAME)
             except S3Error as err:
                 return (
                     jsonify(
@@ -74,8 +99,8 @@ def access_user(user_id):
             # user.full_name = updated_full_name
             # user.email = updated_email
             # user.bio = updated_bio
-            user.profile_pic = updated_profile_pic
-            # user.header_pic = updated_header_pic
+            # user.profile_pic = updated_profile_pic
+            user.header_pic = updated_header_pic
             user.updated_at = datetime.now()
 
             db.session.commit()

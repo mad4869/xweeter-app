@@ -14,7 +14,9 @@ const { xweet_id, body, fileUrl } = defineProps<{
     fileUrl?: string
 }>()
 
-const emit = defineEmits()
+const emit = defineEmits<{
+    (e: 'update-xweet', newBody: string, updateDate?: string): void
+}>()
 
 const authStore = useAuth()
 
@@ -52,14 +54,16 @@ const editXweet = async () => {
             isLoading.value = false
             isSuccess.value = true
             
-            setInterval(() => {
-                emit('update-xweet', data.data.body, data.data.updated_at, isSuccess.value)
+            setTimeout(() => {
+                isSuccess.value = false
+
+                emit('update-xweet', data.data.body, data.data.updated_at)
             }, 3000)
         }
     } catch (err) {
         isError.value = true
 
-        setInterval(() => {
+        setTimeout(() => {
             isError.value = false
         }, 3000)
 

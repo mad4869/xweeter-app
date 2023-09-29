@@ -64,11 +64,11 @@ const followData = (await getFollow()) || []
             class="row-start-3 flex flex-col justify-center items-center w-full text-sky-800 text-lg border-b border-solid border-sky-600/20 dark:text-white">
             <div class="flex justify-center items-center gap-2 w-full">
                 <strong class="flex-1 text-right">{{ followData[0].data.length }}</strong>
-                <span class="flex-[2]">Followings</span>
+                <span class="flex-[2]">Following</span>
             </div>
             <div class="flex justify-center items-center gap-2 w-full">
                 <strong class="flex-1 text-right">{{ followData[1].data.length }}</strong>
-                <span class="flex-[2]">Followers</span>
+                <span class="flex-[2]">{{ followData[1].data.length === 1 ? 'Follower' : 'Followers' }}</span>
             </div>
         </div>
         <div class="row-start-4 flex justify-center items-center">

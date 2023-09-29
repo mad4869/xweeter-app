@@ -1,22 +1,42 @@
 <script setup lang="ts">
+import { TransitionRoot } from '@headlessui/vue';
+
 defineProps<{
+    show: boolean,
     message: string,
-    category: 'success' | 'error'
+    category?: 'success' | 'error'
 }>()
 
-const categories = {
-    success: 'bg-emerald-600',
+const colors = {
+    success: 'bg-sky-600',
     error: 'bg-red-600',
+}
+
+const icons = {
+    success: 'fa-solid fa-clipboard-check',
+    error: 'fa-solid fa-triangle-exclamation'
 }
 </script>
 
 <template>
-    <div class="fixed left-1/2 bottom-4 -translate-x-1/2 flex items-center gap-4 px-4 py-2 text-white rounded-md" :class="categories[category]">
+    <TransitionRoot
+        :show="show"
+        as="div" 
+        class="fixed left-1/2 bottom-4 -translate-x-1/2 flex items-center gap-4 px-4 py-2 text-white rounded-md" 
+        :class="category ? colors[category] : ''"
+        enter="transition-all duration-200 ease-in-out"
+        enter-from="opacity-0 translate-y-4"
+        enter-to="opacity-100 translate-y-0"
+        leave="transition-opacity duration-150"
+        leave-from="opacity-100"
+        leave-to="opacity-0">
         <div>
-            <font-awesome-icon icon="fa-regular fa-sun" class="text-sm" />
+            <font-awesome-icon 
+                :icon="category ? icons[category] : ''" beat-fade 
+                class="text-sm" />
         </div>
         <div class="flex-1">
             <p>{{ message }}</p>
         </div>
-    </div>
+    </TransitionRoot>
 </template>
