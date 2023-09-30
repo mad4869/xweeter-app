@@ -5,6 +5,7 @@ import Layout from '../components/App/Layout/index.vue'
 import Setting from '../components/App/Setting.vue';
 import Suggestions from '../components/App/Suggestions.vue';
 import Xweet from '../components/App/Xweet.vue';
+import Modal from '../components/App/Modal.vue';
 import NewXweet from '../components/Home/NewXweet.vue';
 import Profile from '../components/Home/Profile.vue';
 import Sep from '../components/Home/Sep.vue';
@@ -106,6 +107,14 @@ const showNotice = (category: 'success' | 'error') => {
         notification.category = undefined
     }, 3000)
 }
+
+const isModalShown = ref(false)
+const showModal = () => {
+    isModalShown.value = true
+}
+const handleClickOutsideModal = () => {
+    isModalShown.value = false
+}
 </script>
 
 <template>
@@ -122,7 +131,9 @@ const showNotice = (category: 'success' | 'error') => {
                     </KeepAlive>
                 </Transition>
             </section>
-            <Profile v-if="authStore.getIsAuthenticated" />
+            <Profile 
+                v-if="authStore.getIsAuthenticated"
+                @show-new-xweet="showModal" />
             <Setting />
         </template>
         <NewXweet v-if="authStore.getIsAuthenticated" />
@@ -145,6 +156,9 @@ const showNotice = (category: 'success' | 'error') => {
             @update-timeline="updateTimeline"
             @show-notice="showNotice" />
         <Popup :show="notification.isNotified" message="Success!" :category="notification.category" />
+        <Modal :show="isModalShown" @clicked-outside="handleClickOutsideModal">
+            <NewXweet />
+        </Modal>
         <template #sidebarRight>
             <Suggestions v-if="authStore.getIsAuthenticated" />
             <Trending />

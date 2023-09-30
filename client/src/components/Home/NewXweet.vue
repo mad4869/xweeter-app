@@ -82,7 +82,7 @@ const removeFile = () => {
 </script>
 
 <template>
-    <section class="flex flex-col justify-between items-center px-12 border border-solid border-sky-800 rounded-xl">
+    <section class="flex flex-col justify-between items-center min-w-[50vw] px-12 border border-solid border-sky-800 rounded-xl">
         <span class="w-full py-4 text-2xl text-sky-950 dark:text-white">New Xweet</span>
         <textarea 
             name="new-xweet" 

@@ -4,6 +4,10 @@ import { sendReqCookie } from '../../utils/axiosInstances';
 import { XweetsResponse } from '../../types/xweets';
 import { FollowResponse } from '../../types/follows'
 
+const emit = defineEmits<{
+    (e: 'show-new-xweet'): void
+}>()
+
 const authStore = useAuth()
 
 const getXweets = async (): Promise<XweetsResponse | undefined> => {
@@ -36,6 +40,10 @@ const getFollow = async (): Promise<FollowResponse[] | undefined> => {
 const { data } = (await getXweets()) || { data: [] }
 const xweetData = data
 const followData = (await getFollow()) || []
+
+const showNewXweet = () => {
+    emit('show-new-xweet')
+}
 </script>
 
 <template>
@@ -74,7 +82,8 @@ const followData = (await getFollow()) || []
         <div class="row-start-4 flex justify-center items-center">
             <button  
                 title="Add New Xweet"
-                class="flex items-center gap-2 px-4 py-2 bg-sky-600 text-white text-lg font-bold rounded-xl transition-colors cursor-pointer hover:bg-sky-800">
+                class="flex items-center gap-2 px-4 py-2 bg-sky-600 text-white text-lg font-bold rounded-xl transition-colors cursor-pointer hover:bg-sky-800"
+                @click.prevent="showNewXweet">
                 <font-awesome-icon icon="fa-solid fa-feather" />
                 <span>New Xweet</span>
             </button>
