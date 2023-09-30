@@ -6,7 +6,7 @@ defineProps<{
     inputName: string,
     inputType: string,
     inputErrors?: ErrorObject[],
-    modelValue?: string,
+    modelValue?: string | null,
     labelText: string,
     icon: string
 }>()

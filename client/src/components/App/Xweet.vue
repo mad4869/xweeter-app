@@ -166,7 +166,7 @@ const deleteXweet = async () => {
             class="flex-1 flex flex-col items-center gap-2 h-full px-4 border-r border-solid border-sky-600/20">
             <img 
                 :src="!isRexweet ? profilePic : og_profile_pic"
-                class="w-10 h-10 border border-solid border-sky-800 rounded-full" 
+                class="w-10 h-10 border border-solid border-sky-800 rounded-full object-cover" 
                 loading="lazy" />
             <div class="flex flex-col justify-center items-center text-center">
                 <p class=" text-sky-600 font-semibold">{{ !isRexweet ? fullname : og_fullname }}</p>

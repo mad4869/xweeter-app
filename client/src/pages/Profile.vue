@@ -29,6 +29,7 @@ const getUser = async () => {
     try {
         const { data } = await sendReqCookie.get<{ data: Users, success: boolean } | undefined>(`/api/users/${route.params.id}`)
         if (data) {
+            console.log(data)
             return data
         }
     } catch (err) {
@@ -96,8 +97,10 @@ const handleClickOutsideModal = () => {
         <Timeline />
         <Modal :show="isModalShown" @clicked-outside="handleClickOutsideModal">
             <ProfileForm
+                :user-id="data?.user_id"
                 :username="data?.username"
                 :fullname="data?.full_name"
+                :email="data?.email"
                 :bio="data?.bio"
                 :profile-pic="data?.profile_pic"
                 :header-pic="data?.header_pic" />

@@ -171,7 +171,7 @@ const showEditProfile = () => {
                 class="relative w-20 h-20 border border-solid border-sky-600 rounded-full shadow-xl overflow-hidden group/pfp">
                 <img 
                     :src="pfp" 
-                    class="w-full h-full"
+                    class="w-full h-full object-cover"
                     alt="Profile Pic" 
                     loading="lazy">
                 <div 

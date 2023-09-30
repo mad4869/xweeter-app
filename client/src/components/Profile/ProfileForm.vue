@@ -1,13 +1,17 @@
 <script setup lang="ts">
-import { reactive } from 'vue';
+import { reactive, ref } from 'vue';
 import { useVuelidate } from '@vuelidate/core'
-import { required } from '@vuelidate/validators'
+import { required, email as isEmail } from '@vuelidate/validators'
 
 import InputField from '../App/InputField.vue';
+import { sendReqCookie } from '../../utils/axiosInstances';
+import { UserResponse } from '../../types/users';
 
-const { username, fullname, bio, profilePic, headerPic } = defineProps<{
+const { userId, username, fullname, email, bio, profilePic, headerPic } = defineProps<{
+    userId?: number,
     username?: string,
     fullname?: string,
+    email?: string,
     bio?: string | null,
     profilePic?: string,
     headerPic?: string
@@ -16,6 +20,7 @@ const { username, fullname, bio, profilePic, headerPic } = defineProps<{
 const userProfile = reactive({
     username,
     fullname,
+    email,
     bio,
     profilePic,
     headerPic
@@ -24,9 +29,13 @@ const userProfile = reactive({
 const rules = {
     username: { required },
     fullname: { required },
+    email: { required, isEmail },
+    bio: {}
 }
 
 const v$ = useVuelidate(rules, userProfile)
+
+const isLoading = ref(false)
 
 const editProfilePic = (e: Event) => {
     const target = e.target as HTMLInputElement
@@ -68,11 +77,46 @@ const removeProfilePic = () => {
 const removeHeader = () => {
     userProfile.headerPic = ''
 }
+
+const editProfile = async () => {
+    isLoading.value = true
+
+    try {
+        const { data } = await sendReqCookie.put<UserResponse | undefined>(
+            `/api/users/${userId}`, userProfile
+        )
+
+        if (data?.success) {
+            isLoading.value = false
+            // isSuccess.value = true
+            // notifMsg.value = 'Your profile picture has been changed'
+            // emit('change-profile-pic', isSuccess.value, isError.value, notifMsg.value)
+
+            // setTimeout(() => {
+            //     isSuccess.value = false
+            // }, 3000)
+        }
+    } catch (err) {
+        // isLoading.value = false
+        // isEditable.value = false
+        // isError.value = true
+        // pfp.value = profilePic
+        // notifMsg.value = 'Error occured during process. Please try again.'
+        // emit('change-profile-pic', isSuccess.value, isError.value, notifMsg.value)
+
+        // setTimeout(() => {
+        //     isError.value = false
+        // }, 3000)
+
+        console.error(err)
+    }
+}
 </script>
 
 <template>
     <form 
-        class="flex flex-col justify-center items-center gap-6 px-8 py-4 min-w-[50%]">
+        class="flex flex-col justify-center items-center gap-6 px-8 py-4 min-w-[50%]"
+        @submit.prevent="editProfile">
         <h3 class="text-2xl text-white font-semibold">Edit Profile</h3>
         <InputField 
             input-id="fullname" 
@@ -91,9 +135,18 @@ const removeHeader = () => {
             label-text="Username" 
             icon="fa-solid fa-user" />
         <InputField
+            input-id="email"
+            input-name="email"
+            input-type="text"
+            :input-errors="v$.email.$errors"
+            v-model="v$.email.$model"
+            label-text="Email"
+            icon="fa-solid fa-envelope" />
+        <InputField
             input-id="bio"
             input-name="bio"
             input-type="text"
+            v-model="v$.bio.$model"
             label-text="Bio"
             icon="fa-solid fa-address-card" />
         <div class="flex justify-between items-center w-full">
@@ -145,9 +198,10 @@ const removeHeader = () => {
         <button 
             type="submit"
             class="uppercase w-24 py-1 bg-sky-600 text-white rounded-md shadow-sm shadow-slate-900/50 transition-colors duration-200 ease-in hover:bg-sky-800 active:shadow-inner disabled:bg-neutral-800 disabled:text-neutral-600 disabled:shadow-none disabled:cursor-not-allowed"
-            title="Sign Up"
+            title="Fix your profile"
             :disabled="v$.$invalid">
-            Submit
+            <font-awesome-icon icon="fa-solid fa-spinner" spin-pulse v-if="isLoading" />
+            {{ !isLoading ? 'Submit' : '' }}
         </button>
     </form>
 </template>
