@@ -2,7 +2,8 @@
 defineProps<{
     fullname: string,
     username: string,
-    lastXweet: string
+    lastXweet: string,
+    profilePic: string
 }>()
 </script>
 
@@ -10,14 +11,17 @@ defineProps<{
     <section class="flex flex-col items-center gap-1 px-8 py-1">
         <div class="grid grid-cols-4 grid-rows-2 w-full">
             <div class="col-start-1 col-span-1 row-start-1 row-span-2 flex items-center">
-                <span
-                    class="w-6 h-6 px-1 py-1 bg-white border border-solid border-sky-800 rounded-full text-xs text-center">A</span>
+                <img 
+                    :src="profilePic" 
+                    alt="Profile Pic"
+                    class="w-8 h-8 border border-solid border-sky-800 rounded-full object-cover" 
+                    loading="lazy">
             </div>
             <div class="col-start-2 col-span-3 row-start-1 row-span-1 text-sm text-sky-600 font-bold">
                 {{ fullname }}
             </div>
             <div class="col-start-2 col-span-3 row-start-2 row-span-1 text-sm text-sky-600">
-                {{ username }}
+                @{{ username }}
             </div>
         </div>
         <div 

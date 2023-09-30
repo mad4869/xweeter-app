@@ -56,11 +56,11 @@ const showNewXweet = () => {
                     :src="authStore.getSignedInPfp" 
                     class="w-12 h-12 border border-solid border-sky-800 rounded-full object-cover" />
             </div>
-            <div class="flex flex-col">
-                <span class="text-sky-800 font-bold">
+            <div class="flex flex-col text-sky-600">
+                <span class="font-bold">
                     {{ authStore.getSignedInFullname }}
                 </span>
-                <span class="text-sm text-sky-800">
+                <span class="text-sm">
                     @{{ authStore.getSignedInUsername }}
                 </span>
             </div>

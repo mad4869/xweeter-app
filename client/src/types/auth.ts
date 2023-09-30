@@ -3,7 +3,7 @@ enum UserAuth {
     SignIn
 }
 
-type Users = {
+type User = {
     user_id: number,
     username: string,
     full_name: string,
@@ -19,7 +19,7 @@ type Users = {
 type AuthResponse = {
     success: boolean
     message: string,
-    user: Users
+    user: User
 }
 
 type AuthResponseWoUser = Omit<AuthResponse, 'user'>
@@ -39,4 +39,4 @@ type AuthState = {
     errorMsg: string | undefined
 }
 
-export { UserAuth, type Users, type AuthResponse, type AuthResponseWoUser, type AuthState }
+export { UserAuth, type User, type AuthResponse, type AuthResponseWoUser, type AuthState }

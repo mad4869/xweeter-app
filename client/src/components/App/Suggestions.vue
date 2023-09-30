@@ -1,10 +1,32 @@
 <script setup lang="ts">
-import User from './User.vue';
+import { sendReqCookie } from '../../utils/axiosInstances';
+import UserToFollow from './UserToFollow.vue';
 
-const users = [
-    { fullname: 'Kazusa Okuyama', username: '@kazusa', lastXweet: 'Let\'s go!' },
-    { fullname: 'Tsukasa Senpai', username: '@tsukasa', lastXweet: 'Ikuyo!' },
-]
+type WhoToFollow = {
+    user_id: number,
+    username: string,
+    full_name: string,
+    body: string,
+    profile_pic: string
+}
+
+type WhoToFollowResponse = {
+    data: WhoToFollow[],
+    success: boolean
+}
+
+const getActiveUsers = async (): Promise<WhoToFollowResponse | undefined> => {
+    try {
+        const { data } = await sendReqCookie.get('/api/users/most-active')
+        if (data) {
+            return data
+        }
+    } catch (err) {
+        console.error(err)
+    }
+}
+
+const { data } = (await getActiveUsers()) || { data: [] }
 </script>
 
 <template>
@@ -15,12 +37,13 @@ const users = [
             <font-awesome-icon icon="fa-regular fa-user" class="text-white" />
         </div>
         <div class="flex flex-col justify-center gap-2 overflow-scroll">
-            <User 
-                v-for="(user, index) in users" 
-                :key="index" 
-                :fullname="user.fullname" 
+            <UserToFollow
+                v-for="user in data" 
+                :key="user.user_id" 
+                :fullname="user.full_name" 
                 :username="user.username"
-                :last-xweet="user.lastXweet" />
+                :last-xweet="user.body"
+                :profile-pic="user.profile_pic" />
         </div>
     </section>
 </template>

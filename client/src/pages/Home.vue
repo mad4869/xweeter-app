@@ -4,6 +4,7 @@ import { ref, reactive } from 'vue';
 import Layout from '../components/App/Layout/index.vue'
 import Setting from '../components/App/Setting.vue';
 import Suggestions from '../components/App/Suggestions.vue';
+import SuggestionsLoading from '../components/App/SuggestionsLoading.vue';
 import Xweet from '../components/App/Xweet.vue';
 import Modal from '../components/App/Modal.vue';
 import NewXweet from '../components/Home/NewXweet.vue';
@@ -163,7 +164,12 @@ const handleClickOutsideModal = () => {
             message="Success!" 
             :category="notification.category" />
         <template #sidebarRight>
-            <Suggestions v-if="authStore.getIsAuthenticated" />
+            <Suspense v-if="authStore.getIsAuthenticated">
+                <Suggestions />
+                <template #fallback>
+                    <SuggestionsLoading />
+                </template>
+            </Suspense>
             <Trending />
         </template>
     </Layout>

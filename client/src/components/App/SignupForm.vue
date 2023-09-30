@@ -56,9 +56,9 @@ const signupAndIn = async () => {
 
             isLoading.value = false
 
-            if (!authStore.getIsAuthenticated) {
+            if (authStore.getErrorMsg) {
                 isError.value = true
-                errorMsg.value = 'Error occured during sign in process. Please try again.'
+                errorMsg.value = authStore.getErrorMsg
 
                 setInterval(() => {
                     isError.value = false
