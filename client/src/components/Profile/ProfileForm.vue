@@ -1,0 +1,153 @@
+<script setup lang="ts">
+import { reactive } from 'vue';
+import { useVuelidate } from '@vuelidate/core'
+import { required } from '@vuelidate/validators'
+
+import InputField from '../App/InputField.vue';
+
+const { username, fullname, bio, profilePic, headerPic } = defineProps<{
+    username?: string,
+    fullname?: string,
+    bio?: string | null,
+    profilePic?: string,
+    headerPic?: string
+}>()
+
+const userProfile = reactive({
+    username,
+    fullname,
+    bio,
+    profilePic,
+    headerPic
+})
+
+const rules = {
+    username: { required },
+    fullname: { required },
+}
+
+const v$ = useVuelidate(rules, userProfile)
+
+const editProfilePic = (e: Event) => {
+    const target = e.target as HTMLInputElement
+    const file = target.files?.[0]
+
+    if (file) {
+        const reader = new FileReader()
+
+        reader.onload = (e: ProgressEvent<FileReader>) => {
+            if (e.target instanceof FileReader) {
+                userProfile.profilePic = e.target.result as string
+            }
+        }
+
+        reader.readAsDataURL(file)
+    }
+}
+
+const editHeader = (e: Event) => {
+    const target = e.target as HTMLInputElement
+    const file = target.files?.[0]
+
+    if (file) {
+        const reader = new FileReader()
+
+        reader.onload = (e: ProgressEvent<FileReader>) => {
+            if (e.target instanceof FileReader) {
+                userProfile.headerPic = e.target.result as string
+            }
+        }
+
+        reader.readAsDataURL(file)
+    }
+}
+
+const removeProfilePic = () => {
+    userProfile.profilePic = ''
+}
+const removeHeader = () => {
+    userProfile.headerPic = ''
+}
+</script>
+
+<template>
+    <form 
+        class="flex flex-col justify-center items-center gap-6 px-8 py-4 min-w-[50%]">
+        <h3 class="text-2xl text-white font-semibold">Edit Profile</h3>
+        <InputField 
+            input-id="fullname" 
+            input-name="fullname" 
+            input-type="text" 
+            :input-errors="v$.fullname.$errors"
+            v-model="v$.fullname.$model" 
+            label-text="Full Name" 
+            icon="fa-solid fa-font" />
+        <InputField 
+            input-id="username" 
+            input-name="username" 
+            input-type="text" 
+            :input-errors="v$.username.$errors"
+            v-model="v$.username.$model" 
+            label-text="Username" 
+            icon="fa-solid fa-user" />
+        <InputField
+            input-id="bio"
+            input-name="bio"
+            input-type="text"
+            label-text="Bio"
+            icon="fa-solid fa-address-card" />
+        <div class="flex justify-between items-center w-full">
+            <label for="edit-profile-pic" title="Change your profile picture">
+                <span
+                    class="flex items-center gap-2 px-2 py-1 bg-sky-800/50 text-xs text-white rounded-md transition-colors cursor-pointer hover:bg-sky-800 dark:bg-sky-400/50 dark:hover:bg-sky-400">
+                    <font-awesome-icon icon="fa-solid fa-image-portrait" />
+                    <h6>Profile Picture</h6>
+                </span>
+                <input 
+                    type="file" 
+                    id="edit-profile-pic" 
+                    accept="image/jpeg, image/png" 
+                    class="hidden"
+                    @change="editProfilePic">
+            </label>
+            <div v-if="userProfile.profilePic" class="relative group">
+                <img :src="userProfile.profilePic" class="w-8 h-8 object-scale-down" />
+                <font-awesome-icon 
+                    icon="fa-regular fa-circle-xmark" 
+                    title="Remove the image"
+                    class="absolute -top-1 -right-1 text-xs text-sky-800 cursor-pointer dark:text-white hidden group-hover:block"
+                    @click.prevent="removeProfilePic" />
+            </div>
+        </div>
+        <div class="flex justify-between items-center w-full">
+            <label for="edit-header" title="Change your header">
+                <span
+                    class="flex items-center gap-2 px-2 py-1 bg-sky-800/50 text-xs text-white rounded-md transition-colors cursor-pointer hover:bg-sky-800 dark:bg-sky-400/50 dark:hover:bg-sky-400">
+                    <font-awesome-icon icon="fa-solid fa-panorama" />
+                    <h6>Header</h6>
+                </span>
+                <input 
+                    type="file" 
+                    id="edit-header" 
+                    accept="image/jpeg, image/png" 
+                    class="hidden"
+                    @change="editHeader">
+            </label>
+            <div v-if="userProfile.headerPic" class="relative group">
+                <img :src="userProfile.headerPic" class="w-8 h-8 object-scale-down" />
+                <font-awesome-icon 
+                    icon="fa-regular fa-circle-xmark" 
+                    title="Remove the image"
+                    class="absolute -top-1 -right-1 text-xs text-sky-800 cursor-pointer dark:text-white hidden group-hover:block"
+                    @click.prevent="removeHeader" />
+            </div>
+        </div>
+        <button 
+            type="submit"
+            class="uppercase w-24 py-1 bg-sky-600 text-white rounded-md shadow-sm shadow-slate-900/50 transition-colors duration-200 ease-in hover:bg-sky-800 active:shadow-inner disabled:bg-neutral-800 disabled:text-neutral-600 disabled:shadow-none disabled:cursor-not-allowed"
+            title="Sign Up"
+            :disabled="v$.$invalid">
+            Submit
+        </button>
+    </form>
+</template>

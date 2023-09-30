@@ -31,7 +31,7 @@ onClickOutside(modalRef, () => {
         leave-to="scale-0">
         <section
             ref="modalRef"
-            class="flex justify-center items-center max-w-[75%] max-h-[50%] border border-solid border-white rounded-lg">
+            class="flex justify-center items-center max-w-[75%] max-h-[75%] border border-solid border-white rounded-lg">
             <slot></slot>
         </section>
     </TransitionRoot>

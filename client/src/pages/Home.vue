@@ -155,10 +155,13 @@ const handleClickOutsideModal = () => {
             :liked="likes.includes(xweet.xweet_id)"
             @update-timeline="updateTimeline"
             @show-notice="showNotice" />
-        <Popup :show="notification.isNotified" message="Success!" :category="notification.category" />
         <Modal :show="isModalShown" @clicked-outside="handleClickOutsideModal">
             <NewXweet />
         </Modal>
+        <Popup 
+            :show="notification.isNotified" 
+            message="Success!" 
+            :category="notification.category" />
         <template #sidebarRight>
             <Suggestions v-if="authStore.getIsAuthenticated" />
             <Trending />

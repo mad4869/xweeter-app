@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { reactive } from 'vue';
+import { ref, reactive } from 'vue';
 import { useRoute } from 'vue-router';
 
 import Layout from '../components/App/Layout/index.vue'
@@ -7,10 +7,12 @@ import Popup from '../components/App/Popup.vue';
 import Setting from '../components/App/Setting.vue';
 import Header from '../components/Profile/Header.vue';
 import Profile from '../components/Home/Profile.vue';
-import Profiles from '../components/Profile/Profile.vue';
+import Timeline from '../components/Profile/Timeline.vue';
 import useAuth from '../composables/useAuth';
 import { sendReqCookie } from '../utils/axiosInstances';
 import { Users } from '../types/auth';
+import Modal from '../components/App/Modal.vue';
+import ProfileForm from '../components/Profile/ProfileForm.vue';
 
 const authStore = useAuth()
 await authStore.getUser()
@@ -54,6 +56,14 @@ const handleProfilePic = (
         notification.category = 'error'
     }
 }
+
+const isModalShown = ref(false)
+const showModal = () => {
+    isModalShown.value = true
+}
+const handleClickOutsideModal = () => {
+    isModalShown.value = false
+}
 </script>
 
 <template>
@@ -81,8 +91,17 @@ const handleProfilePic = (
             :bio="data?.bio"
             :profile-pic="data?.profile_pic"
             :header-pic="data?.header_pic"
-            @change-profile-pic="handleProfilePic" />
-        <Profiles />
+            @change-profile-pic="handleProfilePic"
+            @show-edit-profile="showModal" />
+        <Timeline />
+        <Modal :show="isModalShown" @clicked-outside="handleClickOutsideModal">
+            <ProfileForm
+                :username="data?.username"
+                :fullname="data?.full_name"
+                :bio="data?.bio"
+                :profile-pic="data?.profile_pic"
+                :header-pic="data?.header_pic" />
+        </Modal>
         <Popup
             :show="notification.isNotified"
             category="success" 

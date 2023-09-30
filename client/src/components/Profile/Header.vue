@@ -16,7 +16,10 @@ const { userId, profilePic, headerPic } = defineProps<{
     headerPic?: string
 }>()
 
-const emit = defineEmits()
+const emit = defineEmits<{
+    (e: 'change-profile-pic', isSuccess: boolean, isError: boolean, NotifMsg: string): void,
+    (e: 'show-edit-profile'): void
+}>()
 
 const pfp = ref(profilePic)
 const header = ref(headerPic)
@@ -133,6 +136,10 @@ const changeHeader = async () => {
         console.error(err)
     }
 }
+
+const showEditProfile = () => {
+    emit('show-edit-profile')
+}
 </script>
 
 <template>
@@ -181,7 +188,9 @@ const changeHeader = async () => {
             <div class="flex items-center gap-2">
                 <button
                     v-if="isOwn"
-                    class="bg-sky-600 px-4 py-1 text-white font-medium border-2 border-solid border-sky-800 rounded-md">
+                    class="bg-sky-600 px-4 py-1 text-white font-medium border-2 border-solid border-sky-800 rounded-md hover:bg-sky-800 hover:border-sky-600"
+                    title="Edit your profile"
+                    @click.prevent="showEditProfile">
                     Edit
                 </button>
                 <button
