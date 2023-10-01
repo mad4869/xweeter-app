@@ -1,48 +1,23 @@
 <script setup lang="ts">
 import Xweet from '../App/Xweet.vue';
-import useAuth from '../../composables/useAuth';
-import { sendReqCookie } from '../../utils/axiosInstances';
+import Empty from '../App/Empty.vue';
 
-type Xweets = {
-    xweet_id: number,
-    user_id: number,
-    rexweet_id?: number,
-    full_name?: string,
-    username?: string,
-    body: string,
-    media?: string,
-    profile_pic?: string,
-    created_at: string,
-    updated_at?: string,
-    og_user_id?: number,
-    og_username?: string,
-    og_full_name?: string,
-    og_profile_pic?: string
-}
-
-type Response = {
-    data: Xweets[],
-    success: boolean
-}
-
-const authStore = useAuth()
-
-const getProfileTimeline = async (): Promise<Response | undefined> => {
-    try {
-        if (authStore.getIsAuthenticated) {
-            const { data } = await sendReqCookie.get(`api/users/${authStore.getSignedInUserId}/profile-timeline`)
-            if (data) {
-                return data
-            }
-        } else {
-            return { data: [], success: false }
-        }
-    } catch (err) {
-        console.error(err)
-    }
-}
-
-const { data } = (await getProfileTimeline()) || { data: [] }
+defineProps<{
+    isOwn: boolean,
+    data: {
+        xweet_id: number,
+        user_id: number,
+        username: string,
+        full_name: string,
+        body: string,
+        profile_pic: string,
+        created_at: string,
+        rexweet_id: number,
+        og_username: string,
+        og_full_name: string,
+        og_profile_pic: string
+    }[]
+}>()
 </script>
 
 <template>
@@ -64,5 +39,14 @@ const { data } = (await getProfileTimeline()) || { data: [] }
             :isOwn="true"
             :rexweeted="false"
             :liked="false" />
+        <div v-if="data.length === 0">
+            <Empty
+                v-if="isOwn"
+                msg="You haven't xweet anything yet"
+                submsg="Start telling your stories now!" />
+            <Empty
+                v-else
+                msg="This user hasn't xweet anything yet" />
+        </div>
     </section>
 </template>

@@ -4,8 +4,6 @@ import { ref } from 'vue';
 import { sendReqCookie } from '../../utils/axiosInstances';
 import { UserResponse } from '../../types/users'
 
-
-
 const { userId, profilePic, headerPic } = defineProps<{
     isOwn: boolean,
     userId?: number,
@@ -13,7 +11,10 @@ const { userId, profilePic, headerPic } = defineProps<{
     username?: string,
     bio?: string | null,
     profilePic?: string,
-    headerPic?: string
+    headerPic?: string,
+    xweetsCount?: number,
+    followingCount?: number,
+    followersCount?: number
 }>()
 
 const emit = defineEmits<{
@@ -207,12 +208,23 @@ const showEditProfile = () => {
                 </button>
             </div>
         </div>
-        <div class="row-start-4 row-span-2 flex flex-col gap-4 pt-12 px-12 bg-white/10 leading-4">
-            <div>
-                <p class="text-sky-600 font-bold">{{ fullname }}</p>
-                <p class="text-sky-800 text-sm">@{{ username }}</p>
+        <div class="row-start-4 row-span-2 flex justify-between items-center pt-12 px-12 bg-white/10 leading-4">
+            <div class="flex flex-col gap-4 max-w-[50%]">
+                <div>
+                    <p class="text-sky-600 font-bold">{{ fullname }}</p>
+                    <p class="text-sky-800 text-sm">@{{ username }}</p>
+                </div>
+                <p v-if="bio" class="text-xs text-sky-800 dark:text-white">{{ bio }}</p>
             </div>
-            <p v-if="bio" class="text-xs text-sky-800 dark:text-white">{{ bio }}</p>
+            <div class="flex flex-col justify-center items-end gap-4 text-white">
+                <div>
+                    <span class="text-xl"><strong>{{ xweetsCount }}</strong> Xweets</span>
+                </div>
+                <div class="flex justify-center items-center gap-4">
+                    <span><strong>{{ followingCount }}</strong> Following</span>
+                    <span><strong>{{ followersCount }}</strong> Followers</span>
+                </div>
+            </div>
         </div>
     </section>
 </template>

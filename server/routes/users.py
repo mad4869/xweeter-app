@@ -79,7 +79,6 @@ def get_most_active_users():
 
 
 @routes.route("/users/<int:user_id>", methods=["GET", "PUT"], strict_slashes=False)
-@jwt_required()
 def access_user(user_id):
     user = db.session.execute(
         db.select(User).filter(User.user_id == user_id)

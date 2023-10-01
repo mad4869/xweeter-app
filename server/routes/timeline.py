@@ -46,7 +46,6 @@ def get_timeline():
 @routes.route(
     "/users/<int:user_id>/profile-timeline", methods=["GET"], strict_slashes=False
 )
-# @jwt_required()
 def get_profile_timeline(user_id):
     own_xweets = db.session.execute(
         db.select(Xweet)

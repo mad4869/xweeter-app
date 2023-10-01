@@ -1,5 +1,6 @@
 <script setup lang="ts">
 defineProps<{
+    id: number,
     fullname: string,
     username: string,
     lastXweet: string,
@@ -9,7 +10,9 @@ defineProps<{
 
 <template>
     <section class="flex flex-col items-center gap-1 px-8 py-1">
-        <div class="grid grid-cols-4 grid-rows-2 w-full">
+        <router-link :to="`/users/${id}`" 
+            class="grid grid-cols-4 grid-rows-2 w-full"
+            :title="`View @${username}'s profile`">
             <div class="col-start-1 col-span-1 row-start-1 row-span-2 flex items-center">
                 <img 
                     :src="profilePic" 
@@ -23,7 +26,7 @@ defineProps<{
             <div class="col-start-2 col-span-3 row-start-2 row-span-1 text-sm text-sky-600">
                 @{{ username }}
             </div>
-        </div>
+        </router-link>
         <div 
             class="flex flex-col justify-center gap-1 w-full px-2 py-1 text-xs bg-white/5 rounded-sm">
             <span class="bg-slate-800 w-fit px-1 py text-slate-600 rounded">Last Xweet</span>

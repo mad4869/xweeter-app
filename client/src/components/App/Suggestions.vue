@@ -39,7 +39,8 @@ const { data } = (await getActiveUsers()) || { data: [] }
         <div class="flex flex-col justify-center gap-2 overflow-scroll">
             <UserToFollow
                 v-for="user in data" 
-                :key="user.user_id" 
+                :key="user.user_id"
+                :id="user.user_id" 
                 :fullname="user.full_name" 
                 :username="user.username"
                 :last-xweet="user.body"

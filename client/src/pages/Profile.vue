@@ -5,14 +5,31 @@ import { useRoute } from 'vue-router';
 import Layout from '../components/App/Layout/index.vue'
 import Popup from '../components/App/Popup.vue';
 import Setting from '../components/App/Setting.vue';
+import Modal from '../components/App/Modal.vue';
 import Header from '../components/Profile/Header.vue';
+import ProfileForm from '../components/Profile/ProfileForm.vue';
 import Profile from '../components/Home/Profile.vue';
 import Timeline from '../components/Profile/Timeline.vue';
 import useAuth from '../composables/useAuth';
-import { sendReqCookie } from '../utils/axiosInstances';
-import { Users } from '../types/auth';
-import Modal from '../components/App/Modal.vue';
-import ProfileForm from '../components/Profile/ProfileForm.vue';
+import { sendReqWoCookie } from '../utils/axiosInstances';
+import { User } from '../types/auth';
+
+type Response = {
+    data: {
+        xweet_id: number,
+        user_id: number,
+        username: string,
+        full_name: string,
+        body: string,
+        profile_pic: string,
+        created_at: string,
+        rexweet_id: number,
+        og_username: string,
+        og_full_name: string,
+        og_profile_pic: string
+    }[],
+    success: boolean
+}
 
 const authStore = useAuth()
 await authStore.getUser()
@@ -27,7 +44,9 @@ const notification = reactive({
 
 const getUser = async () => {
     try {
-        const { data } = await sendReqCookie.get<{ data: Users, success: boolean } | undefined>(`/api/users/${route.params.id}`)
+        const { data } = await sendReqWoCookie.get<{ data: User, success: boolean } | undefined>(
+            `/api/users/${route.params.id}`
+        )
         if (data) {
             console.log(data)
             return data
@@ -37,7 +56,20 @@ const getUser = async () => {
     }
 }
 
-const { data } = (await getUser()) || { data: undefined }
+const user = (await getUser()) || { data: undefined }
+
+const getProfileTimeline = async (): Promise<Response | undefined> => {
+    try {
+        const { data } = await sendReqWoCookie.get(`api/users/${route.params.id}/profile-timeline`)
+        if (data) {
+            return data
+        }
+    } catch (err) {
+        console.error(err)
+    }
+}
+
+const timeline = (await getProfileTimeline()) || { data: [] }
 
 const handleProfilePic = (
     isSuccess: boolean,
@@ -85,25 +117,30 @@ const handleClickOutsideModal = () => {
             <Setting />
         </template>
         <Header
-            :is-own="data?.user_id === authStore.getSignedInUserId"
-            :user-id="data?.user_id"
-            :fullname="data?.full_name"
-            :username="data?.username"
-            :bio="data?.bio"
-            :profile-pic="data?.profile_pic"
-            :header-pic="data?.header_pic"
+            :is-own="user.data?.user_id === authStore.getSignedInUserId"
+            :user-id="user.data?.user_id"
+            :fullname="user.data?.full_name"
+            :username="user.data?.username"
+            :bio="user.data?.bio"
+            :profile-pic="user.data?.profile_pic"
+            :header-pic="user.data?.header_pic"
+            :xweets-count="timeline.data.length"
+            :following-count="0"
+            :followers-count="0"
             @change-profile-pic="handleProfilePic"
             @show-edit-profile="showModal" />
-        <Timeline />
+        <Timeline 
+            :is-own="parseInt($route.params.id as string) === authStore.getSignedInUserId"
+            :data="timeline.data" />
         <Modal :show="isModalShown" @clicked-outside="handleClickOutsideModal">
             <ProfileForm
-                :user-id="data?.user_id"
-                :username="data?.username"
-                :fullname="data?.full_name"
-                :email="data?.email"
-                :bio="data?.bio"
-                :profile-pic="data?.profile_pic"
-                :header-pic="data?.header_pic" />
+                :user-id="user.data?.user_id"
+                :username="user.data?.username"
+                :fullname="user.data?.full_name"
+                :email="user.data?.email"
+                :bio="user.data?.bio"
+                :profile-pic="user.data?.profile_pic"
+                :header-pic="user.data?.header_pic" />
         </Modal>
         <Popup
             :show="notification.isNotified"

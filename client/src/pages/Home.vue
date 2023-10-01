@@ -22,6 +22,7 @@ import { LikesFullResponse } from '../types/likes'
 import { UpdateTimeline } from '../types/timeline';
 import socket from '../utils/socket';
 import { sendReqCookie, sendReqWoCookie } from '../utils/axiosInstances';
+import Empty from '../components/App/Empty.vue';
 
 const authStore = useAuth()
 await authStore.getUser()
@@ -156,6 +157,10 @@ const handleClickOutsideModal = () => {
             :liked="likes.includes(xweet.xweet_id)"
             @update-timeline="updateTimeline"
             @show-notice="showNotice" />
+        <Empty 
+            v-if="timeline.length === 0"
+            msg="This is where your timeline would appear" 
+            submsg="Start following some people to get contents to your desire!" />
         <Modal :show="isModalShown" @clicked-outside="handleClickOutsideModal">
             <NewXweet />
         </Modal>
