@@ -17,7 +17,7 @@ const { userId, profilePic, headerPic } = defineProps<{
     xweetsCount?: number,
     followingCount?: number,
     followersCount?: number,
-    isFollowed: boolean
+    isFollowed?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -248,7 +248,7 @@ const follow = async () => {
             </div>
             <div class="flex flex-col justify-center items-end gap-4 text-white">
                 <div>
-                    <span class="text-xl"><strong>{{ xweetsCount }}</strong> Xweets</span>
+                    <p class="text-xl"><strong>{{ xweetsCount }}</strong> <span class="text-white/50">Xweets</span></p>
                 </div>
                 <div class="flex justify-center items-center gap-4">
                     <p><strong>{{ followingCount }}</strong> <span class="text-white/50">Following</span></p>

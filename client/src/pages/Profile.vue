@@ -11,8 +11,9 @@ import ProfileForm from '../components/Profile/ProfileForm.vue';
 import Profile from '../components/Home/Profile.vue';
 import Timeline from '../components/Profile/Timeline.vue';
 import useAuth from '../composables/useAuth';
-import { sendReqWoCookie } from '../utils/axiosInstances';
+import { sendReqCookie, sendReqWoCookie } from '../utils/axiosInstances';
 import { User } from '../types/auth';
+import { FollowResponse } from '../types/follows';
 
 type Response = {
     data: {
@@ -71,6 +72,24 @@ const getProfileTimeline = async (): Promise<Response | undefined> => {
 
 const timeline = (await getProfileTimeline()) || { data: [] }
 
+const getFollow = async (): Promise<FollowResponse | undefined> => {
+    try {
+        const following = await sendReqCookie.get(`/api/users/${authStore.getSignedInUserId}/following`)
+        const followers = await sendReqCookie.get(`/api/users/${authStore.getSignedInUserId}/followers`)
+        if (following.data && followers.data) {
+            return {
+                following: following.data, 
+                followers: followers.data
+            }
+        }
+    } catch (err) {
+        console.error(err)
+    }
+}
+
+const followData = await getFollow()
+const userFollowed = followData?.following.data.some(following => following.user_id === user.data?.user_id)
+
 const handleProfilePic = (
     isSuccess: boolean,
     isError: boolean,
@@ -127,7 +146,7 @@ const handleClickOutsideModal = () => {
             :xweets-count="timeline.data.length"
             :following-count="0"
             :followers-count="0"
-            :is-followed="true"
+            :is-followed="userFollowed"
             @change-profile-pic="handleProfilePic"
             @show-edit-profile="showModal" />
         <Timeline 

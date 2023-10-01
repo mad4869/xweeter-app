@@ -71,17 +71,19 @@ const showNewXweet = () => {
         <div
             class="row-start-2 flex flex-col justify-center items-center gap-1 w-full text-sky-800 text-lg border-b border-solid border-sky-600/20 dark:text-white">
             <strong class="text-3xl">{{ xweetData.length }}</strong>
-            <span>Xweets</span>
+            <span class="text-white/50">Xweets</span>
         </div>
         <div 
             class="row-start-3 flex flex-col justify-center items-center w-full text-sky-800 text-lg border-b border-solid border-sky-600/20 dark:text-white">
             <div class="flex justify-center items-center gap-2 w-full">
                 <strong class="flex-1 text-right">{{ followData?.following.data.length }}</strong>
-                <span class="flex-[2]">Following</span>
+                <span class="flex-[2] text-white/50">Following</span>
             </div>
             <div class="flex justify-center items-center gap-2 w-full">
                 <strong class="flex-1 text-right">{{ followData?.followers.data.length }}</strong>
-                <span class="flex-[2]">{{ followData?.followers.data.length === 1 ? 'Follower' : 'Followers' }}</span>
+                <span class="flex-[2] text-white/50">
+                    {{ followData?.followers.data.length === 1 ? 'Follower' : 'Followers' }}
+                </span>
             </div>
         </div>
         <div class="row-start-4 flex justify-center items-center">

@@ -35,7 +35,10 @@ const getFollow = async (): Promise<FollowResponse | undefined> => {
 const { data } = (await getActiveUsers()) || { data: [] }
 const followData = await getFollow()
 const userNotFollowed = data.filter(user => {
-    return !followData?.following.data.some(followed => followed.user_id === user.user_id)
+    return (
+        user.user_id !== authStore.getSignedInUserId &&
+        !followData?.following.data.some(followed => followed.user_id === user.user_id)
+    )
 })
 </script>
 
