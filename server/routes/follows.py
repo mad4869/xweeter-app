@@ -39,6 +39,7 @@ def get_user_followers(user_id):
     methods=["POST"],
     strict_slashes=False,
 )
+@jwt_required()
 def follows(follower_id, followed_id):
     try:
         db.session.execute(

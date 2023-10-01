@@ -127,6 +127,7 @@ const handleClickOutsideModal = () => {
             :xweets-count="timeline.data.length"
             :following-count="0"
             :followers-count="0"
+            :is-followed="true"
             @change-profile-pic="handleProfilePic"
             @show-edit-profile="showModal" />
         <Timeline 

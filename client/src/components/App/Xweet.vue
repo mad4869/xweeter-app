@@ -162,7 +162,8 @@ const deleteXweet = async () => {
 <template>
     <section
         class="px-4 py-4 flex justify-center items-center gap-4 bg-sky-600/10 backdrop-blur-lg border border-solid border-sky-800 rounded-xl">
-        <div
+        <router-link
+            :to="`/users/${userId}`"
             class="flex-1 flex flex-col items-center gap-2 h-full px-4 border-r border-solid border-sky-600/20">
             <img 
                 :src="!isRexweet ? profilePic : og_profile_pic"
@@ -172,7 +173,7 @@ const deleteXweet = async () => {
                 <p class=" text-sky-600 font-semibold">{{ !isRexweet ? fullname : og_fullname }}</p>
                 <p class="text-sm text-sky-800">@{{ !isRexweet ? username : og_username }}</p>
             </div>
-        </div>
+        </router-link>
         <div class="flex flex-col gap-2 w-4/5 h-full">
             <div 
                 class="flex justify-between items-center text-xs text-sky-900">

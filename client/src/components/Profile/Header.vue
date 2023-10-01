@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 
+import useAuth from '../../composables/useAuth';
 import { sendReqCookie } from '../../utils/axiosInstances';
 import { UserResponse } from '../../types/users'
+import { ToFollowResponse } from '../../types/follows'
 
 const { userId, profilePic, headerPic } = defineProps<{
     isOwn: boolean,
@@ -14,13 +16,16 @@ const { userId, profilePic, headerPic } = defineProps<{
     headerPic?: string,
     xweetsCount?: number,
     followingCount?: number,
-    followersCount?: number
+    followersCount?: number,
+    isFollowed: boolean
 }>()
 
 const emit = defineEmits<{
     (e: 'change-profile-pic', isSuccess: boolean, isError: boolean, NotifMsg: string): void,
     (e: 'show-edit-profile'): void
 }>()
+
+const authStore = useAuth()
 
 const pfp = ref(profilePic)
 const header = ref(headerPic)
@@ -141,6 +146,22 @@ const changeHeader = async () => {
 const showEditProfile = () => {
     emit('show-edit-profile')
 }
+
+const follow = async () => {
+    isLoading.value = true
+
+    try {
+        const { data } = await sendReqCookie.post<ToFollowResponse | undefined>(
+            `/api/users/${authStore.getSignedInUserId}/follows/${userId}`
+        )
+
+        if (data?.success) {
+            isLoading.value = false
+        }
+    } catch (err) {
+        console.error(err)
+    }
+}
 </script>
 
 <template>
@@ -195,10 +216,19 @@ const showEditProfile = () => {
                     Edit
                 </button>
                 <button
-                    v-else
-                    class="bg-sky-600 px-4 py-1 text-white font-medium border-2 border-solid border-sky-800 rounded-md">
-                    Follow
+                    v-else-if="!isOwn && !isFollowed"
+                    class="bg-sky-600 px-4 py-1 text-white font-medium border-2 border-solid border-sky-800 rounded-md hover:bg-sky-800 hover:border-sky-600"
+                    title="Follow this user"
+                    @click.prevent="follow">
+                    <font-awesome-icon icon="fa-solid fa-spinner" spin-pulse v-if="isLoading" />
+                    {{ !isLoading ? 'Follow' : '' }}
                 </button>
+                <div
+                    v-else-if="!isOwn && isFollowed"
+                    class="bg-slate-600 px-4 py-1 text-slate-400 font-medium rounded-md cursor-not-allowed"
+                    title="You already followed this user">
+                    Followed
+                </div>
                 <button
                     v-if="isEditable"
                     class="bg-sky-600 px-2 py-1 text-white font-medium border-2 border-solid border-sky-800 rounded-full"
@@ -221,8 +251,8 @@ const showEditProfile = () => {
                     <span class="text-xl"><strong>{{ xweetsCount }}</strong> Xweets</span>
                 </div>
                 <div class="flex justify-center items-center gap-4">
-                    <span><strong>{{ followingCount }}</strong> Following</span>
-                    <span><strong>{{ followersCount }}</strong> Followers</span>
+                    <p><strong>{{ followingCount }}</strong> <span class="text-white/50">Following</span></p>
+                    <p><strong>{{ followersCount }}</strong> <span class="text-white/50">Followers</span></p>
                 </div>
             </div>
         </div>

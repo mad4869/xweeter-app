@@ -1,8 +1,32 @@
-import { Users } from "./auth";
+import { User } from "./auth";
 
 type FollowResponse = {
-    success: boolean,
-    data: Users[]
+    following: {
+        success: boolean,
+        data: User[]
+    },
+    followers: {
+        success: boolean,
+        data: User[]
+    },
 }
 
-export { type FollowResponse }
+type WhoToFollow = {
+    user_id: number,
+    username: string,
+    full_name: string,
+    body: string,
+    profile_pic: string
+}
+
+type WhoToFollowResponse = {
+    data: WhoToFollow[],
+    success: boolean
+}
+
+type ToFollowResponse = {
+    message: string,
+    success: boolean
+}
+
+export { type FollowResponse, type WhoToFollowResponse, type ToFollowResponse }

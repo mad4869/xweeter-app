@@ -1,19 +1,10 @@
 <script setup lang="ts">
-import { sendReqCookie } from '../../utils/axiosInstances';
 import UserToFollow from './UserToFollow.vue';
+import useAuth from '../../composables/useAuth';
+import { sendReqCookie } from '../../utils/axiosInstances';
+import { FollowResponse, WhoToFollowResponse } from '../../types/follows';
 
-type WhoToFollow = {
-    user_id: number,
-    username: string,
-    full_name: string,
-    body: string,
-    profile_pic: string
-}
-
-type WhoToFollowResponse = {
-    data: WhoToFollow[],
-    success: boolean
-}
+const authStore = useAuth()
 
 const getActiveUsers = async (): Promise<WhoToFollowResponse | undefined> => {
     try {
@@ -26,7 +17,26 @@ const getActiveUsers = async (): Promise<WhoToFollowResponse | undefined> => {
     }
 }
 
+const getFollow = async (): Promise<FollowResponse | undefined> => {
+    try {
+        const following = await sendReqCookie.get(`/api/users/${authStore.getSignedInUserId}/following`)
+        const followers = await sendReqCookie.get(`/api/users/${authStore.getSignedInUserId}/followers`)
+        if (following.data && followers.data) {
+            return {
+                following: following.data, 
+                followers: followers.data
+            }
+        }
+    } catch (err) {
+        console.error(err)
+    }
+}
+
 const { data } = (await getActiveUsers()) || { data: [] }
+const followData = await getFollow()
+const userNotFollowed = data.filter(user => {
+    return !followData?.following.data.some(followed => followed.user_id === user.user_id)
+})
 </script>
 
 <template>
@@ -38,7 +48,7 @@ const { data } = (await getActiveUsers()) || { data: [] }
         </div>
         <div class="flex flex-col justify-center gap-2 overflow-scroll">
             <UserToFollow
-                v-for="user in data" 
+                v-for="user in userNotFollowed" 
                 :key="user.user_id"
                 :id="user.user_id" 
                 :fullname="user.full_name" 

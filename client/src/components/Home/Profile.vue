@@ -23,13 +23,16 @@ const getXweets = async (): Promise<XweetsResponse | undefined> => {
     }
 }
 
-const getFollow = async (): Promise<FollowResponse[] | undefined> => {
+const getFollow = async (): Promise<FollowResponse | undefined> => {
     try {
         if (authStore.getIsAuthenticated) {
             const following = await sendReqCookie.get(`/api/users/${authStore.getSignedInUserId}/following`)
             const followers = await sendReqCookie.get(`/api/users/${authStore.getSignedInUserId}/followers`)
             if (following.data && followers.data) {
-                return [following.data, followers.data]
+                return {
+                    following: following.data, 
+                    followers: followers.data
+                }
             }
         }
     } catch (err) {
@@ -39,7 +42,7 @@ const getFollow = async (): Promise<FollowResponse[] | undefined> => {
 
 const { data } = (await getXweets()) || { data: [] }
 const xweetData = data
-const followData = (await getFollow()) || []
+const followData = await getFollow()
 
 const showNewXweet = () => {
     emit('show-new-xweet')
@@ -73,12 +76,12 @@ const showNewXweet = () => {
         <div 
             class="row-start-3 flex flex-col justify-center items-center w-full text-sky-800 text-lg border-b border-solid border-sky-600/20 dark:text-white">
             <div class="flex justify-center items-center gap-2 w-full">
-                <strong class="flex-1 text-right">{{ followData[0].data.length }}</strong>
+                <strong class="flex-1 text-right">{{ followData?.following.data.length }}</strong>
                 <span class="flex-[2]">Following</span>
             </div>
             <div class="flex justify-center items-center gap-2 w-full">
-                <strong class="flex-1 text-right">{{ followData[1].data.length }}</strong>
-                <span class="flex-[2]">{{ followData[1].data.length === 1 ? 'Follower' : 'Followers' }}</span>
+                <strong class="flex-1 text-right">{{ followData?.followers.data.length }}</strong>
+                <span class="flex-[2]">{{ followData?.followers.data.length === 1 ? 'Follower' : 'Followers' }}</span>
             </div>
         </div>
         <div class="row-start-4 flex justify-center items-center">
