@@ -58,7 +58,7 @@ const { data } = (await getTrending()) || { data: [] }
             <Profile v-if="authStore.getIsAuthenticated" />
             <Setting />
         </template>
-        <Sep :title="`Topic: ${$route.query.tag}`" />
+        <Sep title="Topic:" :subtitle="`${$route.query.tag}`" is-sticky />
         <Xweet v-for="xweet in data"
             :key="xweet.xweet_id"
             :id="xweet.xweet_id"
@@ -71,6 +71,7 @@ const { data } = (await getTrending()) || { data: [] }
             :createdAt="xweet.created_at" 
             :updated-at="xweet.updated_at" 
             :is-rexweet="false"
+            :is-reply="false"
             :is-own="xweet.user_id === authStore.getSignedInUserId" 
             :rexweeted="false"
             :liked="false" />

@@ -71,37 +71,44 @@ const { data } = (await getReplies()) || { data: [] }
             <Profile v-if="authStore.getIsAuthenticated" />
             <Setting />
         </template>
-        <Sep :title="`Xweet from: @${xweet.data?.username}`" />
-        <Xweet
-            :key="xweet.data?.xweet_id"
-            :id="xweet.data?.xweet_id!"
-            :userId="xweet.data?.user_id!"
-            :fullname="xweet.data?.full_name!" 
-            :username="xweet.data?.username!" 
-            :body="xweet.data?.body!" 
-            :media="xweet.data?.media"
-            :profilePic="xweet.data?.profile_pic" 
-            :createdAt="xweet.data?.created_at!" 
-            :updated-at="xweet.data?.updated_at" 
-            :is-rexweet="false"
-            :is-own="xweet.data?.user_id === authStore.getSignedInUserId" 
-            :rexweeted="false"
-            :liked="false" />
-        <Xweet v-for="reply in data"
-            :key="reply.xweet_id"
-            :id="reply.xweet_id!"
-            :userId="reply.user_id!"
-            :fullname="reply.full_name!" 
-            :username="reply.username!" 
-            :body="reply.body!" 
-            :media="reply.media"
-            :profilePic="reply.profile_pic" 
-            :createdAt="reply.created_at!" 
-            :updated-at="reply.updated_at" 
-            :is-rexweet="false"
-            :is-own="reply.user_id === authStore.getSignedInUserId" 
-            :rexweeted="false"
-            :liked="false" />
+        <Sep title="Xweet from:" :subtitle="`@${xweet.data?.username}`" :is-sticky="false" />
+        <div class="flex flex-col">
+            <Xweet
+                :key="xweet.data?.xweet_id"
+                :id="xweet.data?.xweet_id!"
+                :userId="xweet.data?.user_id!"
+                :fullname="xweet.data?.full_name!" 
+                :username="xweet.data?.username!" 
+                :body="xweet.data?.body!" 
+                :media="xweet.data?.media"
+                :profilePic="xweet.data?.profile_pic" 
+                :createdAt="xweet.data?.created_at!" 
+                :updated-at="xweet.data?.updated_at" 
+                :is-rexweet="false"
+                :is-reply="false"
+                :is-own="xweet.data?.user_id === authStore.getSignedInUserId" 
+                :rexweeted="false"
+                :liked="false" />
+            <Sep title="Replies" is-sticky />
+            <div class="flex flex-col gap-2">
+                <Xweet v-for="reply in data"
+                    :key="reply.xweet_id"
+                    :id="reply.xweet_id!"
+                    :userId="reply.user_id!"
+                    :fullname="reply.full_name!" 
+                    :username="reply.username!" 
+                    :body="reply.body!" 
+                    :media="reply.media"
+                    :profilePic="reply.profile_pic" 
+                    :createdAt="reply.created_at!" 
+                    :updated-at="reply.updated_at" 
+                    :is-rexweet="false"
+                    :is-reply="true"
+                    :is-own="reply.user_id === authStore.getSignedInUserId" 
+                    :rexweeted="false"
+                    :liked="false" />
+            </div>
+        </div>
         <template #sidebarRight>
             <Suggestions v-if="authStore.getIsAuthenticated" />
             <Trending />

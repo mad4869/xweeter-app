@@ -36,7 +36,7 @@ def access_replies_by_xweet(xweet_id):
         .join(Xweet, Reply.xweet_id == Xweet.xweet_id)
         .join(User, Xweet.user_id == User.user_id)
         .filter(Reply.xweet_id == xweet_id)
-        .order_by(Reply.created_at.desc())
+        .order_by(Reply.created_at)
     ).scalars()
 
     data = []

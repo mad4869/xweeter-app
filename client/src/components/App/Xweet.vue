@@ -26,6 +26,7 @@ const { id, body, userId, createdAt, updatedAt, rexweeted, liked } = defineProps
     og_fullname?: string,
     og_profile_pic?: string,
     isRexweet: boolean,
+    isReply: boolean,
     isOwn: boolean,
     rexweeted: boolean,
     liked: boolean
@@ -195,32 +196,32 @@ const deleteXweet = async () => {
                 </p>
                 <span class="flex justify-center items-center gap-4 text-sm">
                     <font-awesome-icon
-                        v-if="authStore.getIsAuthenticated && !isRepliable"
+                        v-if="authStore.getIsAuthenticated && !isReply && !isRepliable"
                         icon="fa-regular fa-comment"
                         class="transition-transform cursor-pointer hover:text-sky-600 hover:scale-105"
                         title="Reply to this xweet"
                         @click="switchRepliable" />
                     <font-awesome-icon
-                        v-if="authStore.getIsAuthenticated && isRepliable"
+                        v-if="authStore.getIsAuthenticated && !isReply && isRepliable"
                         icon="fa-solid fa-comment"
                         class="transition-transform cursor-pointer text-sky-600 scale-105"
                         title="Cancel reply"
                         @click="switchRepliable" />
                     <font-awesome-icon 
-                        v-if="authStore.getIsAuthenticated && !isOwn"
+                        v-if="authStore.getIsAuthenticated && !isOwn && !isReply"
                         icon="fa-solid fa-retweet" 
                         class="transition-transform cursor-pointer hover:text-sky-600 hover:scale-105"
                         :class="isRexweeted ? 'text-sky-600 scale-105' : ''"
                         title="Rexweet"
                         @click="rexweet" />
                     <font-awesome-icon 
-                        v-if="authStore.getIsAuthenticated && !isLiked"
+                        v-if="authStore.getIsAuthenticated && !isLiked && !isReply"
                         icon="fa-regular fa-heart"
                         class="transition-transform cursor-pointer hover:text-sky-600 hover:scale-105"
                         title="Like this xweet"
                         @click="like" />
                     <font-awesome-icon
-                        v-if="authStore.getIsAuthenticated && isLiked"
+                        v-if="authStore.getIsAuthenticated && isLiked && !isReply"
                         icon="fa-solid fa-heart"
                         class="cursor-pointer text-sky-600 scale-105"
                         title="Unlike this xweet" />

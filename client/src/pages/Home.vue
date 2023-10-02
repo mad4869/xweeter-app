@@ -144,7 +144,7 @@ const showReplyEditor = (xweet_id: number | null) => {
             <Setting />
         </template>
         <NewXweet v-if="authStore.getIsAuthenticated" />
-        <Sep title="Timeline" />
+        <Sep title="Timeline" is-sticky />
         <div v-for="xweet in timeline" class="flex flex-col gap-4">
             <Xweet 
                 :key="xweet.xweet_id" 
@@ -158,6 +158,7 @@ const showReplyEditor = (xweet_id: number | null) => {
                 :createdAt="xweet.created_at" 
                 :updated-at="xweet.updated_at" 
                 :is-rexweet="false"
+                :is-reply="false"
                 :is-own="xweet.user_id === authStore.getSignedInUserId" 
                 :rexweeted="false"
                 :liked="likes.includes(xweet.xweet_id)"
