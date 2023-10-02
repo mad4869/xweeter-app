@@ -28,6 +28,13 @@ def access_xweet(xweet_id):
         db.select(Xweet).filter(Xweet.xweet_id == xweet_id)
     ).scalar_one_or_none()
     data = xweet.serialize()
+    data.update(
+        {
+            "username": xweet.users.username,
+            "full_name": xweet.users.full_name,
+            "profile_pic": xweet.users.profile_pic,
+        }
+    )
 
     return jsonify({"success": True, "data": data}), 200
 

@@ -117,6 +117,11 @@ const showModal = () => {
 const handleClickOutsideModal = () => {
     isModalShown.value = false
 }
+
+const replyingToXweetId = ref<number | null>(null)
+const showReplyEditor = (xweet_id: number | null) => {
+    replyingToXweetId.value = xweet_id
+}
 </script>
 
 <template>
@@ -140,23 +145,29 @@ const handleClickOutsideModal = () => {
         </template>
         <NewXweet v-if="authStore.getIsAuthenticated" />
         <Sep title="Timeline" />
-        <Xweet v-for="xweet in timeline" 
-            :key="xweet.xweet_id" 
-            :id="xweet.xweet_id" 
-            :userId="xweet.user_id"
-            :fullname="xweet.full_name" 
-            :username="xweet.username" 
-            :body="xweet.body" 
-            :media="xweet.media"
-            :profilePic="xweet.profile_pic" 
-            :createdAt="xweet.created_at" 
-            :updated-at="xweet.updated_at" 
-            :is-rexweet="false"
-            :is-own="xweet.user_id === authStore.getSignedInUserId" 
-            :rexweeted="false"
-            :liked="likes.includes(xweet.xweet_id)"
-            @update-timeline="updateTimeline"
-            @show-notice="showNotice" />
+        <div v-for="xweet in timeline" class="flex flex-col gap-4">
+            <Xweet 
+                :key="xweet.xweet_id" 
+                :id="xweet.xweet_id" 
+                :userId="xweet.user_id"
+                :fullname="xweet.full_name" 
+                :username="xweet.username" 
+                :body="xweet.body" 
+                :media="xweet.media"
+                :profilePic="xweet.profile_pic" 
+                :createdAt="xweet.created_at" 
+                :updated-at="xweet.updated_at" 
+                :is-rexweet="false"
+                :is-own="xweet.user_id === authStore.getSignedInUserId" 
+                :rexweeted="false"
+                :liked="likes.includes(xweet.xweet_id)"
+                @update-timeline="updateTimeline"
+                @show-notice="showNotice"
+                @reply="showReplyEditor" />
+            <NewXweet is-reply 
+                v-if="replyingToXweetId === xweet.xweet_id"
+                :xweet-id="xweet.xweet_id" />
+        </div>
         <Empty 
             v-if="timeline.length === 0"
             msg="This is where your timeline would appear" 

@@ -32,8 +32,9 @@ const { id, body, userId, createdAt, updatedAt, rexweeted, liked } = defineProps
 }>()
 
 const emit = defineEmits<{
-    (e: 'update-timeline', event: UpdateTimeline, xweet_id?: number): void
-    (e: 'show-notice', category: 'success' | 'error'): void
+    (e: 'update-timeline', event: UpdateTimeline, xweet_id?: number): void,
+    (e: 'show-notice', category: 'success' | 'error'): void,
+    (e: 'reply', xweet_id: number | null): void
 }>()
 
 const authStore = useAuth()
@@ -76,6 +77,7 @@ const isImageEnlarged = ref(false)
 const isRexweeted = ref(rexweeted)
 const isLiked = ref(liked)
 const isEditable = ref(false)
+const isRepliable = ref(false)
 
 const enlargeImage = () => {
     isImageEnlarged.value = true
@@ -107,6 +109,16 @@ const rexweet = async () => {
 
 const switchEditable = () => {
     isEditable.value = !isEditable.value
+}
+
+const switchRepliable = () => {
+    isRepliable.value = !isRepliable.value
+    
+    if (isRepliable.value) {
+        emit('reply', id)
+    } else {
+        emit('reply', null)
+    }
 }
 
 const like = async () => {
@@ -182,6 +194,18 @@ const deleteXweet = async () => {
                     <em v-if="updatedDate">- Updated at {{ updatedDate }}</em>
                 </p>
                 <span class="flex justify-center items-center gap-4 text-sm">
+                    <font-awesome-icon
+                        v-if="authStore.getIsAuthenticated && !isRepliable"
+                        icon="fa-regular fa-comment"
+                        class="transition-transform cursor-pointer hover:text-sky-600 hover:scale-105"
+                        title="Reply to this xweet"
+                        @click="switchRepliable" />
+                    <font-awesome-icon
+                        v-if="authStore.getIsAuthenticated && isRepliable"
+                        icon="fa-solid fa-comment"
+                        class="transition-transform cursor-pointer text-sky-600 scale-105"
+                        title="Cancel reply"
+                        @click="switchRepliable" />
                     <font-awesome-icon 
                         v-if="authStore.getIsAuthenticated && !isOwn"
                         icon="fa-solid fa-retweet" 
@@ -193,31 +217,31 @@ const deleteXweet = async () => {
                         v-if="authStore.getIsAuthenticated && !isLiked"
                         icon="fa-regular fa-heart"
                         class="transition-transform cursor-pointer hover:text-sky-600 hover:scale-105"
-                        title="Like Xweet"
+                        title="Like this xweet"
                         @click="like" />
                     <font-awesome-icon
                         v-if="authStore.getIsAuthenticated && isLiked"
                         icon="fa-solid fa-heart"
                         class="cursor-pointer text-sky-600 scale-105"
-                        title="Unlike Xweet" />
+                        title="Unlike this xweet" />
                     <font-awesome-icon
                         v-if="authStore.getIsAuthenticated && isOwn && !isEditable"
                         icon="fa-regular fa-pen-to-square"
                         class="transition-transform cursor-pointer hover:text-sky-600 hover:scale-105"
-                        title="Edit Xweet"
+                        title="Edit this xweet"
                         @click.prevent="switchEditable"
                         />
                     <font-awesome-icon
                         v-if="authStore.getIsAuthenticated && isOwn && isEditable"
                         icon="fa-solid fa-pen-to-square"
                         class="cursor-pointer text-sky-600 scale-105"
-                        title="Cancel"
+                        title="Cancel edit"
                         @click.prevent="switchEditable" />
                     <font-awesome-icon
                         v-if="authStore.getIsAuthenticated && isOwn"
                         icon="fa-regular fa-trash-can"
                         class="transition-transform cursor-pointer hover:text-red-600 hover:scale-105"
-                        title="Delete Xweet"
+                        title="Delete this xweet"
                         @click.prevent="deleteXweet"
                         />
                 </span>
@@ -226,7 +250,7 @@ const deleteXweet = async () => {
                 class="flex flex-col gap-2 text-sky-800 dark:text-white"
                 :class="media ? 'row-start-3 row-span-6' : 'row-start-3 row-span-2'">
                 <!-- <Transition mode="out-in"> -->
-                <div v-if="!isEditable" class="break-words">
+                <router-link :to="`/xweets/${id}`" v-if="!isEditable" class="break-words">
                     <template v-for="(word, index) in xweetText">
                         <component 
                             :is="word.type" 
@@ -236,7 +260,7 @@ const deleteXweet = async () => {
                         </component>
                         <span v-if="index < xweet.length - 1" v-html="`&nbsp;`" />
                     </template>
-                </div>
+                </router-link>
                 <div v-if="!isEditable" class="flex-shrink-0">
                     <img 
                         :src="media" 
