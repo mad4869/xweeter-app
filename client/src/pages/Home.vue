@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { ref, reactive } from 'vue';
+import { ref, reactive, watch } from 'vue';
+import { useWindowScroll } from '@vueuse/core';
 
 import Layout from '../components/App/Layout/index.vue'
 import Setting from '../components/App/Setting.vue';
@@ -15,6 +16,8 @@ import SignupForm from '../components/App/SignupForm.vue';
 import Toggle from '../components/App/Toggle.vue';
 import Trending from '../components/App/Trending.vue';
 import Popup from '../components/App/Popup.vue'
+import MoreXweet from '../components/App/MoreXweet.vue';
+import Empty from '../components/App/Empty.vue';
 import useAuth from '../composables/useAuth';
 import { UserAuth } from '../types/auth';
 import { Xweets, XweetsResponse } from '../types/xweets';
@@ -22,15 +25,18 @@ import { LikesFullResponse } from '../types/likes'
 import { UpdateTimeline } from '../types/timeline';
 import socket from '../utils/socket';
 import { sendReqCookie, sendReqWoCookie } from '../utils/axiosInstances';
-import Empty from '../components/App/Empty.vue';
 
 const authStore = useAuth()
 await authStore.getUser()
 
+const start = ref(0)
+
 const getTimeline = async (): Promise<XweetsResponse | undefined> => {
     try {
         if (authStore.getIsAuthenticated) {
-            const { data } = await sendReqCookie.get(`/api/users/${authStore.getSignedInUserId}/timeline`)
+            const { data } = await sendReqCookie.get(
+                `/api/users/${authStore.getSignedInUserId}/timeline?start=${start.value}`
+            )
             if (data) {
                 return data
             }
@@ -79,6 +85,28 @@ const updateTimeline = (event: UpdateTimeline, xweet_id?: number) => {
         timeline.push(...initialTimeline)
     }
 }
+
+const { y } = useWindowScroll()
+const isLoading = ref(false)
+
+watch(y, async (newY, oldY) => {
+    const threshold = 1210
+
+    if (newY >= threshold && newY !== oldY) {
+        isLoading.value = true
+        start.value+= 10
+
+        try {
+            const { data } = (await getTimeline()) || { data: [] }
+        
+            timeline.push(...data);
+        } catch (error) {
+            console.error('Error fetching timeline data:', error);
+        } finally {
+            isLoading.value = false;
+        }
+    }
+})
 
 const likes = reactive<number[]>([])
 const likesData = (await getLikes()) || { data: [] }
@@ -169,6 +197,7 @@ const showReplyEditor = (xweet_id: number | null) => {
                 v-if="replyingToXweetId === xweet.xweet_id"
                 :xweet-id="xweet.xweet_id" />
         </div>
+        <MoreXweet :is-loading="isLoading" />
         <Empty 
             v-if="timeline.length === 0"
             msg="This is where your timeline would appear" 

@@ -7,6 +7,7 @@ import Leaderboard from '../pages/Leaderboard.vue'
 import Trending from '../pages/Trending.vue'
 import useAuth from '../composables/useAuth'
 import Xweet from '../pages/Xweet.vue'
+import Admin from '../pages/Admin.vue'
 
 const routes = [
     { 
@@ -26,7 +27,8 @@ const routes = [
     { path: '/users/:id', component: Profile },
     { path: '/leaderboard', component: Leaderboard },
     { path: '/trending', component: Trending },
-    { path: '/xweets/:id', component: Xweet }
+    { path: '/xweets/:id', component: Xweet },
+    { path: '/admin', component: Admin }
 ]
 
 const router = createRouter({

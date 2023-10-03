@@ -89,7 +89,7 @@ const { data } = (await getReplies()) || { data: [] }
                 :is-own="xweet.data?.user_id === authStore.getSignedInUserId" 
                 :rexweeted="false"
                 :liked="false" />
-            <Sep title="Replies" is-sticky />
+            <Sep v-if="data.length > 0" title="Replies" is-sticky />
             <div class="flex flex-col gap-2">
                 <Xweet v-for="reply in data"
                     :key="reply.xweet_id"
