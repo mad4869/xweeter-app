@@ -3,7 +3,7 @@ import { createPinia } from 'pinia'
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { 
-    faSun, faMoon, faUser, faHeart, faTrashCan, faCircleXmark, faPenToSquare, faComment
+    faSun, faMoon, faUser, faHeart, faTrashCan, faCircleXmark, faPenToSquare, faComment, faSquareCaretLeft, faSquareCaretRight
 } from '@fortawesome/free-regular-svg-icons'
 import { 
     faGear, faFont, faUser as faUserSol, faEnvelope, faLock, faArrowRight, faSpinner, faGlobe, faRetweet, faHeart as faHeartSol, faImages, faFeather, faPenToSquare as faPenToSquareSol, faClipboardCheck, faTriangleExclamation, faCheck, faAddressCard, faImagePortrait, faPanorama, faComment as faCommentSol
@@ -14,7 +14,7 @@ import App from './App.vue'
 import router from './routes'
 
 library.add(
-    faSun, faMoon, faUser, faUserSol, faGear, faFont, faEnvelope, faLock, faArrowRight, faSpinner, faGlobe, faRetweet, faHeart, faHeartSol, faTrashCan, faImages, faCircleXmark, faFeather, faPenToSquare, faPenToSquareSol, faClipboardCheck, faTriangleExclamation, faCheck, faAddressCard, faImagePortrait, faPanorama, faComment, faCommentSol
+    faSun, faMoon, faUser, faUserSol, faGear, faFont, faEnvelope, faLock, faArrowRight, faSpinner, faGlobe, faRetweet, faHeart, faHeartSol, faTrashCan, faImages, faCircleXmark, faFeather, faPenToSquare, faPenToSquareSol, faClipboardCheck, faTriangleExclamation, faCheck, faAddressCard, faImagePortrait, faPanorama, faComment, faCommentSol, faSquareCaretLeft, faSquareCaretRight
 )
 
 const pinia = createPinia()

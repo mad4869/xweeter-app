@@ -80,7 +80,11 @@ def get_most_active_users():
 
 @routes.route("/users/most-active-daily", methods=["GET"], strict_slashes=False)
 def get_daily_top_users():
-    users = db.session.execute(
+    page = int(request.args.get("page", 1))
+    size = int(request.args.get("size", 0))
+    offset = (page - 1) * size if size > 0 else 0
+
+    query = (
         db.select(
             User.user_id,
             User.username,
@@ -90,7 +94,13 @@ def get_daily_top_users():
         .join(Xweet, User.user_id == Xweet.user_id)
         .filter(db.func.date(Xweet.created_at) == db.func.date(db.func.now()))
         .group_by(User.user_id, User.username, User.full_name)
-    ).fetchall()
+        .offset(offset)
+    )
+
+    if size > 0:
+        query = query.limit(size)
+
+    users = db.session.execute(query).fetchall()
     data = [
         {
             "user_id": user[0],

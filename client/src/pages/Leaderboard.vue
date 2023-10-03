@@ -2,6 +2,7 @@
 import Layout from '../components/App/Layout/index.vue'
 import Sep from '../components/Home/Sep.vue';
 import Table from '../components/Leaderboard/Table.vue';
+import Pagination from '../components/Leaderboard/Pagination.vue';
 import { sendReqWoCookie } from '../utils/axiosInstances';
 import { TopDailyResponse } from '../types/users'
 
@@ -23,5 +24,6 @@ const { data } = (await queryTopDailyUsers()) || { data: [] }
     <Layout>
         <Sep is-sticky title="Top Daily Users" />
         <Table :data="data" />
+        <Pagination :pages="Math.ceil(data.length/10)" />
     </Layout>
 </template>
