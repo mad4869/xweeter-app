@@ -1,28 +1,13 @@
 <script setup lang="ts">
 import Layout from '../components/App/Layout/index.vue'
-import Title from '../components/Leaderboard/Title.vue';
+import Sep from '../components/Home/Sep.vue';
 import Table from '../components/Leaderboard/Table.vue';
-import { sendReqCookie } from '../utils/axiosInstances';
+import { sendReqWoCookie } from '../utils/axiosInstances';
+import { TopDailyResponse } from '../types/users'
 
-type Xweet = {
-    xweet_id: number,
-    user_id: number,
-    full_name: string,
-    username: string,
-    body: string,
-    profile_pic: string,
-    created_at: string,
-    updated_at: string
-}
-
-type Response = {
-    data: Xweet[],
-    success: boolean
-}
-
-const queryXweets = async (): Promise<Response | undefined> => {
+const queryTopDailyUsers = async (): Promise<TopDailyResponse | undefined> => {
     try {
-        const { data } = await sendReqCookie.get('/api/users/1/xweets')
+        const { data } = await sendReqWoCookie.get('/api/users/most-active-daily')
         if (data) {
             return data
         }
@@ -31,12 +16,12 @@ const queryXweets = async (): Promise<Response | undefined> => {
     }
 }
 
-const { data } = (await queryXweets()) || { data: [] }
+const { data } = (await queryTopDailyUsers()) || { data: [] }
 </script>
 
 <template>
     <Layout>
-        <Title />
-        <Table users="@Aconitin" :xweets-count="data.length" />
+        <Sep is-sticky title="Top Daily Users" />
+        <Table :data="data" />
     </Layout>
 </template>
