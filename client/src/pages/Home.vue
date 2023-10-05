@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, reactive, watch } from 'vue';
+import { ref, reactive, watch, onMounted } from 'vue';
 import { useWindowScroll } from '@vueuse/core';
 
 import Layout from '../components/App/Layout/index.vue'
@@ -16,7 +16,7 @@ import SignupForm from '../components/App/SignupForm.vue';
 import Toggle from '../components/App/Toggle.vue';
 import Trending from '../components/App/Trending.vue';
 import Popup from '../components/App/Popup.vue'
-import MoreXweet from '../components/App/MoreXweet.vue';
+// import MoreXweet from '../components/App/MoreXweet.vue';
 import Empty from '../components/App/Empty.vue';
 import useAuth from '../composables/useAuth';
 import { UserAuth } from '../types/auth';
@@ -88,20 +88,29 @@ const updateTimeline = (event: UpdateTimeline, xweet_id?: number) => {
 
 const { y } = useWindowScroll()
 const isLoading = ref(false)
+const moreXweet = ref<HTMLElement | null>(null)
+const needsMoreXweet = ref(true)
+const threshold = ref<number | undefined>(0)
+onMounted(() => {
+    const moreXweetRect = moreXweet.value?.getBoundingClientRect()
+    threshold.value = (moreXweetRect?.top || 0)
+})
 
 watch(y, async (newY, oldY) => {
-    const threshold = 1210
-
-    if (newY >= threshold && newY !== oldY) {
+    console.log(newY, oldY)
+    if (newY >= (threshold.value ?? 0) && newY !== oldY) {
         isLoading.value = true
         start.value+= 10
-
+        
         try {
             const { data } = (await getTimeline()) || { data: [] }
-        
-            timeline.push(...data);
-        } catch (error) {
-            console.error('Error fetching timeline data:', error);
+            if (data.length > 0) {
+                timeline.push(...data)
+            } else {
+                needsMoreXweet.value = false
+            }
+        } catch (err) {
+            console.error('Error fetching timeline data:', err);
         } finally {
             isLoading.value = false;
         }
@@ -197,7 +206,14 @@ const showReplyEditor = (xweet_id: number | null) => {
                 v-if="replyingToXweetId === xweet.xweet_id"
                 :xweet-id="xweet.xweet_id" />
         </div>
-        <MoreXweet :is-loading="isLoading" />
+        <section ref="moreXweet" class="flex justify-center items-center">
+            <div class="w-1/2 py-2 bg-sky-800 text-sky-400 text-center rounded-full">
+                <font-awesome-icon 
+                    v-if="isLoading"
+                    icon="fa-solid fa-circle-notch" spin />
+                {{ !isLoading ? 'More Xweets' : '' }}
+            </div>
+        </section>
         <Empty 
             v-if="timeline.length === 0"
             msg="This is where your timeline would appear" 

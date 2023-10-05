@@ -5,9 +5,9 @@ import Landing from '../pages/Landing.vue'
 import Profile from '../pages/Profile.vue'
 import Leaderboard from '../pages/Leaderboard.vue'
 import Trending from '../pages/Trending.vue'
-import useAuth from '../composables/useAuth'
 import Xweet from '../pages/Xweet.vue'
 import Admin from '../pages/Admin.vue'
+import useAuth from '../composables/useAuth'
 
 const routes = [
     { 

@@ -1,4 +1,5 @@
 from flask import Flask
+from flask_admin.contrib.sqla import ModelView
 
 from .extensions import *
 from .models import *
@@ -19,6 +20,13 @@ def create_app():
     cors.init_app(app)
     jwt_manager.init_app(app)
     socket.init_app(app)
+    admin.init_app(app)
+    admin.add_view(ModelView(User, db.session))
+    admin.add_view(ModelView(Xweet, db.session))
+    admin.add_view(ModelView(Rexweet, db.session))
+    admin.add_view(ModelView(Like, db.session))
+    admin.add_view(ModelView(Reply, db.session))
+    admin.add_view(ModelView(Hashtag, db.session))
 
     return app
 

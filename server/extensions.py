@@ -4,6 +4,7 @@ from flask_bcrypt import Bcrypt
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
 from flask_socketio import SocketIO
+from flask_admin import Admin
 from minio import Minio
 from os import environ, path
 from dotenv import load_dotenv
@@ -36,3 +37,6 @@ mc = Minio(
 
 # Websocket
 socket = SocketIO(cors_allowed_origins="http://localhost:5173")
+
+# Admin management
+admin = Admin(name="Xweeter Admin", template_mode="bootstrap4")
