@@ -39,4 +39,4 @@ mc = Minio(
 socket = SocketIO(cors_allowed_origins="http://localhost:5173")
 
 # Admin management
-admin = Admin(name="Xweeter Admin", template_mode="bootstrap4")
+admin = Admin(name="Xweeter Admin", template_mode="bootstrap3")
