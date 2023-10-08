@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import Xweet from '../App/Xweet.vue';
-import Empty from '../App/Empty.vue';
+import Xweet from '@/components/App/Xweet/index.vue';
+import Empty from '@/components/App/Empty.vue';
 
 defineProps<{
     isOwn: boolean,
@@ -32,7 +32,8 @@ defineProps<{
             :body="xweet.body" 
             :profilePic="xweet.profile_pic" 
             :createdAt="xweet.created_at"
-            :isRexweet="xweet.rexweet_id !== undefined" 
+            :isRexweet="xweet.rexweet_id !== undefined"
+            :isReply="false" 
             :og_username="xweet.og_username" 
             :og_fullname="xweet.og_full_name"
             :og_profile_pic="xweet.og_profile_pic"

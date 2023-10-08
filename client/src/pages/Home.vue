@@ -3,28 +3,27 @@ import { ref, reactive, watch, onMounted } from 'vue';
 import { useWindowScroll } from '@vueuse/core';
 
 import Layout from '../components/App/Layout/index.vue'
-import Setting from '../components/App/Setting.vue';
-import Suggestions from '../components/App/Suggestions.vue';
-import SuggestionsLoading from '../components/App/SuggestionsLoading.vue';
-import Xweet from '../components/App/Xweet.vue';
-import Modal from '../components/App/Modal.vue';
-import NewXweet from '../components/Home/NewXweet.vue';
-import Profile from '../components/Home/Profile.vue';
-import Sep from '../components/Home/Sep.vue';
-import SigninForm from '../components/App/SigninForm.vue';
-import SignupForm from '../components/App/SignupForm.vue';
-import Toggle from '../components/App/Toggle.vue';
-import Trending from '../components/App/Trending.vue';
-import Popup from '../components/App/Popup.vue'
-// import MoreXweet from '../components/App/MoreXweet.vue';
-import Empty from '../components/App/Empty.vue';
-import useAuth from '../composables/useAuth';
-import { UserAuth } from '../types/auth';
-import { Xweets, XweetsResponse } from '../types/xweets';
-import { LikesFullResponse } from '../types/likes'
-import { UpdateTimeline } from '../types/timeline';
-import socket from '../utils/socket';
-import { sendReqCookie, sendReqWoCookie } from '../utils/axiosInstances';
+import Settings from '@/components/App/Settings/index.vue';
+import Suggestions from '@/components/App/Suggestions/index.vue';
+import Xweets from '@/components/App/Xweet/index.vue';
+import Modal from '@/components/App/Modal.vue';
+import NewXweet from '@/components/App/Xweet/NewXweet.vue';
+import Profile from '@/components/App/Profile/index.vue';
+import Sep from '@/components/App/Sep.vue';
+import SigninForm from '@/components/App/Auth/SigninForm.vue';
+import SignupForm from '@/components/App/Auth/SignupForm.vue';
+import Toggle from '@/components/App/Auth/Toggle.vue';
+import Trending from '@/components/App/Trending/index.vue';
+import Popup from '@/components/App/Popup.vue'
+// import MoreXweet from '@/components/App/MoreXweet.vue';
+import Empty from '@/components/App/Empty.vue';
+import useAuth from '@/composables/useAuth';
+import { UserAuth } from '@/types/auth';
+import { Xweet, XweetsResponse } from '@/types/xweets';
+import { LikesFullResponse } from '@/types/likes'
+import { UpdateTimeline } from '@/types/timeline';
+import socket from '@/utils/socket';
+import { sendReqCookie, sendReqWoCookie } from '@/utils/axiosInstances';
 
 const authStore = useAuth()
 await authStore.getUser()
@@ -68,7 +67,7 @@ const getLikes = async (): Promise<LikesFullResponse | undefined> => {
 
 const timelineData = (await getTimeline()) || { data: [] }
 const initialTimeline = [...timelineData.data]
-const timeline = reactive<Xweets[]>(initialTimeline)
+const timeline = reactive<Xweet[]>(initialTimeline)
 socket.on('add_to_timeline', (xweet) => {
     timeline.unshift(xweet)
 })
@@ -178,12 +177,12 @@ const showReplyEditor = (xweet_id: number | null) => {
             <Profile 
                 v-if="authStore.getIsAuthenticated"
                 @show-new-xweet="showModal" />
-            <Setting />
+            <Settings />
         </template>
         <NewXweet v-if="authStore.getIsAuthenticated" />
         <Sep title="Timeline" is-sticky />
         <div v-for="xweet in timeline" class="flex flex-col gap-4">
-            <Xweet 
+            <Xweets
                 :key="xweet.xweet_id" 
                 :id="xweet.xweet_id" 
                 :userId="xweet.user_id"
@@ -226,12 +225,7 @@ const showReplyEditor = (xweet_id: number | null) => {
             message="Success!" 
             :category="notification.category" />
         <template #sidebarRight>
-            <Suspense v-if="authStore.getIsAuthenticated">
-                <Suggestions />
-                <template #fallback>
-                    <SuggestionsLoading />
-                </template>
-            </Suspense>
+            <Suggestions />
             <Trending />
         </template>
     </Layout>

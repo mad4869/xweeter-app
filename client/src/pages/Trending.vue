@@ -2,20 +2,20 @@
 import { ref } from 'vue';
 import { useRoute } from 'vue-router';
 
-import Layout from '../components/App/Layout/index.vue'
-import Toggle from '../components/App/Toggle.vue';
-import SigninForm from '../components/App/SigninForm.vue';
-import SignupForm from '../components/App/SignupForm.vue';
-import Setting from '../components/App/Setting.vue';
-import Suggestions from '../components/App/Suggestions.vue';
-import Trending from '../components/App/Trending.vue';
-import Xweet from '../components/App/Xweet.vue';
-import Profile from '../components/Home/Profile.vue';
-import Sep from '../components/Home/Sep.vue';
-import useAuth from '../composables/useAuth';
-import { UserAuth } from '../types/auth';
-import { XweetsResponse } from '../types/xweets';
-import { sendReqWoCookie } from '../utils/axiosInstances';
+import Layout from '@/components/App/Layout/index.vue'
+import Toggle from '@/components/App/Auth/Toggle.vue';
+import SigninForm from '@/components/App/Auth/SigninForm.vue';
+import SignupForm from '@/components/App/Auth/SignupForm.vue';
+import Settings from '@/components/App/Settings/index.vue';
+import Suggestions from '@/components/App/Suggestions/index.vue';
+import Trending from '@/components/App/Trending/index.vue';
+import Xweet from '@/components/App/Xweet/index.vue';
+import Profile from '@/components/App/Profile/index.vue';
+import Sep from '@/components/App/Sep.vue';
+import useAuth from '@/composables/useAuth';
+import { UserAuth } from '@/types/auth';
+import { XweetsResponse } from '@/types/xweets';
+import { sendReqWoCookie } from '@/utils/axiosInstances';
 
 const authStore = useAuth()
 await authStore.getUser()
@@ -56,7 +56,7 @@ const { data } = (await getTrending()) || { data: [] }
                 </Transition>
             </section>
             <Profile v-if="authStore.getIsAuthenticated" />
-            <Setting />
+            <Settings />
         </template>
         <Sep title="Topic:" :subtitle="`${$route.query.tag}`" is-sticky />
         <Xweet v-for="xweet in data"

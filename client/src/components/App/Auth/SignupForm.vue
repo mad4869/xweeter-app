@@ -4,10 +4,10 @@ import { useVuelidate } from '@vuelidate/core'
 import { required, email, sameAs, minLength, helpers } from '@vuelidate/validators'
 import { AxiosError } from 'axios';
 
-import InputField from './InputField.vue';
-import useAuth from '../../composables/useAuth';
-import { AuthResponse, AuthResponseWoUser } from '../../types/auth'
-import { sendReqWoCookie } from '../../utils/axiosInstances';
+import InputField from '@/components/App/InputField.vue';
+import useAuth from '@/composables/useAuth';
+import { AuthResponse, AuthResponseWoUser } from '@/types/auth'
+import { sendReqWoCookie } from '@/utils/axiosInstances';
 
 defineProps({
     useTitle: {

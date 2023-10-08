@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { sendReqWoCookie } from '../../utils/axiosInstances';
 import Hashtag from './Hashtag.vue';
-import { HashtagResponse } from '../../types/hashtags'
+import { sendReqWoCookie } from '@/utils/axiosInstances';
+import { HashtagResponse } from '@/types/hashtags'
 
 const getTrending = async (): Promise<HashtagResponse | undefined> => {
     try {

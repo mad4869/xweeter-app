@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 
-import Toggle from '../../components/App/Toggle.vue';
-import SignupForm from '../../components/App/SignupForm.vue';
-import SigninForm from '../../components/App/SigninForm.vue';
-import { UserAuth } from '../../types/auth'
+import Toggle from '@/components/App/Auth/Toggle.vue';
+import SignupForm from '@/components/App/Auth/SignupForm.vue';
+import SigninForm from '@/components/App/Auth/SigninForm.vue';
+import { UserAuth } from '@/types/auth'
 
 const activeBtn = ref<UserAuth>(UserAuth.SignUp)
 const activateBtn = (btn: UserAuth) => {

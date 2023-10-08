@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import useAuth from '../../composables/useAuth';
-import { sendReqCookie } from '../../utils/axiosInstances';
-import { XweetsResponse } from '../../types/xweets';
-import { FollowResponse } from '../../types/follows'
+import useAuth from '@/composables/useAuth';
+import { sendReqCookie } from '@/utils/axiosInstances';
+import { XweetsResponse } from '@/types/xweets';
+import { FollowResponse } from '@/types/follows'
 
 const emit = defineEmits<{
     (e: 'show-new-xweet'): void

@@ -2,7 +2,7 @@
 import { ref } from 'vue';
 import { onClickOutside } from '@vueuse/core';
 
-import useAuth from '../../composables/useAuth';
+import useAuth from '@/composables/useAuth';
 
 defineProps<{
     username: string,

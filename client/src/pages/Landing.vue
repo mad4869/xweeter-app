@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import Hero from '../components/Landing/Hero.vue'
-import Cta from '../components/Landing/Cta.vue';
-import Footer from '../components/Landing/Footer.vue';
+import Hero from '@/components/Landing/Hero.vue'
+import Cta from '@/components/Landing/Cta.vue';
+import Footer from '@/components/Landing/Footer.vue';
 </script>
 
 <template>

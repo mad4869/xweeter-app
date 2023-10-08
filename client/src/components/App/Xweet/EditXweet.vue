@@ -2,10 +2,9 @@
 import { computed, onMounted, ref } from 'vue';
 import { TransitionRoot } from '@headlessui/vue';
 
-import useAuth from '../../composables/useAuth';
-
-import { sendReqCookie } from '../../utils/axiosInstances';
-import { XweetResponse } from '../../types/xweets'
+import useAuth from '@/composables/useAuth';
+import { sendReqCookie } from '@/utils/axiosInstances';
+import { XweetResponse } from '@/types/xweets'
 
 const { xweet_id, body, fileUrl } = defineProps<{
     show: boolean,

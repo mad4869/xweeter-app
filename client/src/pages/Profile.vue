@@ -2,18 +2,18 @@
 import { ref, reactive } from 'vue';
 import { useRoute } from 'vue-router';
 
-import Layout from '../components/App/Layout/index.vue'
-import Popup from '../components/App/Popup.vue';
-import Setting from '../components/App/Setting.vue';
-import Modal from '../components/App/Modal.vue';
-import Header from '../components/Profile/Header.vue';
-import ProfileForm from '../components/Profile/ProfileForm.vue';
-import Profile from '../components/Home/Profile.vue';
-import Timeline from '../components/Profile/Timeline.vue';
-import useAuth from '../composables/useAuth';
-import { sendReqCookie, sendReqWoCookie } from '../utils/axiosInstances';
-import { User } from '../types/auth';
-import { FollowResponse } from '../types/follows';
+import Layout from '@/components/App/Layout/index.vue'
+import Popup from '@/components/App/Popup.vue';
+import Settings from '@/components/App/Settings/index.vue';
+import Modal from '@/components/App/Modal.vue';
+import Profile from '@/components/App/Profile/index.vue';
+import Header from '@/components/Profile/Header.vue';
+import ProfileForm from '@/components/Profile/ProfileForm.vue';
+import Timeline from '@/components/Profile/Timeline.vue';
+import useAuth from '@/composables/useAuth';
+import { sendReqCookie, sendReqWoCookie } from '@/utils/axiosInstances';
+import { User } from '@/types/auth';
+import { FollowResponse } from '@/types/follows';
 
 type Response = {
     data: {
@@ -133,7 +133,7 @@ const handleClickOutsideModal = () => {
                 </Transition>
             </section> -->
             <Profile v-if="authStore.getIsAuthenticated" />
-            <Setting />
+            <Settings />
         </template>
         <Header
             :is-own="user.data?.user_id === authStore.getSignedInUserId"

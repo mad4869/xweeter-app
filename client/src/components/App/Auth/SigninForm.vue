@@ -3,8 +3,8 @@ import { reactive, ref } from 'vue';
 import { useVuelidate } from '@vuelidate/core'
 import { required, minLength } from '@vuelidate/validators'
 
-import InputField from './InputField.vue';
-import useAuth from '../../composables/useAuth';
+import InputField from '@/components/App/InputField.vue';
+import useAuth from '@/composables/useAuth';
 
 defineProps({
     useTitle: {

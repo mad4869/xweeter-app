@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import Layout from '../components/App/Layout/index.vue'
-import Sep from '../components/Home/Sep.vue';
-import Table from '../components/Leaderboard/Table.vue';
-import Pagination from '../components/Leaderboard/Pagination.vue';
-import { sendReqWoCookie } from '../utils/axiosInstances';
-import { TopDailyResponse } from '../types/users'
+import Layout from '@/components/App/Layout/index.vue'
+import Sep from '@/components/App/Sep.vue';
+import Table from '@/components/Leaderboard/Table.vue';
+import Pagination from '@/components/Leaderboard/Pagination.vue';
+import { sendReqWoCookie } from '@/utils/axiosInstances';
+import { TopDailyResponse } from '@/types/users'
 
 const queryTopDailyUsers = async (): Promise<TopDailyResponse | undefined> => {
     try {

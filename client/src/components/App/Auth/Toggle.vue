@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { UserAuth } from '../../types/auth'
+import { UserAuth } from '@/types/auth'
 
 defineProps<{
     activeBtn: UserAuth

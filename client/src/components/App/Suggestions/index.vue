@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import UserToFollow from './UserToFollow.vue';
-import useAuth from '../../composables/useAuth';
-import { sendReqCookie } from '../../utils/axiosInstances';
-import { FollowResponse, WhoToFollowResponse } from '../../types/follows';
+import useAuth from '@/composables/useAuth';
+import { sendReqCookie } from '@/utils/axiosInstances';
+import { FollowResponse, WhoToFollowResponse } from '@/types/follows';
 
 const authStore = useAuth()
 

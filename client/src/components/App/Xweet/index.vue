@@ -4,13 +4,13 @@ import { RouterLink } from 'vue-router';
 
 import ImageViewer from './ImageViewer.vue';
 import EditXweet from './EditXweet.vue';
-import useAuth from '../../composables/useAuth';
-import { sendReqCookie } from '../../utils/axiosInstances';
-import { RexweetResponse } from '../../types/rexweets';
-import { LikeResponse } from '../../types/likes'
-import useRenderXweet from '../../composables/useRenderXweet';
-import { XweetResponse } from '../../types/xweets';
-import { UpdateTimeline } from '../../types/timeline';
+import useAuth from '@/composables/useAuth';
+import { sendReqCookie } from '@/utils/axiosInstances';
+import { RexweetResponse } from '@/types/rexweets';
+import { LikeResponse } from '@/types/likes'
+import useRenderXweet from '@/composables/useRenderXweet';
+import { XweetResponse } from '@/types/xweets';
+import { UpdateTimeline } from '@/types/timeline';
 
 const { id, body, userId, createdAt, updatedAt, rexweeted, liked } = defineProps<{
     id: number,
