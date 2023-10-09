@@ -1,6 +1,8 @@
 # Created by https://www.toptal.com/developers/gitignore/api/vue,flask
 # Edit at https://www.toptal.com/developers/gitignore?templates=vue,flask
 
+TODOS
+
 ### Flask ###
 instance/*
 !instance/.gitignore
