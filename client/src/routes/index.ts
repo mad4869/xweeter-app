@@ -1,20 +1,20 @@
 import { createRouter, createWebHashHistory, RouteLocationNormalized, NavigationGuardNext } from 'vue-router'
 
-import Home from '../pages/Home.vue'
-import Landing from '../pages/Landing.vue'
-import Profile from '../pages/Profile.vue'
-import Leaderboard from '../pages/Leaderboard.vue'
-import Trending from '../pages/Trending.vue'
-import Xweet from '../pages/Xweet.vue'
-import Admin from '../pages/Admin.vue'
-import useAuth from '../composables/useAuth'
+import Home from '@/pages/Home.vue'
+import Landing from '@/pages/Landing.vue'
+import Profile from '@/pages/Profile.vue'
+import Leaderboard from '@/pages/Leaderboard.vue'
+import Trending from '@/pages/Trending.vue'
+import Xweet from '@/pages/Xweet.vue'
+import Admin from '@/pages/Admin.vue'
+import useAuthStore from '@/stores/useAuthStore'
 
 const routes = [
     { 
         path: '/',  
         component: Landing, 
         beforeEnter: async (_: RouteLocationNormalized, __: RouteLocationNormalized, next: NavigationGuardNext) => {
-        const authStore = useAuth()
+        const authStore = useAuthStore()
         await authStore.getUser()
 
         if (authStore.getIsAuthenticated) {

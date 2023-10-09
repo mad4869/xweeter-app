@@ -17,7 +17,7 @@ import Trending from '@/components/App/Trending/index.vue';
 import Popup from '@/components/App/Popup.vue'
 // import MoreXweet from '@/components/App/MoreXweet.vue';
 import Empty from '@/components/App/Empty.vue';
-import useAuth from '@/composables/useAuth';
+import useAuthStore from '@/stores/useAuthStore';
 import { UserAuth } from '@/types/auth';
 import { Xweet, XweetsResponse } from '@/types/xweets';
 import { LikesFullResponse } from '@/types/likes'
@@ -25,7 +25,7 @@ import { UpdateTimeline } from '@/types/timeline';
 import socket from '@/utils/socket';
 import { sendReqCookie, sendReqWoCookie } from '@/utils/axiosInstances';
 
-const authStore = useAuth()
+const authStore = useAuthStore()
 await authStore.getUser()
 
 const start = ref(0)

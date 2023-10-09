@@ -26,4 +26,4 @@ enum XweetMode {
     ReplyXweet
 }
 
-export { type Xweet, type XweetResponse, type XweetsResponse, XweetMode }
+export { type Xweet, type XweetResponse, type XweetsResponse, XweetMode}

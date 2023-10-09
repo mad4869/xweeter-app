@@ -15,12 +15,13 @@ const { xweet_id, body, fileUrl } = defineProps<{
 }>()
 
 const emit = defineEmits<{
-    (e: 'update-xweet', newBody: string, updateDate?: string): void
+    (e: 'update-xweet', newBody: string, newMedia?: string, updateDate?: string): void
 }>()
 
 const authStore = useAuthStore()
 
 const newBody = ref(body)
+const newMedia = ref(fileUrl)
 const charCount = computed(() => newBody.value.length)
 const hashtags = computed(() => {
     const words = newBody.value.split(' ');
@@ -31,11 +32,10 @@ const hashtags = computed(() => {
 
 const isLoading = ref(false)
 const isSuccess = ref(false)
-const media = ref(fileUrl)
 
 const payload = computed(() => ({
     body: newBody.value,
-    media: media.value,
+    media: newMedia.value,
     hashtags: hashtags.value
 }))
 
@@ -54,7 +54,7 @@ const editXweet = async () => {
             setTimeout(() => {
                 isSuccess.value = false
 
-                emit('update-xweet', data.data.body, data.data.updated_at)
+                emit('update-xweet', data.data.body, data.data.media, data.data.updated_at)
             }, 1000)
         }
     } catch (err) {
@@ -62,8 +62,8 @@ const editXweet = async () => {
     }
 }
 
-const manageFile = (fileUrl: string) => {
-    media.value = fileUrl
+const setMedia = (fileUrl: string) => {
+    newMedia.value = fileUrl
 }
 </script>
 
@@ -81,9 +81,9 @@ const manageFile = (fileUrl: string) => {
             :submit-func="editXweet"
             :is-loading="isLoading"
             :is-success="isSuccess"
-            :show-media-preview="media !== ''"
             :char-count="charCount"
             :max-char-count="MAX_CHAR_COUNT"
-            @send-file="manageFile" />
+            :media="newMedia"
+            @set-media="setMedia" />
     </section>
 </template>

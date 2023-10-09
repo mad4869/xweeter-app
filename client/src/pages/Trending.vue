@@ -12,12 +12,12 @@ import Trending from '@/components/App/Trending/index.vue';
 import Xweet from '@/components/App/Xweet/index.vue';
 import Profile from '@/components/App/Profile/index.vue';
 import Sep from '@/components/App/Sep.vue';
-import useAuth from '@/composables/useAuth';
+import useAuthStore from '@/stores/useAuthStore';
 import { UserAuth } from '@/types/auth';
 import { XweetsResponse } from '@/types/xweets';
 import { sendReqWoCookie } from '@/utils/axiosInstances';
 
-const authStore = useAuth()
+const authStore = useAuthStore()
 await authStore.getUser()
 
 const activeBtn = ref<UserAuth>(UserAuth.SignUp)

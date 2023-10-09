@@ -12,7 +12,7 @@ import useRenderXweet from '@/composables/useRenderXweet';
 import { XweetResponse } from '@/types/xweets';
 import { UpdateTimeline } from '@/types/timeline';
 
-const { id, body, userId, createdAt, updatedAt, rexweeted, liked } = defineProps<{
+const { id, body, media, userId, createdAt, updatedAt, rexweeted, liked } = defineProps<{
     id: number,
     userId: number,
     fullname?: string,
@@ -142,10 +142,12 @@ const like = async () => {
 
 const xweet = ref(body)
 const xweetText = computed(() => useRenderXweet(xweet.value))
+const xweetMedia = ref(media)
 const updatedDate = ref(updatedAt)
 
-const handleUpdateXweet = (newBody: string, updateDate?: string) => {
+const handleUpdateXweet = (newBody: string, newMedia?: string, updateDate?: string) => {
     xweet.value = newBody
+    xweetMedia.value = newMedia
     updatedDate.value = updateDate
     isEditable.value = false
 }
@@ -249,7 +251,7 @@ const deleteXweet = async () => {
             </div>
             <div 
                 class="text-sky-800 dark:text-white"
-                :class="media ? 'row-start-3 row-span-6' : 'row-start-3 row-span-2'">
+                :class="xweetMedia ? 'row-start-3 row-span-6' : 'row-start-3 row-span-2'">
                 <Transition mode="out-in">
                     <div v-if="!isEditable" class="flex flex-col gap-2">
                         <router-link :to="`/xweets/${id}`" class="break-words">
@@ -266,8 +268,8 @@ const deleteXweet = async () => {
                         </router-link>
                         <div class="flex-shrink-0">
                             <img 
-                                :src="media" 
-                                v-if="media"
+                                :src="xweetMedia" 
+                                v-if="xweetMedia"
                                 alt="Media" 
                                 class="max-h-60 rounded-md cursor-zoom-in" 
                                 loading="lazy"
@@ -278,8 +280,8 @@ const deleteXweet = async () => {
                         v-else
                         :key="id"
                         :xweet_id="id" 
-                        :body="body" 
-                        :file-url="media" 
+                        :body="xweet" 
+                        :file-url="xweetMedia" 
                         @update-xweet="handleUpdateXweet" />
                 </Transition>
             </div>
@@ -291,7 +293,7 @@ const deleteXweet = async () => {
         :fullname="fullname!"
         :body="body"
         :profile-pic="profilePic!"
-        :file-url="media!" 
+        :file-url="xweetMedia!" 
         :is-own="isOwn"
         :is-liked="isLiked"
         @clicked-outside="handleClickOutside"

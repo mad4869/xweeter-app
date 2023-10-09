@@ -10,7 +10,7 @@ import Profile from '@/components/App/Profile/index.vue';
 import Header from '@/components/Profile/Header.vue';
 import ProfileForm from '@/components/Profile/ProfileForm.vue';
 import Timeline from '@/components/Profile/Timeline.vue';
-import useAuth from '@/composables/useAuth';
+import useAuthStore from '@/stores/useAuthStore';
 import { sendReqCookie, sendReqWoCookie } from '@/utils/axiosInstances';
 import { User } from '@/types/auth';
 import { FollowResponse } from '@/types/follows';
@@ -32,7 +32,7 @@ type Response = {
     success: boolean
 }
 
-const authStore = useAuth()
+const authStore = useAuthStore()
 await authStore.getUser()
 
 const route = useRoute()

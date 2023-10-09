@@ -12,8 +12,8 @@ import { XweetResponse } from '@/types/xweets'
 const authStore = useAuthStore()
 
 const body = ref('')
-const charCount = computed(() => body.value.length)
 const media = ref('')
+const charCount = computed(() => body.value.length)
 const hashtags = computed(() => {
     const words = body.value.split(' ');
     return words.filter(word => word.startsWith('#')).map(word => word.replace('#', ''));
@@ -54,7 +54,7 @@ const addXweet = async () => {
     }
 }
 
-const manageFile = (fileUrl: string) => {
+const setMedia = (fileUrl: string) => {
     media.value = fileUrl
 }
 </script>
@@ -74,9 +74,9 @@ const manageFile = (fileUrl: string) => {
             :submit-func="addXweet"
             :is-loading="isLoading"
             :is-success="isSuccess"
-            :show-media-preview="media !== ''"
             :char-count="charCount"
             :max-char-count="MAX_CHAR_COUNT"
-            @send-file="manageFile" />
+            :media="media"
+            @set-media="setMedia" />
     </section>
 </template>
