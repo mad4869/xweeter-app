@@ -10,8 +10,7 @@ import imghdr
 from . import routes
 from ..extensions import db, mc
 from ..models import Xweet, User, Hashtag, hashtag_xweet
-
-BUCKET = "xweeter"
+from ..constants import MINIO_BUCKET
 
 
 @routes.route("/xweets", methods=["GET"], strict_slashes=False)
@@ -42,31 +41,21 @@ def access_xweet(xweet_id):
 @routes.route(
     "/users/<int:user_id>/xweets", methods=["GET", "POST"], strict_slashes=False
 )
-# @jwt_required()
+@jwt_required()
 def access_xweets_by_user(user_id):
     if request.method == "POST":
         data = request.get_json()
         body = data.get("body")
-        media = data.get("media")
+        media_url = data.get("media")
         hashtags = data.get("hashtags")
 
-        if not media and len(hashtags) == 0:
-            xweet = Xweet(user_id=user_id, body=body)
+        if not body and not media_url:
+            return (
+                jsonify({"success": False, "message": "Xweet is not found"}),
+                400,
+            )
 
-            try:
-                db.session.add(xweet)
-                db.session.commit()
-            except:
-                db.session.rollback()
-
-                return (
-                    jsonify({"success": False, "message": "Failed to post the xweet"}),
-                    500,
-                )
-            else:
-                return jsonify({"success": True, "data": xweet.serialize()}), 201
-        elif len(hashtags) == 0:
-            media_url = data.get("media")
+        if media_url:
             media_data = base64.b64decode(media_url.split(",")[1])
             media_stream = io.BytesIO(media_data)
             media_id = uuid.uuid4()
@@ -74,16 +63,9 @@ def access_xweets_by_user(user_id):
             OBJECT_NAME = f"{media_id}.{media_ext}"
 
             try:
-                mc.put_object(BUCKET, OBJECT_NAME, media_stream, len(media_data))
-                media = mc.presigned_get_object(BUCKET, OBJECT_NAME)
-
-                xweet = Xweet(user_id=user_id, body=body, media=media)
-
-                db.session.add(xweet)
-                db.session.commit()
+                mc.put_object(MINIO_BUCKET, OBJECT_NAME, media_stream, len(media_data))
+                media = mc.presigned_get_object(MINIO_BUCKET, OBJECT_NAME)
             except S3Error as err:
-                db.session.rollback()
-
                 return (
                     jsonify(
                         {
@@ -93,51 +75,54 @@ def access_xweets_by_user(user_id):
                     ),
                     500,
                 )
-            else:
-                return jsonify({"success": True, "data": xweet.serialize()}), 201
         else:
-            try:
-                db.session.add(xweet)
-                db.session.commit()
-            except Exception as err:
-                db.session.rollback()
+            media = None
 
-                return (
-                    jsonify(
-                        {
-                            "success": False,
-                            "message": f"Error occured during the process: {str(err)}",
-                        }
-                    ),
-                    500,
-                )
+        try:
+            xweet = Xweet(user_id=user_id, body=body, media=media)
 
-            tags = data.get("hashtags")
+            db.session.add(xweet)
+            db.session.commit()
 
-            for tag in tags:
-                hashtag = Hashtag(body=tag)
+            if len(hashtags) != 0:
+                for tag in hashtags:
+                    existing_tag = db.session.execute(
+                        db.select(Hashtag).filter(Hashtag.body == tag)
+                    ).scalar_one_or_none()
 
-                try:
-                    db.session.add(hashtag)
-                    db.session.execute(
-                        hashtag_xweet.insert().values(
-                            xweet_id=xweet.xweet_id, hashtag_id=hashtag.hashtag_id
+                    if existing_tag:
+                        db.session.execute(
+                            hashtag_xweet.insert().values(
+                                xweet_id=xweet.xweet_id,
+                                hashtag_id=existing_tag.hashtag_id,
+                            )
                         )
-                    )
-                    db.session.commit()
-                except Exception as err:
-                    db.session.rollback()
+                        db.session.commit()
+                    else:
+                        hashtag = Hashtag(body=tag)
 
-                    return (
-                        jsonify(
-                            {
-                                "success": False,
-                                "message": f"Error occured during the process: {str(err)}",
-                            }
-                        ),
-                        500,
-                    )
+                        db.session.add(hashtag)
+                        db.session.commit()
 
+                        db.session.execute(
+                            hashtag_xweet.insert().values(
+                                xweet_id=xweet.xweet_id, hashtag_id=hashtag.hashtag_id
+                            )
+                        )
+                        db.session.commit()
+        except Exception as err:
+            db.session.rollback()
+
+            return (
+                jsonify(
+                    {
+                        "success": False,
+                        "message": f"Error occured during the process: {str(err)}",
+                    }
+                ),
+                500,
+            )
+        else:
             return jsonify({"success": True, "data": xweet.serialize()}), 201
 
     xweets = db.session.execute(
@@ -166,6 +151,7 @@ def access_xweets_by_user(user_id):
     methods=["GET", "PUT", "DELETE"],
     strict_slashes=False,
 )
+@jwt_required()
 def access_xweet_by_user(user_id, xweet_id):
     xweet = db.session.execute(
         db.select(Xweet).filter(Xweet.xweet_id == xweet_id)

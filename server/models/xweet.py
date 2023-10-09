@@ -7,7 +7,7 @@ class Xweet(db.Model):
     __tablename__ = "xweets"
     xweet_id = db.Column(db.Integer(), primary_key=True)
     user_id = db.Column(db.Integer(), db.ForeignKey("users.user_id"))
-    body = db.Column(db.String(140), nullable=False)
+    body = db.Column(db.String(140))
     media = db.Column(db.Text())
     created_at = db.Column(db.DateTime(), nullable=False, default=datetime.now)
     updated_at = db.Column(db.DateTime())

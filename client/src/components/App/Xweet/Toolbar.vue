@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref } from 'vue'
 
 defineProps<{
     mode: 'new-xweet' | 'edit-xweet' | 'reply-xweet'
@@ -74,7 +74,7 @@ const removeFile = () => {
                     class="hidden"
                     @change="addFile">
             </label>
-            <div v-if="fileUrl && showMediaPreview" class="relative group">
+            <div v-show="fileUrl && showMediaPreview" class="relative group">
                 <img :src="fileUrl" class="w-8 h-8 object-scale-down" />
                 <font-awesome-icon 
                     icon="fa-regular fa-circle-xmark" 
@@ -84,21 +84,23 @@ const removeFile = () => {
             </div>
         </div>
         <div class="flex items-center h-full px-2 text-center dark:text-white">
-            <p class="text-xs" v-if="charCount > maxCharCount && !isSuccess && !isLoading">
-                <span>{{ charCount }}</span>
-                /
-                <span class="text-sky-800 dark:text-sky-600">{{ maxCharCount }}</span>
-            </p>
-            <p class="text-red-600 opacity-0 fade-in dark:text-red-400" v-if="charCount > maxCharCount">
-                Your xweet exceeds the maximum number of characters
-            </p>
-            <p class="text-sky-800 font-bold opacity-0 fade-in dark:text-sky-600" v-if="isSuccess">
-                {{ modeMap[mode].successMsg }}
-            </p>
+            <Transition mode="out-in">
+                <p v-if="charCount <= maxCharCount && !isSuccess && !isLoading" class="text-xs">
+                    <span>{{ charCount }}</span>
+                    /
+                    <span class="text-sky-800 dark:text-sky-600">{{ maxCharCount }}</span>
+                </p>
+                <p v-else-if="charCount > maxCharCount" class="text-red-600 fade-in dark:text-red-400">
+                    Your xweet exceeds the maximum number of characters
+                </p>
+                <p v-else-if="isSuccess" class="text-sky-800 font-bold fade-in dark:text-sky-600">
+                    {{ modeMap[mode].successMsg }}
+                </p>
+            </Transition>
         </div>
         <div class="flex items-center gap-2 h-full">
             <font-awesome-icon 
-                v-if="isLoading"
+                v-show="isLoading"
                 icon="fa-solid fa-spinner" spin-pulse 
                 class="text-white" />
             <input 
@@ -111,3 +113,15 @@ const removeFile = () => {
         </div>
     </div>
 </template>
+
+<style scoped>
+.v-enter-active,
+.v-leave-active {
+  transition: opacity 0.2s ease;
+}
+
+.v-enter-from,
+.v-leave-to {
+  opacity: 0;
+}
+</style>

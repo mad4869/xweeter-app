@@ -255,7 +255,8 @@ const deleteXweet = async () => {
                     <template v-for="(word, index) in xweetText">
                         <component 
                             :is="word.type" 
-                            :to="word.to" 
+                            :to="word.to"
+                            :title="word.type === RouterLink ? `View ${word.text}` : ''" 
                             :class="word.type === RouterLink ? 'text-sky-600 hover:text-sky-400' : ''">
                             {{ word.text }}
                         </component>
@@ -267,7 +268,7 @@ const deleteXweet = async () => {
                         :src="media" 
                         v-if="media"
                         alt="Media" 
-                        class="max-h-60 cursor-zoom-in" 
+                        class="max-h-60 rounded-md cursor-zoom-in" 
                         loading="lazy"
                         @click="enlargeImage">
                 </div>

@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 
-import TextEditor from '@/components/App/Xweet/TextEditor.vue'
 import Toolbar from './Toolbar.vue'
+import TextEditor from './TextEditor.vue'
 import useAuth from '@/composables/useAuth'
 import socket from '@/utils/socket'
 import { sendReqCookie } from '@/utils/axiosInstances'
