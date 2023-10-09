@@ -15,7 +15,7 @@ const activateBtn = (btn: UserAuth) => {
 <template>
     <section
         class="row-start-1 row-span-5 col-start-2 flex flex-col justify-center items-center gap-2 px-32 py-8 bg-white/10 backdrop-blur-lg rounded-lg shadow-lg shadow-sky-800">
-        <Toggle :activeBtn="activeBtn" @activateBtn="activateBtn" />
+        <Toggle :active-btn="activeBtn" @activate-btn="activateBtn" />
         <Transition name="fade" mode="out-in">
             <KeepAlive>
                 <component :is="activeBtn === UserAuth.SignUp ? SignupForm : SigninForm" />

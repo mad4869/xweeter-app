@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import useAuth from '@/composables/useAuth';
+import useAuthStore from '@/stores/useAuthStore';
 import { sendReqCookie } from '@/utils/axiosInstances';
 import { XweetsResponse } from '@/types/xweets';
 import { FollowResponse } from '@/types/follows'
@@ -8,7 +8,7 @@ const emit = defineEmits<{
     (e: 'show-new-xweet'): void
 }>()
 
-const authStore = useAuth()
+const authStore = useAuthStore()
 
 const getXweets = async (): Promise<XweetsResponse | undefined> => {
     try {

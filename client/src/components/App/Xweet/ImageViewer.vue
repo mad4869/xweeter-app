@@ -2,7 +2,7 @@
 import { ref } from 'vue';
 import { onClickOutside } from '@vueuse/core';
 
-import useAuth from '@/composables/useAuth';
+import useAuthStore from '@/stores/useAuthStore';
 
 defineProps<{
     username: string,
@@ -16,7 +16,7 @@ defineProps<{
 
 const emit = defineEmits()
 
-const authStore = useAuth()
+const authStore = useAuthStore()
 
 const imgRef = ref<HTMLImageElement | null>(null)
 const isClickedOutside = ref(false)

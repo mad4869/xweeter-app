@@ -3,7 +3,7 @@ import { computed, ref } from 'vue';
 
 import TextEditor from './TextEditor.vue';
 import Toolbar from './Toolbar.vue';
-import useAuth from '@/composables/useAuth';
+import useAuthStore from '@/stores/useAuthStore';
 import { MAX_CHAR_COUNT } from '@/utils/constants';
 import { sendReqCookie } from '@/utils/axiosInstances';
 import { XweetResponse } from '@/types/xweets'
@@ -18,7 +18,7 @@ const emit = defineEmits<{
     (e: 'update-xweet', newBody: string, updateDate?: string): void
 }>()
 
-const authStore = useAuth()
+const authStore = useAuthStore()
 
 const newBody = ref(body)
 const charCount = computed(() => newBody.value.length)

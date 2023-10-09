@@ -3,9 +3,9 @@ import { reactive, ref } from 'vue';
 import { useVuelidate } from '@vuelidate/core'
 import { required, email as isEmail } from '@vuelidate/validators'
 
-import InputField from '../App/InputField.vue';
-import { sendReqCookie } from '../../utils/axiosInstances';
-import { UserResponse } from '../../types/users';
+import InputField from '@/components/App/InputField.vue';
+import { sendReqCookie } from '@/utils/axiosInstances';
+import { UserResponse } from '@/types/users';
 
 const { userId, username, fullname, email, bio, profilePic, headerPic } = defineProps<{
     userId?: number,

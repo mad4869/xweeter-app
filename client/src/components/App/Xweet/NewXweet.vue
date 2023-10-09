@@ -3,13 +3,13 @@ import { computed, ref } from 'vue'
 
 import Toolbar from './Toolbar.vue'
 import TextEditor from './TextEditor.vue'
-import useAuth from '@/composables/useAuth'
+import useAuthStore from '@/stores/useAuthStore'
 import socket from '@/utils/socket'
 import { sendReqCookie } from '@/utils/axiosInstances'
 import { MAX_CHAR_COUNT } from '@/utils/constants'
 import { XweetResponse } from '@/types/xweets'
 
-const authStore = useAuth()
+const authStore = useAuthStore()
 
 const body = ref('')
 const charCount = computed(() => body.value.length)

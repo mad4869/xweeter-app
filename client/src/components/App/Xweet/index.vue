@@ -4,7 +4,7 @@ import { RouterLink } from 'vue-router';
 
 import ImageViewer from './ImageViewer.vue';
 import EditXweet from './EditXweet.vue';
-import useAuth from '@/composables/useAuth';
+import useAuthStore from '@/stores/useAuthStore';
 import { sendReqCookie } from '@/utils/axiosInstances';
 import { RexweetResponse } from '@/types/rexweets';
 import { LikeResponse } from '@/types/likes'
@@ -38,7 +38,7 @@ const emit = defineEmits<{
     (e: 'reply', xweet_id: number | null): void
 }>()
 
-const authStore = useAuth()
+const authStore = useAuthStore()
 
 const currentDate = new Date()
 const xweetDate = new Date(createdAt)

@@ -1,5 +1,6 @@
 from datetime import datetime
 
+from .hashtag_xweet import hashtag_xweet
 from .. import db
 
 
@@ -19,6 +20,13 @@ class Xweet(db.Model):
     )
     likes = db.Relationship(
         "Like", backref="xweets", lazy=True, cascade="all, delete-orphan"
+    )
+    hashtags = db.Relationship(
+        "Hashtags",
+        secondary=hashtag_xweet,
+        backref=db.backref("xweets", lazy="dynamic"),
+        lazy="dynamic",
+        cascade="all, delete-orphan",
     )
 
     def serialize(self):

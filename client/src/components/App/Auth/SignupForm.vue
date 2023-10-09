@@ -5,7 +5,7 @@ import { required, email, sameAs, minLength, helpers } from '@vuelidate/validato
 import { AxiosError } from 'axios';
 
 import InputField from '@/components/App/InputField.vue';
-import useAuth from '@/composables/useAuth';
+import useAuthStore from '@/stores/useAuthStore';
 import { AuthResponse, AuthResponseWoUser } from '@/types/auth'
 import { sendReqWoCookie } from '@/utils/axiosInstances';
 
@@ -16,7 +16,7 @@ defineProps({
     }
 })
 
-const authStore = useAuth()
+const authStore = useAuthStore()
 
 const userData = reactive({
     username: '',

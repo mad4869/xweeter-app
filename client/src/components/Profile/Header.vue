@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 
-import useAuth from '../../composables/useAuth';
-import { sendReqCookie } from '../../utils/axiosInstances';
-import { UserResponse } from '../../types/users'
-import { ToFollowResponse } from '../../types/follows'
+import useAuthStore from '@/stores/useAuthStore';
+import { sendReqCookie } from '@/utils/axiosInstances';
+import { UserResponse } from '@/types/users'
+import { ToFollowResponse } from '@/types/follows'
 
 const { userId, profilePic, headerPic } = defineProps<{
     isOwn: boolean,
@@ -25,7 +25,7 @@ const emit = defineEmits<{
     (e: 'show-edit-profile'): void
 }>()
 
-const authStore = useAuth()
+const authStore = useAuthStore()
 
 const pfp = ref(profilePic)
 const header = ref(headerPic)

@@ -4,7 +4,7 @@ import { useVuelidate } from '@vuelidate/core'
 import { required, minLength } from '@vuelidate/validators'
 
 import InputField from '@/components/App/InputField.vue';
-import useAuth from '@/composables/useAuth';
+import useAuthStore from '@/stores/useAuthStore';
 
 defineProps({
     useTitle: {
@@ -13,7 +13,7 @@ defineProps({
     }
 })
 
-const authStore = useAuth()
+const authStore = useAuthStore()
 
 const credentials = reactive({
     username: '',

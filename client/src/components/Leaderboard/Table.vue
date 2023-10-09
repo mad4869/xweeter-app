@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { TopDailyUser } from '../../types/users'
+import { TopDailyUser } from '@/types/users'
 
 defineProps<{
     data: TopDailyUser[],

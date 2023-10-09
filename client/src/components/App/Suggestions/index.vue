@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import UserToFollow from './UserToFollow.vue';
-import useAuth from '@/composables/useAuth';
+import useAuthStore from '@/stores/useAuthStore';
 import { sendReqCookie } from '@/utils/axiosInstances';
 import { FollowResponse, WhoToFollowResponse } from '@/types/follows';
 
-const authStore = useAuth()
+const authStore = useAuthStore()
 
 const getActiveUsers = async (): Promise<WhoToFollowResponse | undefined> => {
     try {

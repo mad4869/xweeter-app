@@ -5,7 +5,7 @@ defineProps<{
     activeBtn: UserAuth
 }>()
 defineEmits<{
-    (e: 'activateBtn', btn: UserAuth): void
+    (e: 'activate-btn', btn: UserAuth): void
 }>()
 </script>
 
@@ -14,12 +14,12 @@ defineEmits<{
         class="flex items-center w-40 text-xs border border-solid border-sky-600 rounded-lg overflow-hidden">
         <button 
             :class="{ active: activeBtn === UserAuth.SignUp }" 
-            @click="$emit('activateBtn', UserAuth.SignUp)">
+            @click="$emit('activate-btn', UserAuth.SignUp)">
             Sign Up
         </button>
         <button 
             :class="{ active: activeBtn === UserAuth.SignIn }" 
-            @click="$emit('activateBtn', UserAuth.SignIn)">
+            @click="$emit('activate-btn', UserAuth.SignIn)">
             Sign In
         </button>
     </div>

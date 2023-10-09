@@ -1,10 +1,10 @@
 import { defineStore } from 'pinia'
 import { AxiosError } from 'axios'
 
-import { authService, sendReqCookie } from '../utils/axiosInstances'
-import { AuthResponse, AuthResponseWoUser, AuthState } from '../types/auth'
+import { authService, sendReqCookie } from '@/utils/axiosInstances'
+import { AuthResponse, AuthResponseWoUser, AuthState } from '@/types/auth'
 
-const useAuth = defineStore('auth', {
+const useAuthStore = defineStore('auth', {
         state: () => ({
             isAuthenticated: false,
             signedInUserId: undefined,
@@ -103,10 +103,10 @@ const useAuth = defineStore('auth', {
                         this.signedInUpdate = undefined
                     }
                 } catch (err) {
-                    this.isAuthenticated = false
+                    console.error(err)
                 }
             }
         },
     })
 
-export default useAuth
+export default useAuthStore
