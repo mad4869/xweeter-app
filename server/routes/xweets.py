@@ -51,7 +51,7 @@ def access_xweets_by_user(user_id):
 
         if not body and not media_url:
             return (
-                jsonify({"success": False, "message": "Xweet is not found"}),
+                jsonify({"success": False, "message": "Xweet cannot be empty"}),
                 400,
             )
 
@@ -166,24 +166,95 @@ def access_xweet_by_user(user_id, xweet_id):
     if request.method == "PUT":
         data = request.get_json()
         body = data.get("body")
-        media = data.get("media")
+        media_url = data.get("media")
         hashtags = data.get("hashtags")
 
-        if not media and len(hashtags) == 0:
+        if not body and not media_url:
+            return (
+                jsonify({"success": False, "message": "Xweet cannot be empty"}),
+                400,
+            )
+
+        if media_url:
+            media_data = base64.b64decode(media_url.split(",")[1])
+            media_stream = io.BytesIO(media_data)
+            media_id = uuid.uuid4()
+            media_ext = imghdr.what(media_stream)
+            OBJECT_NAME = f"{media_id}.{media_ext}"
+
             try:
-                xweet.body = body
-                xweet.updated_at = datetime.now()
-
-                db.session.commit()
-            except:
-                db.session.rollback()
-
+                mc.put_object(MINIO_BUCKET, OBJECT_NAME, media_stream, len(media_data))
+                media = mc.presigned_get_object(MINIO_BUCKET, OBJECT_NAME)
+            except S3Error as err:
                 return (
-                    jsonify({"success": False, "message": "Failed to edit the xweet"}),
+                    jsonify(
+                        {
+                            "success": False,
+                            "message": f"Error occured during the process: {str(err)}",
+                        }
+                    ),
                     500,
                 )
-            else:
-                return jsonify({"success": True, "data": xweet.serialize()}), 201
+        else:
+            media = None
+
+        try:
+            xweet.body = body
+            xweet.media = media
+            xweet.updated_at = datetime.now()
+            db.session.commit()
+
+            if len(hashtags) != 0:
+                for tag in hashtags:
+                    existing_tag = db.session.execute(
+                        db.select(Hashtag).filter(Hashtag.body == tag)
+                    ).scalar_one_or_none()
+
+                    if existing_tag:
+                        tag_already_in_xweet = db.session.execute(
+                            db.select(hashtag_xweet)
+                            .filter(
+                                hashtag_xweet.c.hashtag_id == existing_tag.hashtag_id
+                            )
+                            .filter(hashtag_xweet.c.xweet_id == xweet_id)
+                        ).scalar_one_or_none()
+
+                        if tag_already_in_xweet:
+                            pass
+                        else:
+                            db.session.execute(
+                                hashtag_xweet.insert().values(
+                                    xweet_id=xweet.xweet_id,
+                                    hashtag_id=existing_tag.hashtag_id,
+                                )
+                            )
+                            db.session.commit()
+                    else:
+                        hashtag = Hashtag(body=tag)
+
+                        db.session.add(hashtag)
+                        db.session.commit()
+
+                        db.session.execute(
+                            hashtag_xweet.insert().values(
+                                xweet_id=xweet.xweet_id, hashtag_id=hashtag.hashtag_id
+                            )
+                        )
+                        db.session.commit()
+        except Exception as err:
+            db.session.rollback()
+
+            return (
+                jsonify(
+                    {
+                        "success": False,
+                        "message": f"Error occured during the process: {str(err)}",
+                    }
+                ),
+                500,
+            )
+        else:
+            return jsonify({"success": True, "data": xweet.serialize()}), 201
 
     elif request.method == "DELETE":
         try:

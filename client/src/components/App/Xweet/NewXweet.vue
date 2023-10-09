@@ -6,13 +6,13 @@ import TextEditor from './TextEditor.vue'
 import useAuth from '@/composables/useAuth'
 import socket from '@/utils/socket'
 import { sendReqCookie } from '@/utils/axiosInstances'
+import { MAX_CHAR_COUNT } from '@/utils/constants'
 import { XweetResponse } from '@/types/xweets'
 
 const authStore = useAuth()
 
 const body = ref('')
 const charCount = computed(() => body.value.length)
-const maxCharCount = 140
 const media = ref('')
 const hashtags = computed(() => {
     const words = body.value.split(' ');
@@ -68,7 +68,7 @@ const manageFile = (fileUrl: string) => {
             input-name="new-xweet"
             v-model="body"
             :char-count="charCount"
-            :max-char-count="maxCharCount" />
+            :max-char-count="MAX_CHAR_COUNT" />
         <Toolbar
             mode="new-xweet"
             :submit-func="addXweet"
@@ -76,7 +76,7 @@ const manageFile = (fileUrl: string) => {
             :is-success="isSuccess"
             :show-media-preview="media !== ''"
             :char-count="charCount"
-            :max-char-count="maxCharCount"
+            :max-char-count="MAX_CHAR_COUNT"
             @send-file="manageFile" />
     </section>
 </template>

@@ -248,38 +248,40 @@ const deleteXweet = async () => {
                 </span>
             </div>
             <div 
-                class="flex flex-col gap-2 text-sky-800 dark:text-white"
+                class="text-sky-800 dark:text-white"
                 :class="media ? 'row-start-3 row-span-6' : 'row-start-3 row-span-2'">
-                <!-- <Transition mode="out-in"> -->
-                <router-link :to="`/xweets/${id}`" v-if="!isEditable" class="break-words">
-                    <template v-for="(word, index) in xweetText">
-                        <component 
-                            :is="word.type" 
-                            :to="word.to"
-                            :title="word.type === RouterLink ? `View ${word.text}` : ''" 
-                            :class="word.type === RouterLink ? 'text-sky-600 hover:text-sky-400' : ''">
-                            {{ word.text }}
-                        </component>
-                        <span v-if="index < xweet.length - 1" v-html="`&nbsp;`" />
-                    </template>
-                </router-link>
-                <div v-if="!isEditable" class="flex-shrink-0">
-                    <img 
-                        :src="media" 
-                        v-if="media"
-                        alt="Media" 
-                        class="max-h-60 rounded-md cursor-zoom-in" 
-                        loading="lazy"
-                        @click="enlargeImage">
-                </div>
-                <EditXweet 
-                    ref="xweetEditor" 
-                    :show="isEditable" 
-                    :xweet_id="id" 
-                    :body="body" 
-                    :file-url="media" 
-                    @update-xweet="handleUpdateXweet" />
-                <!-- </Transition> -->
+                <Transition mode="out-in">
+                    <div v-if="!isEditable" class="flex flex-col gap-2">
+                        <router-link :to="`/xweets/${id}`" class="break-words">
+                            <template v-for="(word, index) in xweetText">
+                                <component 
+                                    :is="word.type" 
+                                    :to="word.to"
+                                    :title="word.type === RouterLink ? `View ${word.text}` : ''" 
+                                    :class="word.type === RouterLink ? 'text-sky-600 hover:text-sky-400' : ''">
+                                    {{ word.text }}
+                                </component>
+                                <span v-if="index < xweet.length - 1" v-html="`&nbsp;`" />
+                            </template>
+                        </router-link>
+                        <div class="flex-shrink-0">
+                            <img 
+                                :src="media" 
+                                v-if="media"
+                                alt="Media" 
+                                class="max-h-60 rounded-md cursor-zoom-in" 
+                                loading="lazy"
+                                @click="enlargeImage">
+                        </div>
+                    </div>
+                    <EditXweet
+                        v-else
+                        :key="id"
+                        :xweet_id="id" 
+                        :body="body" 
+                        :file-url="media" 
+                        @update-xweet="handleUpdateXweet" />
+                </Transition>
             </div>
         </div>
     </section>
@@ -295,3 +297,15 @@ const deleteXweet = async () => {
         @clicked-outside="handleClickOutside"
         />
 </template>
+
+<style scoped>
+.v-enter-active,
+.v-leave-active {
+  transition: opacity 0.2s ease;
+}
+
+.v-enter-from,
+.v-leave-to {
+  opacity: 0;
+}
+</style>
