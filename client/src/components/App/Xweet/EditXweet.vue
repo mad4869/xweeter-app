@@ -3,6 +3,7 @@ import { computed, ref } from 'vue';
 
 import TextEditor from './TextEditor.vue';
 import Toolbar from './Toolbar.vue';
+import useRenderHashtags from '@/composables/useRenderHashtags';
 import useAuthStore from '@/stores/useAuthStore';
 import { MAX_CHAR_COUNT } from '@/utils/constants';
 import { sendReqCookie } from '@/utils/axiosInstances';
@@ -23,21 +24,16 @@ const authStore = useAuthStore()
 const newBody = ref(body)
 const newMedia = ref(fileUrl)
 const charCount = computed(() => newBody.value.length)
-const hashtags = computed(() => {
-    const words = newBody.value.split(' ');
-    return words.filter(word => word.startsWith('#')).map(word => word.replace('#', ''));
-})
-
-// const textareaRef = ref<HTMLTextAreaElement | null>(null)
-
-const isLoading = ref(false)
-const isSuccess = ref(false)
+const hashtags = useRenderHashtags(newBody)
 
 const payload = computed(() => ({
     body: newBody.value,
     media: newMedia.value,
     hashtags: hashtags.value
 }))
+
+const isLoading = ref(false)
+const isSuccess = ref(false)
 
 const editXweet = async () => {
     isLoading.value = true
@@ -50,6 +46,8 @@ const editXweet = async () => {
         if (data?.success) {
             isLoading.value = false
             isSuccess.value = true
+            newBody.value = ''
+            newMedia.value = ''
             
             setTimeout(() => {
                 isSuccess.value = false
@@ -70,9 +68,7 @@ const setMedia = (fileUrl: string) => {
 <template>
     <section class="flex flex-col justify-between items-center h-full">
         <TextEditor
-            input-id="edit-xweet"
             input-name="edit-xweet"
-            ref="textareaRef"
             v-model="newBody"
             :char-count="charCount"
             :max-char-count="MAX_CHAR_COUNT" />

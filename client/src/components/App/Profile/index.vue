@@ -1,27 +1,16 @@
 <script setup lang="ts">
 import useAuthStore from '@/stores/useAuthStore';
 import { sendReqCookie } from '@/utils/axiosInstances';
-import { XweetsResponse } from '@/types/xweets';
 import { FollowResponse } from '@/types/follows'
 
+defineProps<{
+    xweetCount: number
+}>()
 const emit = defineEmits<{
     (e: 'show-new-xweet'): void
 }>()
 
 const authStore = useAuthStore()
-
-const getXweets = async (): Promise<XweetsResponse | undefined> => {
-    try {
-        if (authStore.getIsAuthenticated) {
-            const { data } = await sendReqCookie.get(`/api/users/${authStore.getSignedInUserId}/xweets`)
-            if (data) {
-                return data
-            }
-        }
-    } catch (err) {
-        console.error(err)
-    }
-}
 
 const getFollow = async (): Promise<FollowResponse | undefined> => {
     try {
@@ -40,8 +29,6 @@ const getFollow = async (): Promise<FollowResponse | undefined> => {
     }
 }
 
-const { data } = (await getXweets()) || { data: [] }
-const xweetData = data
 const followData = await getFollow()
 
 const showNewXweet = () => {
@@ -70,7 +57,7 @@ const showNewXweet = () => {
         </div>
         <div
             class="row-start-2 flex flex-col justify-center items-center gap-1 w-full text-sky-800 text-lg border-b border-solid border-sky-600/20 dark:text-white">
-            <strong class="text-3xl">{{ xweetData.length }}</strong>
+            <strong class="text-3xl">{{ xweetCount }}</strong>
             <span class="text-white/50">Xweets</span>
         </div>
         <div 

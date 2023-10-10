@@ -78,9 +78,9 @@ def access_xweets_by_user(user_id):
         else:
             media = None
 
-        try:
-            xweet = Xweet(user_id=user_id, body=body, media=media)
+        xweet = Xweet(user_id=user_id, body=body, media=media)
 
+        try:
             db.session.add(xweet)
             db.session.commit()
 

@@ -8,6 +8,7 @@ import Suggestions from '@/components/App/Suggestions/index.vue';
 import Xweets from '@/components/App/Xweet/index.vue';
 import Modal from '@/components/App/Modal.vue';
 import NewXweet from '@/components/App/Xweet/NewXweet.vue';
+import ReplyXweet from '@/components/App/Xweet/ReplyXweet.vue';
 import Profile from '@/components/App/Profile/index.vue';
 import Sep from '@/components/App/Sep.vue';
 import SigninForm from '@/components/App/Auth/SigninForm.vue';
@@ -49,6 +50,22 @@ const getTimeline = async (): Promise<XweetsResponse | undefined> => {
         console.error(err)
     }
 }
+
+const getXweets = async (): Promise<XweetsResponse | undefined> => {
+    try {
+        if (authStore.getIsAuthenticated) {
+            const { data } = await sendReqCookie.get(`/api/users/${authStore.getSignedInUserId}/xweets`)
+            if (data) {
+                return data
+            }
+        }
+    } catch (err) {
+        console.error(err)
+    }
+}
+
+const { data } = (await getXweets()) || { data: [] }
+const xweetCount = ref(data.length)
 
 const getLikes = async (): Promise<LikesFullResponse | undefined> => {
     try {
@@ -167,7 +184,7 @@ const showReplyEditor = (xweet_id: number | null) => {
                 v-if="!authStore.getIsAuthenticated"
                 class="flex-[4] flex flex-col items-center px-2 pt-4 border border-solid border-sky-800 rounded-xl">
                 <Toggle :active-btn="activeBtn" @activate-btn="activateBtn" />
-                <Transition name="fade" mode="out-in">
+                <Transition mode="out-in">
                     <KeepAlive>
                         <SignupForm :use-title="false" v-if="activeBtn === UserAuth.SignUp" />
                         <SigninForm :use-title="false" v-else />
@@ -176,10 +193,11 @@ const showReplyEditor = (xweet_id: number | null) => {
             </section>
             <Profile 
                 v-if="authStore.getIsAuthenticated"
+                :xweet-count="xweetCount"
                 @show-new-xweet="showModal" />
             <Settings />
         </template>
-        <NewXweet v-if="authStore.getIsAuthenticated" />
+        <NewXweet v-if="authStore.getIsAuthenticated" @increment-xweet-count="() => { xweetCount++ }" />
         <Sep title="Timeline" is-sticky />
         <div v-for="xweet in timeline" class="flex flex-col gap-4">
             <Xweets
@@ -201,9 +219,10 @@ const showReplyEditor = (xweet_id: number | null) => {
                 @update-timeline="updateTimeline"
                 @show-notice="showNotice"
                 @reply="showReplyEditor" />
-            <NewXweet is-reply 
-                v-if="replyingToXweetId === xweet.xweet_id"
-                :xweet-id="xweet.xweet_id" />
+            <ReplyXweet 
+                :show="replyingToXweetId === xweet.xweet_id"
+                :xweet-id="xweet.xweet_id"
+                @close-reply="() => { replyingToXweetId = null }" />
         </div>
         <section ref="moreXweet" class="flex justify-center items-center">
             <div class="w-1/2 py-2 bg-sky-800 text-sky-400 text-center rounded-full">
@@ -218,7 +237,9 @@ const showReplyEditor = (xweet_id: number | null) => {
             msg="This is where your timeline would appear" 
             submsg="Start following some people to get contents to your desire!" />
         <Modal :show="isModalShown" @clicked-outside="handleClickOutsideModal">
-            <NewXweet />
+            <NewXweet in-modal 
+                @increment-xweet-count="() => { xweetCount++ }"
+                @close-modal="() => { isModalShown = false }" />
         </Modal>
         <Popup 
             :show="notification.isNotified" 
@@ -232,13 +253,13 @@ const showReplyEditor = (xweet_id: number | null) => {
 </template>
 
 <style scoped>
-.fade-enter-active,
-.fade-leave-active {
+.v-enter-active,
+.v-leave-active {
     @apply transition-all duration-300 ease-out
 }
 
-.fade-enter-from,
-.fade-leave-to {
+.v-enter-from,
+.v-leave-to {
     @apply translate-x-4 opacity-0
 }
 </style>

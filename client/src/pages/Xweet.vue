@@ -68,7 +68,7 @@ const { data } = (await getReplies()) || { data: [] }
                     </KeepAlive>
                 </Transition>
             </section>
-            <Profile v-if="authStore.getIsAuthenticated" />
+            <Profile v-if="authStore.getIsAuthenticated" :xweet-count="24" />
             <Setting />
         </template>
         <Sep title="Xweet from:" :subtitle="`@${xweet.data?.username}`" :is-sticky="false" />

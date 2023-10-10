@@ -11,6 +11,7 @@ import { LikeResponse } from '@/types/likes'
 import useRenderXweet from '@/composables/useRenderXweet';
 import { XweetResponse } from '@/types/xweets';
 import { UpdateTimeline } from '@/types/timeline';
+import useCountReplies from '@/composables/useCountReplies';
 
 const { id, body, media, userId, createdAt, updatedAt, rexweeted, liked } = defineProps<{
     id: number,
@@ -144,6 +145,7 @@ const xweet = ref(body)
 const xweetText = computed(() => useRenderXweet(xweet.value))
 const xweetMedia = ref(media)
 const updatedDate = ref(updatedAt)
+const repliesCount = ref(await useCountReplies(id))
 
 const handleUpdateXweet = (newBody: string, newMedia?: string, updateDate?: string) => {
     xweet.value = newBody
@@ -197,18 +199,27 @@ const deleteXweet = async () => {
                     <em v-if="updatedDate">- Updated at {{ updatedDate }}</em>
                 </p>
                 <span class="flex justify-center items-center gap-4 text-sm">
-                    <font-awesome-icon
-                        v-if="authStore.getIsAuthenticated && !isReply && !isRepliable"
-                        icon="fa-regular fa-comment"
-                        class="transition-transform cursor-pointer hover:text-sky-600 hover:scale-105"
-                        title="Reply to this xweet"
-                        @click="switchRepliable" />
-                    <font-awesome-icon
-                        v-if="authStore.getIsAuthenticated && !isReply && isRepliable"
-                        icon="fa-solid fa-comment"
-                        class="transition-transform cursor-pointer text-sky-600 scale-105"
-                        title="Cancel reply"
-                        @click="switchRepliable" />
+                    <span v-if="authStore.getIsAuthenticated && !isReply" class="flex items-center gap-1">
+                        <font-awesome-icon
+                            v-if="!isRepliable"
+                            icon="fa-regular fa-comment"
+                            class="transition-transform cursor-pointer hover:text-sky-600 hover:scale-105"
+                            title="Reply to this xweet"
+                            @click="switchRepliable" />
+                        <font-awesome-icon
+                            v-else
+                            icon="fa-solid fa-comment"
+                            class="transition-transform cursor-pointer text-sky-600 scale-105"
+                            title="Cancel reply"
+                            @click="switchRepliable" />
+                        <router-link 
+                            :to="`/xweets/${id}`" 
+                            v-if="repliesCount" 
+                            class="text-xs text-sky-600" 
+                            title="View replies">
+                            {{ repliesCount }}
+                        </router-link>
+                    </span>
                     <font-awesome-icon 
                         v-if="authStore.getIsAuthenticated && !isOwn && !isReply"
                         icon="fa-solid fa-retweet" 
@@ -285,6 +296,7 @@ const deleteXweet = async () => {
                         @update-xweet="handleUpdateXweet" />
                 </Transition>
             </div>
+            <div></div>
         </div>
     </section>
     <ImageViewer 

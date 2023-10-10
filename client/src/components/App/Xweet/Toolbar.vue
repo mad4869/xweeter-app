@@ -1,6 +1,6 @@
 <script setup lang="ts">
 defineProps<{
-    mode: 'new-xweet' | 'edit-xweet' | 'reply-xweet'
+    mode: 'new-xweet' | 'modal-new-xweet' | 'edit-xweet' | 'reply-xweet'
     submitFunc: () => Promise<void>
     isLoading: boolean
     isSuccess: boolean
@@ -14,6 +14,11 @@ const emit = defineEmits<{
 
 const modeMap = {
     'new-xweet': {
+        btn: 'Xweet',
+        tooltip: 'Add new xweet',
+        successMsg: 'You posted a new xweet!'
+    },
+    'modal-new-xweet': {
         btn: 'Xweet',
         tooltip: 'Add new xweet',
         successMsg: 'You posted a new xweet!'
