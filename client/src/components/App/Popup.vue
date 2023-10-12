@@ -24,12 +24,12 @@ const icons = {
         as="div" 
         class="fixed left-1/2 bottom-4 -translate-x-1/2 flex items-center gap-4 px-4 py-2 text-white rounded-md" 
         :class="category ? colors[category] : ''"
-        enter="transition-all duration-200 ease-in-out"
+        enter="transition-all duration-200 ease-out"
         enter-from="opacity-0 translate-y-4"
         enter-to="opacity-100 translate-y-0"
-        leave="transition-opacity duration-150"
-        leave-from="opacity-100"
-        leave-to="opacity-0">
+        leave="transition-all duration-150 ease-in"
+        leave-from="opacity-100 translate-y-0"
+        leave-to="opacity-0 translate-y-4">
         <div>
             <font-awesome-icon 
                 :icon="category ? icons[category] : ''" beat-fade 

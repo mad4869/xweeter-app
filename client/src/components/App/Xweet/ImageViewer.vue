@@ -3,39 +3,56 @@ import { ref } from 'vue';
 import { onClickOutside } from '@vueuse/core';
 
 import useAuthStore from '@/stores/useAuthStore';
+import { TransitionRoot } from '@headlessui/vue';
 
 defineProps<{
-    username: string,
-    fullname: string,
-    profilePic: string,
-    body: string,
-    fileUrl: string,
-    isOwn: boolean,
+    show: boolean
+    username: string
+    fullname: string
+    profilePic: string
+    body: string
+    fileUrl?: string
+    isOwn: boolean
     isLiked: boolean
 }>()
 
-const emit = defineEmits()
+const emit = defineEmits<{
+    (e: 'clicked-outside'): void
+}>()
 
 const authStore = useAuthStore()
 
-const imgRef = ref<HTMLImageElement | null>(null)
-const isClickedOutside = ref(false)
+const imgRef = ref<HTMLDivElement | null>(null)
 
 onClickOutside(imgRef, () => {
-    isClickedOutside.value = true
-    emit('clicked-outside', isClickedOutside.value)
+    emit('clicked-outside')
 })
 </script>
 
 <template>
-    <div 
-        class="fixed left-0 right-0 top-0 bottom-0 flex flex-col justify-center items-center gap-4 bg-black/5 backdrop-blur-md z-30 fade-in">
-        <img 
-            :src="fileUrl"
-            ref="imgRef" 
-            alt="Image" 
-            loading="lazy" 
-            class="max-w-[75vw] max-h-[75vh] border-4 border-solid border-white shadow-xl" />
+    <TransitionRoot
+        :show="show"
+        as="div" 
+        class="fixed left-0 right-0 top-0 bottom-0 flex flex-col justify-center items-center gap-4 bg-black/5 backdrop-blur-md z-30"
+        enter="transition-opacity ease-out"
+        enter-from="opacity-0"
+        enter-to="opacity-100"
+        leave="transition-opacity ease-in"
+        leave-from="opacity-100"
+        leave-to="opacity-0">
+        <div class="relative group" ref="imgRef">
+            <img 
+                :src="fileUrl" 
+                alt="Image" 
+                loading="lazy" 
+                class="max-w-[75vw] max-h-[75vh] border-4 border-solid border-white shadow-xl" />
+            <div class="absolute items-center -right-4 -top-4 w-8 h-8 px-2 py-2 bg-white/50 rounded-full hidden group-hover:flex hover:bg-white">
+                <a :href="fileUrl" class="text-sky-800" title="Download this image" download>
+                    <font-awesome-icon 
+                        icon="fa-solid fa-download" />
+                </a>
+            </div>
+        </div>
         <div 
             class="flex justify-center items-center gap-4 w-[50vw] px-8 py-2 bg-slate-900/70 text-white rounded-lg">
             <aside class="flex justify-center items-center">
@@ -77,21 +94,5 @@ onClickOutside(imgRef, () => {
                 <span class="w-full">{{ body }}</span>
             </div>
         </div>
-    </div>
+    </TransitionRoot>
 </template>
-
-<style scoped>
-.fade-in {
-    animation: fade-in 100ms ease-in forwards;
-}
-
-@keyframes fade-in {
-    from {
-        opacity: 0;
-    }
-
-    to {
-        opacity: 100;
-    }
-}
-</style>

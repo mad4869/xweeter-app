@@ -13,7 +13,7 @@ from ..models import Xweet, User, Like
 def access_likes_by_xweet(xweet_id):
     if request.method == "POST":
         data = request.get_json()
-        user_id = data.get("user_id")
+        user_id = data.get("userId")
 
         like = Like(user_id=user_id, xweet_id=xweet_id)
 

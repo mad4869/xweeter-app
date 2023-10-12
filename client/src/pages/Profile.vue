@@ -132,7 +132,7 @@ const handleClickOutsideModal = () => {
                     </KeepAlive>
                 </Transition>
             </section> -->
-            <Profile v-if="authStore.getIsAuthenticated" />
+            <Profile v-if="authStore.getIsAuthenticated" :xweet-count="24" />
             <Settings />
         </template>
         <Header

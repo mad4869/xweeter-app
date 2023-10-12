@@ -12,4 +12,4 @@ const useCountReplies = async (xweetId: number): Promise<number | undefined> => 
     }
 }
 
-export default useCountReplies
+export { useCountReplies }

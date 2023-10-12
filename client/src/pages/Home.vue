@@ -1,25 +1,21 @@
 <script setup lang="ts">
-import { ref, reactive, watch, onMounted } from 'vue';
-import { useWindowScroll } from '@vueuse/core';
+import { ref, reactive, onMounted } from 'vue';
+// import { useWindowScroll } from '@vueuse/core';
 
 import Layout from '../components/App/Layout/index.vue'
-import Settings from '@/components/App/Settings/index.vue';
-import Suggestions from '@/components/App/Suggestions/index.vue';
+import SidebarLeft from '@/components/App/Layout/SidebarLeft.vue';
+import SidebarRight from '@/components/App/Layout/SidebarRight.vue';
 import Xweets from '@/components/App/Xweet/index.vue';
 import Modal from '@/components/App/Modal.vue';
 import NewXweet from '@/components/App/Xweet/NewXweet.vue';
 import ReplyXweet from '@/components/App/Xweet/ReplyXweet.vue';
-import Profile from '@/components/App/Profile/index.vue';
 import Sep from '@/components/App/Sep.vue';
-import SigninForm from '@/components/App/Auth/SigninForm.vue';
-import SignupForm from '@/components/App/Auth/SignupForm.vue';
-import Toggle from '@/components/App/Auth/Toggle.vue';
-import Trending from '@/components/App/Trending/index.vue';
 import Popup from '@/components/App/Popup.vue'
 // import MoreXweet from '@/components/App/MoreXweet.vue';
+import Skeleton from '@/components/App/Skeleton/index.vue'
 import Empty from '@/components/App/Empty.vue';
 import useAuthStore from '@/stores/useAuthStore';
-import { UserAuth } from '@/types/auth';
+import { countStore } from '@/stores/useCountStore'
 import { Xweet, XweetsResponse } from '@/types/xweets';
 import { LikesFullResponse } from '@/types/likes'
 import { UpdateTimeline } from '@/types/timeline';
@@ -65,17 +61,15 @@ const getXweets = async (): Promise<XweetsResponse | undefined> => {
 }
 
 const { data } = (await getXweets()) || { data: [] }
-const xweetCount = ref(data.length)
+countStore.xweetsCount = data.length
 
 const getLikes = async (): Promise<LikesFullResponse | undefined> => {
     try {
-        if (!authStore.getIsAuthenticated) {
-            return
-        }
-
-        const { data } = await sendReqCookie.get(`/api/users/${authStore.getSignedInUserId}/likes`)
-        if (data) {
-            return data
+        if (authStore.getIsAuthenticated) {
+            const { data } = await sendReqCookie.get(`/api/users/${authStore.getSignedInUserId}/likes`)
+            if (data) {
+                return data
+            }
         }
     } catch (err) {
         console.error(err)
@@ -102,36 +96,35 @@ const updateTimeline = (event: UpdateTimeline, xweet_id?: number) => {
     }
 }
 
-const { y } = useWindowScroll()
-const isLoading = ref(false)
+// const { y } = useWindowScroll()
+// const isLoading = ref(false)
 const moreXweet = ref<HTMLElement | null>(null)
-const needsMoreXweet = ref(true)
+// const needsMoreXweet = ref(true)
 const threshold = ref<number | undefined>(0)
 onMounted(() => {
     const moreXweetRect = moreXweet.value?.getBoundingClientRect()
     threshold.value = (moreXweetRect?.top || 0)
 })
 
-watch(y, async (newY, oldY) => {
-    console.log(newY, oldY)
-    if (newY >= (threshold.value ?? 0) && newY !== oldY) {
-        isLoading.value = true
-        start.value+= 10
+// watch(y, async (newY, oldY) => {
+//     if (newY >= (threshold.value ?? 0) && newY !== oldY) {
+//         isLoading.value = true
+//         start.value+= 10
         
-        try {
-            const { data } = (await getTimeline()) || { data: [] }
-            if (data.length > 0) {
-                timeline.push(...data)
-            } else {
-                needsMoreXweet.value = false
-            }
-        } catch (err) {
-            console.error('Error fetching timeline data:', err);
-        } finally {
-            isLoading.value = false;
-        }
-    }
-})
+//         try {
+//             const { data } = (await getTimeline()) || { data: [] }
+//             if (data.length > 0) {
+//                 timeline.push(...data)
+//             } else {
+//                 needsMoreXweet.value = false
+//             }
+//         } catch (err) {
+//             console.error('Error fetching timeline data:', err);
+//         } finally {
+//             isLoading.value = false;
+//         }
+//     }
+// })
 
 const likes = reactive<number[]>([])
 const likesData = (await getLikes()) || { data: [] }
@@ -139,117 +132,92 @@ likesData.data.forEach(like => {
     likes.push(like.xweet_id)
 })
 
-const activeBtn = ref<UserAuth>(UserAuth.SignUp)
-const activateBtn = (btn: UserAuth) => {
-    activeBtn.value = btn
-}
-
 const notification = reactive<{
     isNotified: boolean,
     category: 'success' | 'error' | undefined
+    msg: string
 }>({
     isNotified: false,
-    category: undefined
+    category: undefined,
+    msg: ''
 })
 
-const showNotice = (category: 'success' | 'error') => {
-    console.log(category)
+const showNotice = (category: 'success' | 'error', msg: string) => {
     notification.isNotified = true
     notification.category = category
+    notification.msg = msg
 
     setTimeout(() => {
         notification.isNotified = false
         notification.category = undefined
+        notification.msg = ''
     }, 3000)
 }
 
 const isModalShown = ref(false)
-const showModal = () => {
-    isModalShown.value = true
-}
-const handleClickOutsideModal = () => {
-    isModalShown.value = false
-}
 
 const replyingToXweetId = ref<number | null>(null)
-const showReplyEditor = (xweet_id: number | null) => {
-    replyingToXweetId.value = xweet_id
+const showReplyEditor = (xweetId: number | null) => {
+    replyingToXweetId.value = xweetId
 }
 </script>
 
 <template>
-    <Layout>
-        <template #sidebarLeft>
-            <section 
-                v-if="!authStore.getIsAuthenticated"
-                class="flex-[4] flex flex-col items-center px-2 pt-4 border border-solid border-sky-800 rounded-xl">
-                <Toggle :active-btn="activeBtn" @activate-btn="activateBtn" />
-                <Transition mode="out-in">
-                    <KeepAlive>
-                        <SignupForm :use-title="false" v-if="activeBtn === UserAuth.SignUp" />
-                        <SigninForm :use-title="false" v-else />
-                    </KeepAlive>
-                </Transition>
-            </section>
-            <Profile 
-                v-if="authStore.getIsAuthenticated"
-                :xweet-count="xweetCount"
-                @show-new-xweet="showModal" />
-            <Settings />
-        </template>
-        <NewXweet v-if="authStore.getIsAuthenticated" @increment-xweet-count="() => { xweetCount++ }" />
-        <Sep title="Timeline" is-sticky />
-        <div v-for="xweet in timeline" class="flex flex-col gap-4">
-            <Xweets
-                :key="xweet.xweet_id" 
-                :id="xweet.xweet_id" 
-                :userId="xweet.user_id"
-                :fullname="xweet.full_name" 
-                :username="xweet.username" 
-                :body="xweet.body" 
-                :media="xweet.media"
-                :profilePic="xweet.profile_pic" 
-                :createdAt="xweet.created_at" 
-                :updated-at="xweet.updated_at" 
-                :is-rexweet="false"
-                :is-reply="false"
-                :is-own="xweet.user_id === authStore.getSignedInUserId" 
-                :rexweeted="false"
-                :liked="likes.includes(xweet.xweet_id)"
-                @update-timeline="updateTimeline"
-                @show-notice="showNotice"
-                @reply="showReplyEditor" />
-            <ReplyXweet 
-                :show="replyingToXweetId === xweet.xweet_id"
-                :xweet-id="xweet.xweet_id"
-                @close-reply="() => { replyingToXweetId = null }" />
-        </div>
-        <section ref="moreXweet" class="flex justify-center items-center">
-            <div class="w-1/2 py-2 bg-sky-800 text-sky-400 text-center rounded-full">
-                <font-awesome-icon 
-                    v-if="isLoading"
-                    icon="fa-solid fa-circle-notch" spin />
-                {{ !isLoading ? 'More Xweets' : '' }}
+    <Suspense>
+        <Layout>
+            <template #sidebarLeft>
+                <SidebarLeft />
+            </template>
+            <NewXweet 
+                v-if="authStore.getIsAuthenticated" 
+                @increment-xweet-count="() => { countStore.incrementXweetsCount() }" />
+            <Sep title="Timeline" is-sticky />
+            <div v-for="xweet in timeline" class="flex flex-col gap-4">
+                <Xweets
+                    :key="xweet.xweet_id" 
+                    :id="xweet.xweet_id" 
+                    :userId="xweet.user_id"
+                    :fullname="xweet.full_name" 
+                    :username="xweet.username" 
+                    :body="xweet.body" 
+                    :media="xweet.media"
+                    :profilePic="xweet.profile_pic" 
+                    :createdAt="xweet.created_at" 
+                    :updated-at="xweet.updated_at" 
+                    :is-rexweet="false"
+                    :is-reply="false"
+                    :is-own="xweet.user_id === authStore.getSignedInUserId" 
+                    :rexweeted="false"
+                    :liked="likes.includes(xweet.xweet_id)"
+                    @update-timeline="updateTimeline"
+                    @show-notice="showNotice"
+                    @reply="showReplyEditor" />
+                <ReplyXweet 
+                    :show="replyingToXweetId === xweet.xweet_id"
+                    :xweet-id="xweet.xweet_id"
+                    @close-reply="() => { replyingToXweetId = null }" />
             </div>
-        </section>
-        <Empty 
-            v-if="timeline.length === 0"
-            msg="This is where your timeline would appear" 
-            submsg="Start following some people to get contents to your desire!" />
-        <Modal :show="isModalShown" @clicked-outside="handleClickOutsideModal">
-            <NewXweet in-modal 
-                @increment-xweet-count="() => { xweetCount++ }"
-                @close-modal="() => { isModalShown = false }" />
-        </Modal>
-        <Popup 
-            :show="notification.isNotified" 
-            message="Success!" 
-            :category="notification.category" />
-        <template #sidebarRight>
-            <Suggestions />
-            <Trending />
+            <Empty 
+                v-if="timeline.length === 0"
+                msg="This is where your timeline would appear" 
+                submsg="Start following some people to get contents to your desire!" />
+            <Modal :show="isModalShown" @clicked-outside="() => { isModalShown = false }">
+                <NewXweet in-modal 
+                    @increment-xweet-count="() => { countStore.incrementXweetsCount() }"
+                    @close-modal="() => { isModalShown = false }" />
+            </Modal>
+            <Popup 
+                :show="notification.isNotified" 
+                :message="(notification.msg as string)" 
+                :category="notification.category" />
+            <template #sidebarRight>
+                <SidebarRight />
+            </template>
+        </Layout>
+        <template #fallback>
+            <Skeleton />
         </template>
-    </Layout>
+    </Suspense>
 </template>
 
 <style scoped>

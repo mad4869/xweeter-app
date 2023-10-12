@@ -4,16 +4,18 @@ import { RouterLink } from 'vue-router';
 
 import ImageViewer from './ImageViewer.vue';
 import EditXweet from './EditXweet.vue';
+import useRenderXweet from '@/composables/useRenderXweet';
+import { useCountReplies } from '@/composables/useCount';
+import useTimestamp from '@/composables/useTimestamp';
 import useAuthStore from '@/stores/useAuthStore';
+import { countStore } from '@/stores/useCountStore';
 import { sendReqCookie } from '@/utils/axiosInstances';
 import { RexweetResponse } from '@/types/rexweets';
 import { LikeResponse } from '@/types/likes'
-import useRenderXweet from '@/composables/useRenderXweet';
 import { XweetResponse } from '@/types/xweets';
 import { UpdateTimeline } from '@/types/timeline';
-import useCountReplies from '@/composables/useCountReplies';
 
-const { id, body, media, userId, createdAt, updatedAt, rexweeted, liked } = defineProps<{
+const { id, username, body, media, userId, createdAt, updatedAt, rexweeted, liked } = defineProps<{
     id: number,
     userId: number,
     fullname?: string,
@@ -35,82 +37,42 @@ const { id, body, media, userId, createdAt, updatedAt, rexweeted, liked } = defi
 
 const emit = defineEmits<{
     (e: 'update-timeline', event: UpdateTimeline, xweet_id?: number): void,
-    (e: 'show-notice', category: 'success' | 'error'): void,
+    (e: 'show-notice', category: 'success' | 'error', msg: string): void,
     (e: 'reply', xweet_id: number | null): void
 }>()
 
 const authStore = useAuthStore()
-
-const currentDate = new Date()
-const xweetDate = new Date(createdAt)
-const deltaDate = currentDate.getTime() - xweetDate.getTime()
-
-const seconds = Math.floor(deltaDate / 1000)
-const minutes = Math.floor(seconds / 60)
-const hours = Math.floor(minutes / 60)
-const days = Math.floor(hours / 24)
-const months = Math.floor(days / 30)
-const years = Math.floor(months / 12)
-
-const xweetAge = ref('')
-
-switch(true) {
-    case years > 0:
-        xweetAge.value = `${years} year${years !== 1 ? 's' : ''} ago`
-        break
-    case months > 0:
-        xweetAge.value = `${months} month${months !== 1 ? 's' : ''} ago`
-        break
-    case days > 0:
-        xweetAge.value = `${days} day${days !== 1 ? 's' : ''} ago`
-        break
-    case hours > 0:
-        xweetAge.value = `${hours} hour${hours !== 1 ? 's' : ''} ago`;
-        break;
-    case minutes > 0:
-        xweetAge.value = `${minutes} minute${minutes !== 1 ? 's' : ''} ago`;
-        break;
-    default:
-        xweetAge.value = `${seconds} second${seconds !== 1 ? 's' : ''} ago`;
-        break;
-}
+countStore.repliesCount = await useCountReplies(id) || 0
 
 const isImageEnlarged = ref(false)
 const isRexweeted = ref(rexweeted)
 const isLiked = ref(liked)
 const isEditable = ref(false)
 const isRepliable = ref(false)
-
-const enlargeImage = () => {
-    isImageEnlarged.value = true
-}
-
-const handleClickOutside = (isClickedOutside: boolean) => {
-    if (isClickedOutside) {
-        isImageEnlarged.value = false
-    }
-}
+const xweet = ref(body)
+const xweetText = computed(() => useRenderXweet(xweet.value))
+const xweetMedia = ref(media)
+const xweetTimestamp = ref(useTimestamp(createdAt))
+const updatedDate = ref(useTimestamp(updatedAt))
 
 const rexweet = async () => {
     isRexweeted.value = true
 
     try {
         const { data } = await sendReqCookie.post<RexweetResponse | undefined>(
-            `/api/xweets/${id}/rexweets`, { userId }
+            `/api/xweets/${id}/rexweets`, { userId: authStore.getSignedInUserId }
         )
 
         if (data?.success) {
-            console.log('Success!')
+            emit('show-notice', 'success', `You rexweeted ${username}'s xweet`)
         }
     } catch (err) {
         isRexweeted.value = false
 
+        emit('show-notice', 'error', 'Failed to rexweet: error occured during the process')
+
         console.error(err)
     }
-}
-
-const switchEditable = () => {
-    isEditable.value = !isEditable.value
 }
 
 const switchRepliable = () => {
@@ -123,34 +85,30 @@ const switchRepliable = () => {
     }
 }
 
-const like = async () => {
+const likeXweet = async () => {
     isLiked.value = true
 
     try {
         const { data } = await sendReqCookie.post<LikeResponse | undefined>(
-            `/api/xweets/${id}/likes`, { userId }
+            `/api/xweets/${id}/likes`, { userId: authStore.getSignedInUserId }
         )
 
         if (data?.success) {
-            console.log('Success!')
+            emit('show-notice', 'success', `You liked ${username}'s xweet`)
         }
     } catch (err) {
         isLiked.value = false
+
+        emit('show-notice', 'error', 'Failed to like xweet: error occured during the process')
 
         console.error(err)
     }
 }
 
-const xweet = ref(body)
-const xweetText = computed(() => useRenderXweet(xweet.value))
-const xweetMedia = ref(media)
-const updatedDate = ref(updatedAt)
-const repliesCount = ref(await useCountReplies(id))
-
-const handleUpdateXweet = (newBody: string, newMedia?: string, updateDate?: string) => {
+const updateXweet = (newBody: string, newMedia?: string, updateDate?: string) => {
     xweet.value = newBody
     xweetMedia.value = newMedia
-    updatedDate.value = updateDate
+    updatedDate.value = useTimestamp(updateDate)
     isEditable.value = false
 }
 
@@ -163,13 +121,11 @@ const deleteXweet = async () => {
         )
 
         if (data?.success) {
-            emit('show-notice', 'success')
-        } else {
-            emit('show-notice', 'error')
+            emit('show-notice', 'success', 'Your xweet has been deleted')
         }
     } catch (err) {
         emit('update-timeline', UpdateTimeline.Restore)
-        emit('show-notice', 'error')
+        emit('show-notice', 'error', 'Failed to delete xweet: error occured during the process')
 
         console.error(err)
     }
@@ -195,8 +151,8 @@ const deleteXweet = async () => {
             <div 
                 class="flex justify-between items-center text-xs text-sky-900">
                 <p class="flex items-center gap-1">
-                    <span class="cursor-help" :title="createdAt">{{ xweetAge }}</span>
-                    <em v-if="updatedDate">- Updated at {{ updatedDate }}</em>
+                    <span class="cursor-help" :title="createdAt">{{ xweetTimestamp }}</span>
+                    <em v-if="updatedDate">- Updated {{ updatedDate }}</em>
                 </p>
                 <span class="flex justify-center items-center gap-4 text-sm">
                     <span v-if="authStore.getIsAuthenticated && !isReply" class="flex items-center gap-1">
@@ -213,11 +169,11 @@ const deleteXweet = async () => {
                             title="Cancel reply"
                             @click="switchRepliable" />
                         <router-link 
-                            :to="`/xweets/${id}`" 
-                            v-if="repliesCount" 
+                            :to="`/xweets/${id}`"
+                            v-if="countStore.repliesCount"  
                             class="text-xs text-sky-600" 
                             title="View replies">
-                            {{ repliesCount }}
+                            {{ countStore.repliesCount }}
                         </router-link>
                     </span>
                     <font-awesome-icon 
@@ -232,7 +188,7 @@ const deleteXweet = async () => {
                         icon="fa-regular fa-heart"
                         class="transition-transform cursor-pointer hover:text-sky-600 hover:scale-105"
                         title="Like this xweet"
-                        @click="like" />
+                        @click="likeXweet" />
                     <font-awesome-icon
                         v-if="authStore.getIsAuthenticated && isLiked && !isReply"
                         icon="fa-solid fa-heart"
@@ -243,14 +199,14 @@ const deleteXweet = async () => {
                         icon="fa-regular fa-pen-to-square"
                         class="transition-transform cursor-pointer hover:text-sky-600 hover:scale-105"
                         title="Edit this xweet"
-                        @click.prevent="switchEditable"
+                        @click="() => { isEditable = true }"
                         />
                     <font-awesome-icon
                         v-if="authStore.getIsAuthenticated && isOwn && isEditable"
                         icon="fa-solid fa-pen-to-square"
                         class="cursor-pointer text-sky-600 scale-105"
                         title="Cancel edit"
-                        @click.prevent="switchEditable" />
+                        @click="() => { isEditable = false }" />
                     <font-awesome-icon
                         v-if="authStore.getIsAuthenticated && isOwn"
                         icon="fa-regular fa-trash-can"
@@ -261,8 +217,7 @@ const deleteXweet = async () => {
                 </span>
             </div>
             <div 
-                class="text-sky-800 dark:text-white"
-                :class="xweetMedia ? 'row-start-3 row-span-6' : 'row-start-3 row-span-2'">
+                class="text-sky-800 dark:text-white">
                 <Transition mode="out-in">
                     <div v-if="!isEditable" class="flex flex-col gap-2">
                         <router-link :to="`/xweets/${id}`" class="break-words">
@@ -284,7 +239,7 @@ const deleteXweet = async () => {
                                 alt="Media" 
                                 class="max-h-60 rounded-md cursor-zoom-in" 
                                 loading="lazy"
-                                @click="enlargeImage">
+                                @click="() => { isImageEnlarged = true }">
                         </div>
                     </div>
                     <EditXweet
@@ -293,14 +248,14 @@ const deleteXweet = async () => {
                         :xweet_id="id" 
                         :body="xweet" 
                         :file-url="xweetMedia" 
-                        @update-xweet="handleUpdateXweet" />
+                        @update-xweet="updateXweet" />
                 </Transition>
             </div>
             <div></div>
         </div>
     </section>
     <ImageViewer 
-        v-if="isImageEnlarged" 
+        :show="isImageEnlarged" 
         :username="username!"
         :fullname="fullname!"
         :body="body"
@@ -308,7 +263,7 @@ const deleteXweet = async () => {
         :file-url="xweetMedia!" 
         :is-own="isOwn"
         :is-liked="isLiked"
-        @clicked-outside="handleClickOutside"
+        @clicked-outside="() => { isImageEnlarged = false }"
         />
 </template>
 

@@ -5,6 +5,7 @@ import { TransitionRoot } from '@headlessui/vue';
 import TextEditor from './TextEditor.vue';
 import Toolbar from './Toolbar.vue';
 import useAuthStore from '@/stores/useAuthStore';
+import { countStore } from '@/stores/useCountStore';
 import { sendReqCookie } from '@/utils/axiosInstances'
 import { MAX_CHAR_COUNT } from '@/utils/constants'
 import { RepliesResponse } from '@/types/replies';
@@ -14,6 +15,7 @@ const { xweetId } = defineProps<{
     xweetId: number
 }>()
 const emit = defineEmits<{
+    (e: 'increment-reply-count'): void
     (e: 'close-reply'): void
 }>()
 
@@ -46,9 +48,10 @@ const replyXweet = async () => {
             body.value = ''
             media.value = ''
 
-            setInterval(() => {
+            setTimeout(() => {
                 isSuccess.value = false
                 
+                countStore.incrementRepliesCount()
                 emit('close-reply')
             }, 3000)
         }

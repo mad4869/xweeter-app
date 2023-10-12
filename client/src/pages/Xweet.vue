@@ -10,6 +10,7 @@ import Setting from '@/components/App/Settings/index.vue';
 import Suggestions from '@/components/App/Suggestions/index.vue';
 import Trending from '@/components/App/Trending/index.vue';
 import Xweet from '@/components/App/Xweet/index.vue';
+import ReplyXweet from '@/components/App/Xweet/ReplyXweet.vue';
 import Profile from '@/components/App/Profile/index.vue';
 import Sep from '@/components/App/Sep.vue';
 import useAuthStore from '@/stores/useAuthStore';
@@ -52,6 +53,14 @@ const getReplies = async (): Promise<RepliesResponse | undefined> => {
 
 const xweet = (await getXweet()) || { data: undefined }
 const { data } = (await getReplies()) || { data: [] }
+const isRepliable = ref(false)
+const showReplyEditor = (xweetId: number | null) => {
+    if (!xweetId) {
+        isRepliable.value = false
+    } else {
+        isRepliable.value = true
+    }
+}
 </script>
 
 <template>
@@ -88,7 +97,13 @@ const { data } = (await getReplies()) || { data: [] }
                 :is-reply="false"
                 :is-own="xweet.data?.user_id === authStore.getSignedInUserId" 
                 :rexweeted="false"
-                :liked="false" />
+                :liked="false"
+                @reply="showReplyEditor" />
+            <ReplyXweet
+                class="mt-4" 
+                :show="isRepliable"
+                :xweet-id="(xweet.data?.xweet_id as number)"
+                @close-reply="() => { isRepliable = false }" />
             <Sep v-if="data.length > 0" title="Replies" is-sticky />
             <div class="flex flex-col gap-2">
                 <Xweet v-for="reply in data"
