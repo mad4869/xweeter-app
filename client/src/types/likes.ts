@@ -1,4 +1,4 @@
-interface Likes {
+interface Like {
     like_id: number,
     user_id: number,
     xweet_id: number,
@@ -6,7 +6,7 @@ interface Likes {
     updated_at?: string
 }
 
-interface LikesFull extends Likes {
+interface LikeDetail extends Like {
     body: string,
     media?: string,
     username: string,
@@ -19,13 +19,13 @@ interface LikesFull extends Likes {
 }
 
 type LikeResponse = {
-    data: Likes,
+    data: Like,
     success: boolean
 }
 
-type LikesFullResponse = {
-    data: LikesFull[]
+type LikeDetailResponse = {
+    data: LikeDetail[]
     success: boolean
 }
 
-export { type LikeResponse, type LikesFull, type LikesFullResponse }
+export { type LikeResponse, type LikeDetail, type LikeDetailResponse }

@@ -30,10 +30,6 @@ const getFollow = async (): Promise<FollowResponse | undefined> => {
 }
 
 const followData = await getFollow()
-
-const showNewXweet = () => {
-    emit('show-new-xweet')
-}
 </script>
 
 <template>
@@ -77,7 +73,7 @@ const showNewXweet = () => {
             <button  
                 title="Add New Xweet"
                 class="flex items-center gap-2 px-4 py-2 bg-sky-600 text-white text-lg font-bold rounded-xl transition-colors cursor-pointer hover:bg-sky-800"
-                @click.prevent="showNewXweet">
+                @click="$emit('show-new-xweet')">
                 <font-awesome-icon icon="fa-solid fa-feather" />
                 <span>New Xweet</span>
             </button>

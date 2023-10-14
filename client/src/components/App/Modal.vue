@@ -22,7 +22,7 @@ onClickOutside(modalRef, () => {
     <TransitionRoot
         :show="show"
         as="dialog"
-        class="fixed left-0 right-0 top-0 bottom-0 w-screen h-screen flex justify-center items-center bg-black/60 backdrop-blur-md z-30"
+        class="fixed top-0 bottom-0 left-0 right-0 z-30 flex items-center justify-center w-screen h-screen bg-black/60 backdrop-blur-md"
         enter="transition-transform ease-out"
         enter-from="scale-0"
         enter-to="scale-100"
@@ -31,7 +31,7 @@ onClickOutside(modalRef, () => {
         leave-to="scale-0">
         <section
             ref="modalRef"
-            class="flex justify-center items-center max-w-[75%] max-h-[75%] border border-solid border-white rounded-lg">
+            class="flex justify-center items-center max-w-[75%] max-h-[75%] border border-solid border-white rounded-lg overflow-hidden">
             <slot></slot>
         </section>
     </TransitionRoot>

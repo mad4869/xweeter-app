@@ -8,11 +8,9 @@ import useRenderXweet from '@/composables/useRenderXweet';
 import { useCountReplies } from '@/composables/useCount';
 import useTimestamp from '@/composables/useTimestamp';
 import useAuthStore from '@/stores/useAuthStore';
-import { countStore } from '@/stores/useCountStore';
 import { sendReqCookie } from '@/utils/axiosInstances';
 import { RexweetResponse } from '@/types/rexweets';
 import { LikeResponse } from '@/types/likes'
-import { XweetResponse } from '@/types/xweets';
 import { UpdateTimeline } from '@/types/timeline';
 
 const { id, username, body, media, userId, createdAt, updatedAt, rexweeted, liked } = defineProps<{
@@ -39,10 +37,10 @@ const emit = defineEmits<{
     (e: 'update-timeline', event: UpdateTimeline, xweet_id?: number): void,
     (e: 'show-notice', category: 'success' | 'error', msg: string): void,
     (e: 'reply', xweet_id: number | null): void
+    (e: 'delete', xweet_id: number): void
 }>()
 
 const authStore = useAuthStore()
-countStore.repliesCount = await useCountReplies(id) || 0
 
 const isImageEnlarged = ref(false)
 const isRexweeted = ref(rexweeted)
@@ -53,7 +51,8 @@ const xweet = ref(body)
 const xweetText = computed(() => useRenderXweet(xweet.value))
 const xweetMedia = ref(media)
 const xweetTimestamp = ref(useTimestamp(createdAt))
-const updatedDate = ref(useTimestamp(updatedAt))
+const xweetUpdatedTimestamp = ref(useTimestamp(updatedAt))
+const xweetRepliesCount = ref(await useCountReplies(id))
 
 const rexweet = async () => {
     isRexweeted.value = true
@@ -108,27 +107,8 @@ const likeXweet = async () => {
 const updateXweet = (newBody: string, newMedia?: string, updateDate?: string) => {
     xweet.value = newBody
     xweetMedia.value = newMedia
-    updatedDate.value = useTimestamp(updateDate)
+    xweetUpdatedTimestamp.value = useTimestamp(updateDate)
     isEditable.value = false
-}
-
-const deleteXweet = async () => {
-    emit('update-timeline', UpdateTimeline.Delete, id)
-
-    try {
-        const { data } = await sendReqCookie.delete<XweetResponse | undefined>(
-            `/api/users/${authStore.getSignedInUserId}/xweets/${id}`
-        )
-
-        if (data?.success) {
-            emit('show-notice', 'success', 'Your xweet has been deleted')
-        }
-    } catch (err) {
-        emit('update-timeline', UpdateTimeline.Restore)
-        emit('show-notice', 'error', 'Failed to delete xweet: error occured during the process')
-
-        console.error(err)
-    }
 }
 </script>
 
@@ -152,7 +132,7 @@ const deleteXweet = async () => {
                 class="flex justify-between items-center text-xs text-sky-900">
                 <p class="flex items-center gap-1">
                     <span class="cursor-help" :title="createdAt">{{ xweetTimestamp }}</span>
-                    <em v-if="updatedDate">- Updated {{ updatedDate }}</em>
+                    <em v-if="xweetUpdatedTimestamp">- Updated {{ xweetUpdatedTimestamp }}</em>
                 </p>
                 <span class="flex justify-center items-center gap-4 text-sm">
                     <span v-if="authStore.getIsAuthenticated && !isReply" class="flex items-center gap-1">
@@ -170,10 +150,10 @@ const deleteXweet = async () => {
                             @click="switchRepliable" />
                         <router-link 
                             :to="`/xweets/${id}`"
-                            v-if="countStore.repliesCount"  
+                            v-if="xweetRepliesCount"  
                             class="text-xs text-sky-600" 
                             title="View replies">
-                            {{ countStore.repliesCount }}
+                            {{ xweetRepliesCount }}
                         </router-link>
                     </span>
                     <font-awesome-icon 
@@ -212,7 +192,7 @@ const deleteXweet = async () => {
                         icon="fa-regular fa-trash-can"
                         class="transition-transform cursor-pointer hover:text-red-600 hover:scale-105"
                         title="Delete this xweet"
-                        @click.prevent="deleteXweet"
+                        @click="$emit('delete', id)"
                         />
                 </span>
             </div>

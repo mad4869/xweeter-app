@@ -9,13 +9,6 @@ import useAuthStore from '@/stores/useAuthStore';
 import { AuthResponse, AuthResponseWoUser } from '@/types/auth'
 import { sendReqWoCookie } from '@/utils/axiosInstances';
 
-defineProps({
-    useTitle: {
-        type: Boolean,
-        default: true
-    }
-})
-
 const authStore = useAuthStore()
 
 const userData = reactive({
@@ -87,9 +80,8 @@ const signupAndIn = async () => {
 
 <template>
     <form 
-        class="flex-1 flex flex-col justify-center items-center gap-6 w-full" 
+        class="flex flex-col items-center justify-center flex-1 w-full gap-6" 
         @submit.prevent="signupAndIn">
-        <h3 v-if="useTitle" class="text-2xl text-white font-semibold">Let's get you started!</h3>
         <InputField 
             input-id="fullname" 
             input-name="fullname" 
@@ -130,10 +122,10 @@ const signupAndIn = async () => {
             v-model="v$.confirmPassword.$model" 
             label-text="Confirm Password"
             icon="fa-solid fa-lock" />
-        <div v-if="isError" class="text-red-400 text-xs">{{ errorMsg }}</div>
+        <div v-if="isError" class="text-xs text-red-400">{{ errorMsg }}</div>
         <button 
             type="submit"
-            class="uppercase w-24 py-1 bg-sky-600 text-white rounded-md shadow-sm shadow-slate-900/50 transition-colors duration-200 ease-in hover:bg-sky-800 active:shadow-inner disabled:bg-neutral-800 disabled:text-neutral-600 disabled:shadow-none disabled:cursor-not-allowed"
+            class="w-24 py-1 text-white uppercase transition-colors duration-200 ease-in rounded-md shadow-sm bg-sky-600 shadow-slate-900/50 hover:bg-sky-800 active:shadow-inner disabled:bg-neutral-800 disabled:text-neutral-600 disabled:shadow-none disabled:cursor-not-allowed"
             title="Sign Up"
             :disabled="v$.$invalid">
             <font-awesome-icon icon="fa-solid fa-spinner" spin-pulse v-if="isLoading" />

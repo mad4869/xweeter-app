@@ -11,7 +11,7 @@ defineEmits<{
 
 <template>
     <div 
-        class="flex items-center w-40 text-xs border border-solid border-sky-600 rounded-lg overflow-hidden">
+        class="flex items-center w-40 overflow-hidden text-xs border border-solid rounded-lg border-sky-600">
         <button 
             :class="{ active: activeBtn === UserAuth.SignUp }" 
             @click="$emit('activate-btn', UserAuth.SignUp)">

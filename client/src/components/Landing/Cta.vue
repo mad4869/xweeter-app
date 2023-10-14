@@ -14,9 +14,12 @@ const activateBtn = (btn: UserAuth) => {
 
 <template>
     <section
-        class="row-start-1 row-span-5 col-start-2 flex flex-col justify-center items-center gap-2 px-32 py-8 bg-white/10 backdrop-blur-lg rounded-lg shadow-lg shadow-sky-800">
+        class="flex flex-col items-center justify-center col-start-2 row-span-5 row-start-1 gap-2 px-32 py-8 rounded-lg shadow-lg bg-white/10 backdrop-blur-lg shadow-sky-800">
         <Toggle :active-btn="activeBtn" @activate-btn="activateBtn" />
-        <Transition name="fade" mode="out-in">
+        <h3 class="text-2xl font-semibold text-white">
+            {{ activeBtn === UserAuth.SignUp ? 'Let\'s get you started!' : 'Welcome Back!' }}
+        </h3>
+        <Transition mode="out-in">
             <KeepAlive>
                 <component :is="activeBtn === UserAuth.SignUp ? SignupForm : SigninForm" />
             </KeepAlive>
@@ -25,13 +28,13 @@ const activateBtn = (btn: UserAuth) => {
 </template>
 
 <style scoped>
-.fade-enter-active,
-.fade-leave-active {
+.v-enter-active,
+.v-leave-active {
     @apply transition-all duration-300 ease-out
 }
 
-.fade-enter-from,
-.fade-leave-to {
+.v-enter-from,
+.v-leave-to {
     @apply translate-x-4 opacity-0
 }
 </style>

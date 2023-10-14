@@ -5,6 +5,9 @@ export const countStore = reactive({
     incrementXweetsCount() {
         this.xweetsCount++
     },
+    decrementXweetsCount() {
+        this.xweetsCount--
+    },
     repliesCount: 0,
     incrementRepliesCount() {
         this.repliesCount++

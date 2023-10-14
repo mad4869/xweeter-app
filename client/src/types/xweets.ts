@@ -1,4 +1,4 @@
-type Xweet = {
+type XweetDetail = {
     xweet_id: number,
     user_id: number,
     full_name: string,
@@ -11,12 +11,12 @@ type Xweet = {
 }
 
 type XweetResponse = {
-    data: Xweet,
+    data: XweetDetail,
     success: boolean
 }
 
 type XweetsResponse = {
-    data: Xweet[],
+    data: XweetDetail[],
     success: boolean
 }
 
@@ -26,4 +26,4 @@ enum XweetMode {
     ReplyXweet
 }
 
-export { type Xweet, type XweetResponse, type XweetsResponse, XweetMode}
+export { type XweetDetail, type XweetResponse, type XweetsResponse, XweetMode}

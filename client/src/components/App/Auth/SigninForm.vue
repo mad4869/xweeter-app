@@ -6,13 +6,6 @@ import { required, minLength } from '@vuelidate/validators'
 import InputField from '@/components/App/InputField.vue';
 import useAuthStore from '@/stores/useAuthStore';
 
-defineProps({
-    useTitle: {
-        type: Boolean,
-        default: true
-    }
-})
-
 const authStore = useAuthStore()
 
 const credentials = reactive({
@@ -47,9 +40,8 @@ const signin = async () => {
 
 <template>
     <form 
-        class="flex-1 relative flex flex-col justify-center items-center gap-6 w-full" 
+        class="relative flex flex-col items-center justify-center flex-1 w-full gap-6" 
         @submit.prevent="signin">
-        <h3 v-if="useTitle" class="text-2xl text-white font-semibold">Welcome back!</h3>
         <InputField 
             input-id="username" 
             input-name="username" 
@@ -66,10 +58,10 @@ const signin = async () => {
             v-model="v$.password.$model" 
             label-text="Password" 
             icon="fa-solid fa-lock" />
-        <div v-if="isError" class="text-red-400 text-xs">{{ authStore.getErrorMsg }}</div>
+        <div v-if="isError" class="text-xs text-red-400">{{ authStore.getErrorMsg }}</div>
         <button 
             type="submit"
-            class="uppercase w-24 py-1 bg-sky-600 text-white rounded-md shadow-sm shadow-slate-900/50 transition-colors duration-200 ease-in hover:bg-sky-800 active:shadow-inner disabled:bg-neutral-800 disabled:text-neutral-600 disabled:shadow-none disabled:cursor-not-allowed"
+            class="w-24 py-1 text-white uppercase transition-colors duration-200 ease-in rounded-md shadow-sm bg-sky-600 shadow-slate-900/50 hover:bg-sky-800 active:shadow-inner disabled:bg-neutral-800 disabled:text-neutral-600 disabled:shadow-none disabled:cursor-not-allowed"
             title="Sign In"
             :disabled="v$.$invalid">
             <font-awesome-icon icon="fa-solid fa-spinner" spin-pulse v-if="isLoading" />
