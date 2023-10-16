@@ -114,10 +114,10 @@ const updateXweet = (newBody: string, newMedia?: string, updateDate?: string) =>
 
 <template>
     <section
-        class="px-4 py-4 flex justify-center items-center gap-4 bg-sky-600/10 backdrop-blur-lg border border-solid border-sky-800 rounded-xl">
+        class="px-4 py-4 flex justify-center gap-4 bg-sky-600/10 backdrop-blur-lg border border-solid border-sky-800 rounded-xl">
         <router-link
             :to="`/users/${userId}`"
-            class="flex-1 flex flex-col items-center gap-2 h-full px-4 border-r border-solid border-sky-600/20">
+            class="flex-1 flex flex-col items-center gap-2 px-4 border-r border-solid border-sky-600/20">
             <img 
                 :src="!isRexweet ? profilePic : og_profile_pic"
                 class="w-10 h-10 border border-solid border-sky-800 rounded-full object-cover" 

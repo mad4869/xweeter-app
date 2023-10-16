@@ -35,12 +35,13 @@ const followData = await getFollow()
 <template>
     <section 
         class="flex-[4] grid grid-rows-4 border border-solid border-sky-800 rounded-xl">
-        <div 
-            class="row-start-1 flex justify-center items-center gap-4 w-full border-b border-solid border-sky-600/20">
+        <router-link
+            :to="`users/${authStore.getSignedInUserId}`" 
+            class="flex items-center justify-center w-full row-start-1 gap-4 border-b border-solid border-sky-600/20">
             <div>
                 <img 
                     :src="authStore.getSignedInPfp" 
-                    class="w-12 h-12 border border-solid border-sky-800 rounded-full object-cover" />
+                    class="object-cover w-12 h-12 border border-solid rounded-full border-sky-800" />
             </div>
             <div class="flex flex-col text-sky-600">
                 <span class="font-bold">
@@ -50,29 +51,29 @@ const followData = await getFollow()
                     @{{ authStore.getSignedInUsername }}
                 </span>
             </div>
-        </div>
+        </router-link>
         <div
-            class="row-start-2 flex flex-col justify-center items-center gap-1 w-full text-sky-800 text-lg border-b border-solid border-sky-600/20 dark:text-white">
+            class="flex flex-col items-center justify-center w-full row-start-2 gap-1 text-lg border-b border-solid text-sky-800 border-sky-600/20 dark:text-white">
             <strong class="text-3xl">{{ xweetCount }}</strong>
             <span class="text-white/50">Xweets</span>
         </div>
         <div 
-            class="row-start-3 flex flex-col justify-center items-center w-full text-sky-800 text-lg border-b border-solid border-sky-600/20 dark:text-white">
-            <div class="flex justify-center items-center gap-2 w-full">
+            class="flex flex-col items-center justify-center w-full row-start-3 text-lg border-b border-solid text-sky-800 border-sky-600/20 dark:text-white">
+            <div class="flex items-center justify-center w-full gap-2">
                 <strong class="flex-1 text-right">{{ followData?.following.data.length }}</strong>
                 <span class="flex-[2] text-white/50">Following</span>
             </div>
-            <div class="flex justify-center items-center gap-2 w-full">
+            <div class="flex items-center justify-center w-full gap-2">
                 <strong class="flex-1 text-right">{{ followData?.followers.data.length }}</strong>
                 <span class="flex-[2] text-white/50">
                     {{ followData?.followers.data.length === 1 ? 'Follower' : 'Followers' }}
                 </span>
             </div>
         </div>
-        <div class="row-start-4 flex justify-center items-center">
+        <div class="flex items-center justify-center row-start-4">
             <button  
                 title="Add New Xweet"
-                class="flex items-center gap-2 px-4 py-2 bg-sky-600 text-white text-lg font-bold rounded-xl transition-colors cursor-pointer hover:bg-sky-800"
+                class="flex items-center gap-2 px-4 py-2 text-lg font-bold text-white transition-colors cursor-pointer bg-sky-600 rounded-xl hover:bg-sky-800"
                 @click="$emit('show-new-xweet')">
                 <font-awesome-icon icon="fa-solid fa-feather" />
                 <span>New Xweet</span>

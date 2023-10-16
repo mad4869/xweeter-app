@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import Hashtag from './Hashtag.vue';
 import { sendReqWoCookie } from '@/utils/axiosInstances';
-import { HashtagResponse } from '@/types/hashtags'
+import { TrendingResponse } from '@/types/hashtags'
 
-const getTrending = async (): Promise<HashtagResponse | undefined> => {
+const getTrending = async (): Promise<TrendingResponse | undefined> => {
     try {
-        const { data } = await sendReqWoCookie.get('/api/hashtags')
+        const { data } = await sendReqWoCookie.get('/api/trending')
         if (data) {
             return data
         }
@@ -19,16 +19,17 @@ const { data } = (await getTrending()) || { data: [] }
 
 <template>
     <section 
-        class="flex-1 flex flex-col gap-4 border border-solid border-sky-800 rounded-xl overflow-hidden">
-        <div class="flex justify-between items-center px-4 py-2 bg-sky-600">
-            <span class="text-white font-semibold">Trending</span>
+        class="flex flex-col flex-1 gap-4 overflow-hidden border border-solid border-sky-800 rounded-xl">
+        <div class="flex items-center justify-between px-4 py-2 bg-sky-600">
+            <span class="font-semibold text-white">Trending</span>
             <font-awesome-icon icon="fa-solid fa-globe" class="text-white" />
         </div>
         <div class="overflow-scroll">
             <Hashtag 
                 v-for="hashtag in data" 
                 :key="hashtag.hashtag_id" 
-                :body="hashtag.body" />
+                :body="hashtag.body"
+                :xweet-count="hashtag.xweet_count" />
         </div>
     </section>
 </template>

@@ -1,11 +1,20 @@
-type Hashtags = {
-    hashtag_id: number,
+interface Hashtags {
+    hashtag_id: number
     body: string
 }
 
+interface Trending extends Hashtags {
+    xweet_count: number
+}
+
 type HashtagResponse = {
-    success: boolean,
+    success: boolean
     data: Hashtags[]
 }
 
-export { type HashtagResponse }
+type TrendingResponse = {
+    success: boolean
+    data: Trending[]
+}
+
+export { type HashtagResponse, type TrendingResponse }

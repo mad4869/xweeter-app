@@ -22,7 +22,7 @@ const icons = {
     <TransitionRoot
         :show="show"
         as="div" 
-        class="fixed left-1/2 bottom-4 -translate-x-1/2 flex items-center gap-4 px-4 py-2 text-white rounded-md" 
+        class="fixed flex items-center gap-4 px-4 py-2 text-white -translate-x-1/2 rounded-md left-1/2 bottom-4" 
         :class="category ? colors[category] : ''"
         enter="transition-all duration-200 ease-out"
         enter-from="opacity-0 translate-y-4"

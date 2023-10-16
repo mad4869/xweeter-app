@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref, reactive } from 'vue';
-import { useWindowScroll } from '@vueuse/core';
+import { ref, reactive, watch } from 'vue';
+import { useScroll } from '@vueuse/core';
 
 import Xweet from '@/components/App/Xweet/index.vue';
 import NewXweet from '@/components/App/Xweet/NewXweet.vue';
@@ -9,6 +9,7 @@ import MoreXweet from '@/components/App/Xweet/MoreXweet.vue';
 import Empty from '@/components/App/Empty.vue';
 import Sep from '@/components/App/Sep.vue';
 import Modal from '@/components/App/Modal.vue';
+import ConfirmDialog from '@/components/App/ConfirmDialog.vue';
 import useAuthStore from '@/stores/useAuthStore';
 import { countStore } from '@/stores/useCountStore'
 import { XweetDetail, XweetResponse, XweetsResponse } from '@/types/xweets';
@@ -18,7 +19,7 @@ import socket from '@/utils/socket';
 import { sendReqCookie, sendReqWoCookie } from '@/utils/axiosInstances';
 
 defineProps<{
-    showNotice: (category: 'success' | 'error', msg: string) => void
+    showNotice: (category: 'success' | 'error', msg: string) => void;
 }>()
 const emit = defineEmits<{
     (e: 'show-notice', category: 'success' | 'error', msg: string): void
@@ -90,39 +91,29 @@ likesData.data.forEach(like => {
 
 const xweetToReply = ref<number | null>()
 const xweetToDelete = ref<number | null>()
-
-const moreXweet = ref<HTMLElement | null>(null)
-// const needsMoreXweet = ref(true)
-const threshold = ref<number | undefined>(0)
-const { y } = useWindowScroll()
-
-const moreXweetRect = moreXweet.value?.getBoundingClientRect()
-threshold.value = (moreXweetRect?.top || 0)
-
-console.log(threshold.value, y.value)
-
-// watch(y, async (newY, oldY) => {
-//     if (newY >= (threshold.value ?? 0) && newY !== oldY) {
-//         isLoading.value = true
-//         start.value+= 10
-        
-//         try {
-//             const { data } = (await getTimeline()) || { data: [] }
-//             if (data.length > 0) {
-//                 timeline.push(...data)
-//             } else {
-//                 needsMoreXweet.value = false
-//             }
-//         } catch (err) {
-//             console.error('Error fetching timeline data:', err);
-//         } finally {
-//             isLoading.value = false;
-//         }
-//     }
-// })
 const showModal = ref(false)
 const isLoading = ref(false)
 const isError = ref(false)
+
+const el = ref<HTMLElement | null>(null)
+const { y, arrivedState } = useScroll(el)
+const needMoreXweet = ref(true)
+
+watch(() => arrivedState.bottom, async () => {
+    if (needMoreXweet) {
+        start.value+= 10
+        isLoading.value = true
+    
+        const newTimeline = (await getTimeline()) || { data: [] }
+        isLoading.value = false
+    
+        if (newTimeline.data.length === 0) {
+            needMoreXweet.value = false
+        } else {
+            timeline.push(...newTimeline.data)
+        }
+    }
+})
 
 const deleteXweet = async (xweet_id?: number | null) => {
     isLoading.value = true
@@ -156,59 +147,59 @@ const deleteXweet = async (xweet_id?: number | null) => {
     <NewXweet 
         v-if="authStore.getIsAuthenticated" 
         @increment-xweet-count="() => { countStore.incrementXweetsCount() }" />
-    <Sep title="Timeline" is-sticky />
-    <div v-for="xweet in timeline" class="flex flex-col gap-4">
-        <Xweet
-            :key="xweet.xweet_id" 
-            :id="xweet.xweet_id" 
-            :userId="xweet.user_id"
-            :fullname="xweet.full_name" 
-            :username="xweet.username" 
-            :body="xweet.body" 
-            :media="xweet.media"
-            :profilePic="xweet.profile_pic" 
-            :createdAt="xweet.created_at" 
-            :updated-at="xweet.updated_at" 
-            :is-rexweet="false"
-            :is-reply="false"
-            :is-own="xweet.user_id === authStore.getSignedInUserId" 
-            :rexweeted="false"
-            :liked="likes.includes(xweet.xweet_id)"
-            @update-timeline="updateTimeline"
-            @show-notice="showNotice"
-            @reply="(xweetId) => { xweetToReply = xweetId }"
-            @delete="(xweetId) => { showModal = true; xweetToDelete = xweetId }" />
-        <ReplyXweet 
-            :show="xweetToReply === xweet.xweet_id"
-            :xweet-id="xweet.xweet_id"
-            @close-reply="() => { xweetToReply = null }" />
-    </div>
-    <MoreXweet />
-    <Empty 
-        v-if="timeline.length === 0"
-        msg="This is where your timeline would appear" 
-        submsg="Start following some people to get contents to your desire!" />
+    <Sep title="Timeline" is-sticky class="cursor-pointer" @click="() => { y = 0 }" />
+    <section class="flex flex-col max-h-screen gap-4 overflow-y-scroll scrollbar-hide" ref="el">
+        <div v-for="xweet in timeline">
+            <Xweet
+                :key="xweet.xweet_id" 
+                :id="xweet.xweet_id" 
+                :userId="xweet.user_id"
+                :fullname="xweet.full_name" 
+                :username="xweet.username" 
+                :body="xweet.body" 
+                :media="xweet.media"
+                :profilePic="xweet.profile_pic" 
+                :createdAt="xweet.created_at" 
+                :updated-at="xweet.updated_at" 
+                :is-rexweet="false"
+                :is-reply="false"
+                :is-own="xweet.user_id === authStore.getSignedInUserId" 
+                :rexweeted="false"
+                :liked="likes.includes(xweet.xweet_id)"
+                @update-timeline="updateTimeline"
+                @show-notice="showNotice"
+                @reply="(xweetId) => { xweetToReply = xweetId }"
+                @delete="(xweetId) => { showModal = true; xweetToDelete = xweetId }" />
+            <ReplyXweet 
+                :show="xweetToReply === xweet.xweet_id"
+                :xweet-id="xweet.xweet_id"
+                @close-reply="() => { xweetToReply = null }" />
+        </div>
+        <MoreXweet v-if="needMoreXweet" :is-loading="isLoading" />
+        <Empty 
+            v-if="timeline.length === 0"
+            msg="This is where your timeline would appear" 
+            submsg="Start following some people to get contents to your desire!" />
+    </section>
     <Modal :show="showModal" @clicked-outside="() => { showModal = false }">
-        <section class="w-[50vw] h-36 flex flex-col items-center gap-4  bg-sky-800/20 text-white">
-            <div class="w-full py-2 font-semibold text-center bg-red-600/60">
-                <font-awesome-icon icon="fa-solid fa-spinner" spin-pulse v-if="isLoading" />
-                <p>{{ isLoading ? '' : isError ? 'Failed to delete xweet. Please try again.' : 'Delete Xweet' }}</p>
-            </div>
-            <p>Are you sure you want to delete this xweet?</p>
-            <div class="flex items-center justify-center gap-4">
-                <button 
-                    class="w-16 py-1 rounded-md bg-red-600/60 hover:bg-red-600 active:shadow-inner" 
-                    title="Confirm delete" 
-                    @click="deleteXweet(xweetToDelete)">
-                    Yes
-                </button>
-                <button 
-                    class="w-16 py-1 border border-solid rounded-md border-red-600/60 hover:border-red-600" 
-                    title="Cancel"
-                    @click="() => { showModal = false }">
-                    No
-                </button>
-            </div>
-        </section>
+        <ConfirmDialog
+            title="Delete Xweet"
+            confirm-msg="Are you sure you want to delete this xweet?"
+            :confirm-fn="deleteXweet"
+            :payload="xweetToDelete"
+            error-msg="Failed to delete xweet. Please try again"
+            :is-loading="isLoading"
+            :is-error="isError"
+            @close-modal="() => { showModal = false }" />
     </Modal>
 </template>
+
+<style scoped>
+.scrollbar-hide::-webkit-scrollbar {
+    display: none;
+}
+.scrollbar-hide {
+    -ms-overflow-style: none; 
+    scrollbar-width: none;
+}
+</style>

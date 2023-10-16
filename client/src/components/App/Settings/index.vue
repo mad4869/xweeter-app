@@ -7,9 +7,9 @@ const isDark = useDark()
 
 <template>
     <section 
-        class="flex-1 flex flex-col gap-4 border border-solid border-sky-800 rounded-xl overflow-hidden">
-        <div class="flex justify-between items-center px-4 py-2 bg-sky-600">
-            <span class="text-white font-semibold">Settings</span>
+        class="flex flex-col flex-1 gap-4 overflow-hidden border border-solid border-sky-800 rounded-xl">
+        <div class="flex items-center justify-between px-4 py-2 bg-sky-600">
+            <span class="font-semibold text-white">Settings</span>
             <font-awesome-icon icon="fa-solid fa-gear" class="text-white" />
         </div>
         <SwitchGroup>
@@ -19,9 +19,9 @@ const isDark = useDark()
                 </SwitchLabel>
                 <Switch 
                     v-model="isDark"
-                    class="relative inline-flex h-6 w-11 items-center bg-slate-400 rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-sky-800 focus:ring-offset-2 dark:bg-sky-600">
+                    class="relative inline-flex items-center h-6 transition-colors rounded-full w-11 bg-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-800 focus:ring-offset-2 dark:bg-sky-600">
                     <span 
-                        class="inline-block h-4 w-4 transform translate-x-1 rounded-full bg-white transition-transform dark:translate-x-6" />
+                        class="inline-block w-4 h-4 transition-transform transform translate-x-1 bg-white rounded-full dark:translate-x-6" />
                 </Switch>
                 <SwitchLabel passive>
                     <font-awesome-icon icon="fa-regular fa-moon" class="text-sky-800 dark:text-white" />
