@@ -61,6 +61,9 @@ def access_likes_by_xweet(xweet_id):
 @routes.route("/users/<int:user_id>/likes", methods=["GET"], strict_slashes=False)
 # @jwt_required()
 def get_likes_by_user(user_id):
+    start = int(request.args.get("start", 0))
+    size = int(request.args.get("size", 10))
+
     likes = db.session.execute(
         db.select(Like)
         .join(Xweet, Like.xweet_id == Xweet.xweet_id)
@@ -86,4 +89,10 @@ def get_likes_by_user(user_id):
         )
         data.append(serial)
 
-    return jsonify({"success": True, "data": data}), 200
+    sorted_data = sorted(data, key=lambda xweet: xweet["created_at"], reverse=True)
+
+    end = min(start + size, len(sorted_data))
+
+    sliced_data = sorted_data[start:end]
+
+    return jsonify({"success": True, "data": sliced_data}), 200

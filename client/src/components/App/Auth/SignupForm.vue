@@ -53,7 +53,7 @@ const signupAndIn = async () => {
                 isError.value = true
                 errorMsg.value = authStore.getErrorMsg
 
-                setInterval(() => {
+                setTimeout(() => {
                     isError.value = false
                     errorMsg.value = ''
                 }, 3000)
@@ -69,7 +69,7 @@ const signupAndIn = async () => {
             const data = err.response.data as AuthResponseWoUser
             errorMsg.value = data.message
 
-            setInterval(() => {
+            setTimeout(() => {
                 isError.value = false
                 errorMsg.value = ''
             }, 3000)

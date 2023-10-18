@@ -38,7 +38,7 @@ def access_xweet(xweet_id):
 @routes.route(
     "/users/<int:user_id>/xweets", methods=["GET", "POST"], strict_slashes=False
 )
-@jwt_required()
+# @jwt_required()
 def access_xweets_by_user(user_id):
     if request.method == "POST":
         data = request.get_json()

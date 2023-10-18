@@ -6,15 +6,11 @@ import SigninForm from '../Auth/SigninForm.vue';
 import SignupForm from '../Auth/SignupForm.vue';
 import Profile from '@/components/App/Profile/index.vue'
 import Settings from '@/components/App/Settings/index.vue'
+import Modal from '@/components/App/Modal.vue';
+import NewXweet from '@/components/App/Xweet/NewXweet.vue';
 import useAuthStore from '@/stores/useAuthStore';
 import { countStore } from '@/stores/useCountStore';
 import { UserAuth } from '@/types/auth';
-
-defineProps<{
-    profileProps: {
-        showNewXweet: () => void
-    }
-}>()
 
 const authStore = useAuthStore()
 
@@ -22,6 +18,8 @@ const activeBtn = ref<UserAuth>(UserAuth.SignUp)
 const activateBtn = (btn: UserAuth) => {
     activeBtn.value = btn
 }
+
+const showModal = ref(false)
 </script>
 
 <template>
@@ -37,8 +35,12 @@ const activateBtn = (btn: UserAuth) => {
     </section>
     <Profile 
         v-else
-        :xweet-count="countStore.xweetsCount"
-        @show-new-xweet="profileProps.showNewXweet" />
+        @show-new-xweet="() => { showModal = true }" />
+    <Modal :show="showModal" @clicked-outside="() => { showModal = false }">
+        <NewXweet in-modal 
+            @increment-xweet-count="() => { countStore.incrementXweetsCount() }"
+            @close-modal="() => { showModal = false }" />
+    </Modal>
     <Settings />
 </template>
 

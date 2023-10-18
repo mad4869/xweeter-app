@@ -5,8 +5,9 @@ import useAuthStore from '@/stores/useAuthStore';
 import { sendReqCookie } from '@/utils/axiosInstances';
 import { UserResponse } from '@/types/users'
 import { ToFollowResponse } from '@/types/follows'
+import useFile from '@/composables/useFile'
 
-const { userId, profilePic, headerPic } = defineProps<{
+const { userId, profilePic, headerPic, isFollowed } = defineProps<{
     isOwn: boolean,
     userId?: number,
     fullname?: string,
@@ -21,7 +22,7 @@ const { userId, profilePic, headerPic } = defineProps<{
 }>()
 
 const emit = defineEmits<{
-    (e: 'change-profile-pic', isSuccess: boolean, isError: boolean, NotifMsg: string): void,
+    (e: 'change-profile-pic', isSuccess: boolean, isError: boolean, notifMsg: string): void,
     (e: 'show-edit-profile'): void
 }>()
 
@@ -29,122 +30,63 @@ const authStore = useAuthStore()
 
 const pfp = ref(profilePic)
 const header = ref(headerPic)
+const userFollowed = ref(isFollowed)
 const isSuccess = ref(false)
 const isError = ref(false)
 const isLoading = ref(false)
 const isEditable = ref(false)
-const notifMsg = ref('')
 
-const managePfp = (e: Event) => {
-    const target = e.target as HTMLInputElement
-    const file = target.files?.[0]
-
-    if (file) {
-        isEditable.value = true
-
-        const reader = new FileReader()
-
-        reader.onload = (e: ProgressEvent<FileReader>) => {
-            if (e.target instanceof FileReader) {
-                pfp.value = e.target.result as string
-            }
-        }
-
-        reader.readAsDataURL(file)
-    }
+const managePfp = async (e: Event) => {
+    isEditable.value = true
+    pfp.value = await useFile(e)
 }
 
-const manageHeader = (e: Event) => {
-    const target = e.target as HTMLInputElement
-    const file = target.files?.[0]
-
-    if (file) {
-        isEditable.value = true
-
-        const reader = new FileReader()
-
-        reader.onload = (e: ProgressEvent<FileReader>) => {
-            if (e.target instanceof FileReader) {
-                header.value = e.target.result as string
-            }
-        }
-
-        reader.readAsDataURL(file)
-    }
+const manageHeader = async (e: Event) => {
+    isEditable.value = true
+    header.value = await useFile(e)
 }
 
-// const changeProfilePic = async () => {
-//     isLoading.value = true
-
-//     try {
-//         const { data } = await sendReqCookie.put<UserResponse | undefined>(
-//             `/api/users/${userId}`, { profile_pic: pfp.value }
-//         )
-
-//         if (data?.success) {
-//             isLoading.value = false
-//             isSuccess.value = true
-//             isEditable.value = false
-//             notifMsg.value = 'Your profile picture has been changed'
-//             emit('change-profile-pic', isSuccess.value, isError.value, notifMsg.value)
-
-//             setTimeout(() => {
-//                 isSuccess.value = false
-//             }, 3000)
-//         }
-//     } catch (err) {
-//         isLoading.value = false
-//         isEditable.value = false
-//         isError.value = true
-//         pfp.value = profilePic
-//         notifMsg.value = 'Error occured during process. Please try again.'
-//         emit('change-profile-pic', isSuccess.value, isError.value, notifMsg.value)
-
-//         setTimeout(() => {
-//             isError.value = false
-//         }, 3000)
-
-//         console.error(err)
-//     }
-// }
-
-const changeHeader = async () => {
+const changeImage = async () => {
     isLoading.value = true
 
+    let payload
+
     try {
+        if (pfp.value !== profilePic && header.value !== headerPic) {
+            payload = { profile_pic: pfp.value, header_pic: header.value }
+        } else if (pfp.value !== profilePic) {
+            payload = { profile_pic: pfp.value }
+        } else {
+            payload = { header_pic: header.value }
+        }
+
         const { data } = await sendReqCookie.put<UserResponse | undefined>(
-            `/api/users/${userId}`, { header_pic: header.value }
+            `/api/users/${userId}`, payload
         )
 
         if (data?.success) {
-            // isLoading.value = false
+            isLoading.value = false
             isSuccess.value = true
             isEditable.value = false
-            notifMsg.value = 'Your profile picture has been changed'
-            emit('change-profile-pic', isSuccess.value, isError.value, notifMsg.value)
+            emit('change-profile-pic', isSuccess.value, isError.value, 'Your picture has been changed')
 
             setTimeout(() => {
                 isSuccess.value = false
             }, 3000)
         }
     } catch (err) {
-        // isLoading.value = false
-        // isEditable.value = false
-        // isError.value = true
-        // pfp.value = profilePic
-        // notifMsg.value = 'Error occured during process. Please try again.'
-        // emit('change-profile-pic', isSuccess.value, isError.value, notifMsg.value)
+        isLoading.value = false
+        isEditable.value = false
+        isError.value = true
+        pfp.value = profilePic
+        emit('change-profile-pic', isSuccess.value, isError.value, 'Error occured during process. Please try again.')
 
-        // setTimeout(() => {
-        //     isError.value = false
-        // }, 3000)
+        setTimeout(() => {
+            isError.value = false
+        }, 3000)
 
         console.error(err)
     }
-}
-
-const showEditProfile = () => {
-    emit('show-edit-profile')
 }
 
 const follow = async () => {
@@ -157,8 +99,11 @@ const follow = async () => {
 
         if (data?.success) {
             isLoading.value = false
+            userFollowed.value = true
         }
     } catch (err) {
+        isLoading.value = false
+
         console.error(err)
     }
 }
@@ -212,11 +157,11 @@ const follow = async () => {
                     v-if="isOwn"
                     class="bg-sky-600 px-4 py-1 text-white font-medium border-2 border-solid border-sky-800 rounded-md hover:bg-sky-800 hover:border-sky-600"
                     title="Edit your profile"
-                    @click.prevent="showEditProfile">
+                    @click="$emit('show-edit-profile')">
                     Edit
                 </button>
                 <button
-                    v-else-if="!isOwn && !isFollowed"
+                    v-else-if="!isOwn && !userFollowed"
                     class="bg-sky-600 px-4 py-1 text-white font-medium border-2 border-solid border-sky-800 rounded-md hover:bg-sky-800 hover:border-sky-600"
                     title="Follow this user"
                     @click.prevent="follow">
@@ -224,7 +169,7 @@ const follow = async () => {
                     {{ !isLoading ? 'Follow' : '' }}
                 </button>
                 <div
-                    v-else-if="!isOwn && isFollowed"
+                    v-else-if="!isOwn && userFollowed"
                     class="bg-slate-600 px-4 py-1 text-slate-400 font-medium rounded-md cursor-not-allowed"
                     title="You already followed this user">
                     Followed
@@ -233,7 +178,7 @@ const follow = async () => {
                     v-if="isEditable"
                     class="bg-sky-600 px-2 py-1 text-white font-medium border-2 border-solid border-sky-800 rounded-full"
                     title="Confirm change"
-                    @click.prevent="changeHeader">
+                    @click="changeImage">
                     <font-awesome-icon icon="fa-solid fa-check" class="text-sm" />
                 </button>
             </div>

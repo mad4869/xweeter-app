@@ -7,10 +7,10 @@ import { TransitionRoot } from '@headlessui/vue';
 
 defineProps<{
     show: boolean
-    username: string
-    fullname: string
-    profilePic: string
-    body: string
+    username?: string
+    fullname?: string
+    profilePic?: string
+    body?: string
     fileUrl?: string
     isOwn: boolean
     isLiked: boolean
@@ -33,7 +33,7 @@ onClickOutside(imgRef, () => {
     <TransitionRoot
         :show="show"
         as="div" 
-        class="fixed left-0 right-0 top-0 bottom-0 flex flex-col justify-center items-center gap-4 bg-black/5 backdrop-blur-md z-30"
+        class="fixed top-0 bottom-0 left-0 right-0 z-30 flex flex-col items-center justify-center gap-4 bg-black/5 backdrop-blur-md"
         enter="transition-opacity ease-out"
         enter-from="opacity-0"
         enter-to="opacity-100"
@@ -46,7 +46,7 @@ onClickOutside(imgRef, () => {
                 alt="Image" 
                 loading="lazy" 
                 class="max-w-[75vw] max-h-[75vh] border-4 border-solid border-white shadow-xl" />
-            <div class="absolute items-center -right-4 -top-4 w-8 h-8 px-2 py-2 bg-white/50 rounded-full hidden group-hover:flex hover:bg-white">
+            <div class="absolute items-center hidden w-8 h-8 px-2 py-2 rounded-full -right-4 -top-4 bg-white/50 group-hover:flex hover:bg-white">
                 <a :href="fileUrl" class="text-sky-800" title="Download this image" download>
                     <font-awesome-icon 
                         icon="fa-solid fa-download" />
@@ -55,20 +55,20 @@ onClickOutside(imgRef, () => {
         </div>
         <div 
             class="flex justify-center items-center gap-4 w-[50vw] px-8 py-2 bg-slate-900/70 text-white rounded-lg">
-            <aside class="flex justify-center items-center">
+            <aside class="flex items-center justify-center">
                 <img 
                     :src="profilePic" 
                     alt="Profile Pic"
-                    class="w-10 h-10 border border-solid border-sky-800 rounded-full" 
+                    class="object-cover w-10 h-10 border border-solid rounded-full border-sky-800" 
                     loading="lazy">
             </aside>
-            <div class="flex-1 flex flex-col items-center">
-                <div class="flex justify-between items-center w-full">
+            <div class="flex flex-col items-center flex-1">
+                <div class="flex items-center justify-between w-full">
                     <div class="flex gap-2 text-sm text-sky-400">
                         <span class="font-bold">{{ fullname }}</span>
                         <span>@{{ username }}</span>
                     </div>
-                    <div class="flex justify-center items-center gap-4">
+                    <div class="flex items-center justify-center gap-4">
                         <font-awesome-icon 
                             v-if="authStore.getIsAuthenticated && !isOwn"
                             icon="fa-solid fa-retweet" 
@@ -82,7 +82,7 @@ onClickOutside(imgRef, () => {
                         <font-awesome-icon
                             v-if="authStore.getIsAuthenticated && isLiked"
                             icon="fa-solid fa-heart"
-                            class="text-sm transition-transform cursor-pointer text-sky-600 scale-105"
+                            class="text-sm transition-transform scale-105 cursor-pointer text-sky-600"
                             title="Unlike Xweet" />
                         <font-awesome-icon
                             v-if="authStore.getIsAuthenticated && isOwn"

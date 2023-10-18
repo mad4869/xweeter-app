@@ -14,22 +14,22 @@ import { LikeResponse } from '@/types/likes'
 import { UpdateTimeline } from '@/types/timeline';
 
 const { id, username, body, media, userId, createdAt, updatedAt, rexweeted, liked } = defineProps<{
-    id: number,
-    userId: number,
-    fullname?: string,
-    username?: string,
-    body: string,
-    media?: string,
-    profilePic?: string,
-    createdAt: string,
-    updatedAt?: string,
-    og_username?: string,
-    og_fullname?: string,
-    og_profile_pic?: string,
-    isRexweet: boolean,
-    isReply: boolean,
-    isOwn: boolean,
-    rexweeted: boolean,
+    id: number
+    userId: number
+    fullname?: string
+    username?: string
+    body: string
+    media?: string
+    profilePic?: string
+    createdAt: string
+    updatedAt?: string
+    ogUserId?: number
+    ogUsername?: string
+    ogFullname?: string
+    ogProfilePic?: string
+    isRexweet: boolean
+    isOwn: boolean
+    rexweeted: boolean
     liked: boolean
 }>()
 
@@ -116,15 +116,15 @@ const updateXweet = (newBody: string, newMedia?: string, updateDate?: string) =>
     <section
         class="px-4 py-4 flex justify-center gap-4 bg-sky-600/10 backdrop-blur-lg border border-solid border-sky-800 rounded-xl">
         <router-link
-            :to="`/users/${userId}`"
+            :to="`/users/${!isRexweet ? userId : ogUserId}`"
             class="flex-1 flex flex-col items-center gap-2 px-4 border-r border-solid border-sky-600/20">
             <img 
-                :src="!isRexweet ? profilePic : og_profile_pic"
+                :src="!isRexweet ? profilePic : ogProfilePic"
                 class="w-10 h-10 border border-solid border-sky-800 rounded-full object-cover" 
                 loading="lazy" />
             <div class="flex flex-col justify-center items-center text-center">
-                <p class=" text-sky-600 font-semibold">{{ !isRexweet ? fullname : og_fullname }}</p>
-                <p class="text-sm text-sky-800">@{{ !isRexweet ? username : og_username }}</p>
+                <p class=" text-sky-600 font-semibold">{{ !isRexweet ? fullname : ogFullname }}</p>
+                <p class="text-sm text-sky-800">@{{ !isRexweet ? username : ogUsername }}</p>
             </div>
         </router-link>
         <div class="flex flex-col gap-2 w-4/5 h-full">
@@ -135,7 +135,7 @@ const updateXweet = (newBody: string, newMedia?: string, updateDate?: string) =>
                     <em v-if="xweetUpdatedTimestamp">- Updated {{ xweetUpdatedTimestamp }}</em>
                 </p>
                 <span class="flex justify-center items-center gap-4 text-sm">
-                    <span v-if="authStore.getIsAuthenticated && !isReply" class="flex items-center gap-1">
+                    <span v-if="authStore.getIsAuthenticated" class="flex items-center gap-1">
                         <font-awesome-icon
                             v-if="!isRepliable"
                             icon="fa-regular fa-comment"
@@ -157,20 +157,20 @@ const updateXweet = (newBody: string, newMedia?: string, updateDate?: string) =>
                         </router-link>
                     </span>
                     <font-awesome-icon 
-                        v-if="authStore.getIsAuthenticated && !isOwn && !isReply"
+                        v-if="authStore.getIsAuthenticated && !isOwn"
                         icon="fa-solid fa-retweet" 
                         class="transition-transform cursor-pointer hover:text-sky-600 hover:scale-105"
                         :class="isRexweeted ? 'text-sky-600 scale-105' : ''"
                         title="Rexweet"
                         @click="rexweet" />
                     <font-awesome-icon 
-                        v-if="authStore.getIsAuthenticated && !isLiked && !isReply"
+                        v-if="authStore.getIsAuthenticated && !isLiked"
                         icon="fa-regular fa-heart"
                         class="transition-transform cursor-pointer hover:text-sky-600 hover:scale-105"
                         title="Like this xweet"
                         @click="likeXweet" />
                     <font-awesome-icon
-                        v-if="authStore.getIsAuthenticated && isLiked && !isReply"
+                        v-if="authStore.getIsAuthenticated && isLiked"
                         icon="fa-solid fa-heart"
                         class="cursor-pointer text-sky-600 scale-105"
                         title="Unlike this xweet" />

@@ -31,7 +31,7 @@ const signin = async () => {
 
     if (!authStore.getIsAuthenticated) {
         isError.value = true
-        setInterval(() => {
+        setTimeout(() => {
             isError.value = false
         }, 3000)
     }

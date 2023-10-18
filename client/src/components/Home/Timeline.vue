@@ -1,18 +1,17 @@
 <script setup lang="ts">
 import { ref, reactive, watch } from 'vue';
-import { useRoute } from 'vue-router';
 import { useScroll } from '@vueuse/core';
 
 import Xweet from '@/components/App/Xweet/index.vue';
 import ReplyXweet from '@/components/App/Xweet/ReplyXweet.vue';
 import MoreXweet from '@/components/App/Xweet/MoreXweet.vue';
 import Empty from '@/components/App/Empty.vue';
-// import Modal from '@/components/App/Modal.vue';
-// import ConfirmDialog from '@/components/App/ConfirmDialog.vue';
+import Modal from '@/components/App/Modal.vue';
+import ConfirmDialog from '@/components/App/ConfirmDialog.vue';
 import useAuthStore from '@/stores/useAuthStore';
-// import { countStore } from '@/stores/useCountStore'
-// import { XweetResponse } from '@/types/xweets';
-import { ProfileTimelineResponse, UpdateTimeline } from '@/types/timeline';
+import { countStore } from '@/stores/useCountStore'
+import { XweetResponse, XweetsResponse } from '@/types/xweets';
+import { UpdateTimeline } from '@/types/timeline';
 import { LikeDetailResponse } from '@/types/likes'
 import { RexweetDetailResponse } from '@/types/rexweets'
 import socket from '@/utils/socket';
@@ -28,16 +27,21 @@ const emit = defineEmits<{
 
 const authStore = useAuthStore()
 
-const route = useRoute()
-
 const start = ref(0)
 const getTimeline = async () => {
     try {
-        const { data } = await sendReqWoCookie.get<ProfileTimelineResponse | undefined>(
-            `/api/users/${route.params.id}/profile-timeline?start=${start.value}`
-        )
-        if (data?.success) {
-            return data.data
+        if (authStore.getIsAuthenticated) {
+            const { data } = await sendReqCookie.get<XweetsResponse | undefined>(
+                `/api/users/${authStore.getSignedInUserId}/timeline?start=${start.value}`
+            )
+            if (data?.success) {
+                return data.data
+            }
+        } else {
+            const { data } = await sendReqWoCookie.get<XweetsResponse | undefined>(`/api/timeline`)
+            if (data?.success) {
+                return data.data
+            }
         }
     } catch (err) {
         console.error(err)
@@ -103,37 +107,37 @@ const xweetToReply = ref<number | null>()
 const xweetToDelete = ref<number | null>()
 const showModal = ref(false)
 const isLoading = ref(false)
-// const isError = ref(false)
+const isError = ref(false)
 
-// const deleteXweet = async (xweet_id?: number | null) => {
-//     isLoading.value = true
+const deleteXweet = async (xweet_id?: number | null) => {
+    isLoading.value = true
 
-//     try {
-//         const { data } = await sendReqCookie.delete<XweetResponse | undefined>(
-//             `/api/users/${authStore.getSignedInUserId}/xweets/${xweet_id}`
-//         )
+    try {
+        const { data } = await sendReqCookie.delete<XweetResponse | undefined>(
+            `/api/users/${authStore.getSignedInUserId}/xweets/${xweet_id}`
+        )
 
-//         if (data?.success) {
-//             isLoading.value = false
-//             showModal.value = false
+        if (data?.success) {
+            isLoading.value = false
+            showModal.value = false
             
-//             updateTimeline(UpdateTimeline.Delete, xweetToDelete.value)
-//             countStore.decrementXweetsCount()
-//             emit('show-notice', 'error', 'You have deleted the xweet')
-//         }
-//     } catch (err) {
-//         isError.value = true
+            updateTimeline(UpdateTimeline.Delete, xweetToDelete.value)
+            countStore.decrementXweetsCount()
+            emit('show-notice', 'error', 'You have deleted the xweet')
+        }
+    } catch (err) {
+        isError.value = true
 
-//         setTimeout(() => {
-//             isError.value = false
-//         }, 2000)
+        setTimeout(() => {
+            isError.value = false
+        }, 2000)
 
-//         console.error(err)
-//     }
-// }
+        console.error(err)
+    }
+}
 
-const timelineRef = ref<HTMLElement | null>(null)
-const { arrivedState } = useScroll(timelineRef)
+const el = ref<HTMLElement | null>(null)
+const { arrivedState } = useScroll(el)
 const needMoreXweet = ref(true)
 
 watch(() => arrivedState.bottom, async () => {
@@ -154,7 +158,7 @@ watch(() => arrivedState.bottom, async () => {
 </script>
 
 <template>
-    <section class="flex flex-col max-h-screen gap-4 overflow-y-scroll scrollbar-hide" ref="timelineRef">
+    <section class="flex flex-col max-h-screen gap-4 overflow-y-scroll scrollbar-hide" ref="el">
         <div v-for="xweet in timeline">
             <Xweet
                 :key="xweet.xweet_id" 
@@ -166,12 +170,8 @@ watch(() => arrivedState.bottom, async () => {
                 :media="xweet.media"
                 :profilePic="xweet.profile_pic" 
                 :createdAt="xweet.created_at" 
-                :updated-at="xweet.updated_at"
-                :og-user-id="xweet.og_user_id"
-                :og-fullname="xweet.og_full_name"
-                :og-username="xweet.og_username"
-                :og-profile-pic="xweet.og_profile_pic" 
-                :is-rexweet="xweet.rexweet_id !== undefined"
+                :updated-at="xweet.updated_at" 
+                :is-rexweet="false"
                 :is-own="xweet.user_id === authStore.getSignedInUserId" 
                 :rexweeted="rexweets.includes(xweet.xweet_id)"
                 :liked="likes.includes(xweet.xweet_id)"
@@ -190,7 +190,7 @@ watch(() => arrivedState.bottom, async () => {
             msg="This is where your timeline would appear" 
             submsg="Start following some people to get contents to your desire!" />
     </section>
-    <!-- <Modal :show="showModal" @clicked-outside="() => { showModal = false }">
+    <Modal :show="showModal" @clicked-outside="() => { showModal = false }">
         <ConfirmDialog
             title="Delete Xweet"
             confirm-msg="Are you sure you want to delete this xweet?"
@@ -200,7 +200,7 @@ watch(() => arrivedState.bottom, async () => {
             :is-loading="isLoading"
             :is-error="isError"
             @close-modal="() => { showModal = false }" />
-    </Modal> -->
+    </Modal>
 </template>
 
 <style scoped>

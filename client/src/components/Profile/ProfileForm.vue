@@ -22,8 +22,8 @@ const userProfile = reactive({
     fullname,
     email,
     bio,
-    profilePic,
-    headerPic
+    profile_pic: profilePic,
+    header_pic: headerPic
 })
 
 const rules = {
@@ -46,7 +46,7 @@ const editProfilePic = (e: Event) => {
 
         reader.onload = (e: ProgressEvent<FileReader>) => {
             if (e.target instanceof FileReader) {
-                userProfile.profilePic = e.target.result as string
+                userProfile.profile_pic = e.target.result as string
             }
         }
 
@@ -63,7 +63,7 @@ const editHeader = (e: Event) => {
 
         reader.onload = (e: ProgressEvent<FileReader>) => {
             if (e.target instanceof FileReader) {
-                userProfile.headerPic = e.target.result as string
+                userProfile.header_pic = e.target.result as string
             }
         }
 
@@ -72,10 +72,10 @@ const editHeader = (e: Event) => {
 }
 
 const removeProfilePic = () => {
-    userProfile.profilePic = ''
+    userProfile.profile_pic = ''
 }
 const removeHeader = () => {
-    userProfile.headerPic = ''
+    userProfile.header_pic = ''
 }
 
 const editProfile = async () => {
@@ -100,7 +100,7 @@ const editProfile = async () => {
         // isLoading.value = false
         // isEditable.value = false
         // isError.value = true
-        // pfp.value = profilePic
+        // pfp.value = profile_pic
         // notifMsg.value = 'Error occured during process. Please try again.'
         // emit('change-profile-pic', isSuccess.value, isError.value, notifMsg.value)
 
@@ -163,8 +163,8 @@ const editProfile = async () => {
                     class="hidden"
                     @change="editProfilePic">
             </label>
-            <div v-if="userProfile.profilePic" class="relative group">
-                <img :src="userProfile.profilePic" class="w-8 h-8 object-scale-down" />
+            <div v-if="userProfile.profile_pic" class="relative group">
+                <img :src="userProfile.profile_pic" class="w-8 h-8 object-scale-down" />
                 <font-awesome-icon 
                     icon="fa-regular fa-circle-xmark" 
                     title="Remove the image"
@@ -186,8 +186,8 @@ const editProfile = async () => {
                     class="hidden"
                     @change="editHeader">
             </label>
-            <div v-if="userProfile.headerPic" class="relative group">
-                <img :src="userProfile.headerPic" class="w-8 h-8 object-scale-down" />
+            <div v-if="userProfile.header_pic" class="relative group">
+                <img :src="userProfile.header_pic" class="w-8 h-8 object-scale-down" />
                 <font-awesome-icon 
                     icon="fa-regular fa-circle-xmark" 
                     title="Remove the image"

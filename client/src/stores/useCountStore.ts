@@ -11,5 +11,8 @@ export const countStore = reactive({
     repliesCount: 0,
     incrementRepliesCount() {
         this.repliesCount++
+    },
+    decrementRepliesCount() {
+        this.repliesCount--
     }
 })

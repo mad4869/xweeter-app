@@ -9,7 +9,7 @@ defineProps<{
 </script>
 
 <template>
-    <section class="flex flex-col items-center gap-1 px-8 py-1">
+    <section class="flex flex-col items-center gap-1 px-4 py-1">
         <router-link :to="`/users/${id}`" 
             class="grid w-full grid-cols-4 grid-rows-2"
             :title="`View @${username}'s profile`">

@@ -1,14 +1,28 @@
-type Rexweets = {
-    rexweet_id: number,
-    user_id: number,
-    xweet_id: number,
-    created_at: string,
+interface Rexweet {
+    rexweet_id: number
+    user_id: number
+    xweet_id: number
+    created_at: string
     updated_at?: string
 }
 
+interface RexweetDetail extends Rexweet {
+    body: string
+    media: string
+    og_user_id: string
+    og_username: string
+    og_full_name: string
+    og_profile_pic: string
+}
+
 type RexweetResponse = {
-    data: Rexweets,
+    data: Rexweet
     success: boolean
 }
 
-export { type RexweetResponse }
+type RexweetDetailResponse = {
+    data: RexweetDetail[]
+    success: boolean
+}
+
+export { type RexweetResponse, type RexweetDetailResponse }

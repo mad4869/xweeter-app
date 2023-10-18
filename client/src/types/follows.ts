@@ -1,14 +1,13 @@
 import { User } from "./auth";
 
 type FollowResponse = {
-    following: {
-        success: boolean,
-        data: User[]
-    },
-    followers: {
-        success: boolean,
-        data: User[]
-    },
+    success: boolean
+    data: User[]
+}
+
+type FollowDetailResponse = {
+    following: FollowResponse
+    followers: FollowResponse
 }
 
 type WhoToFollow = {
@@ -29,4 +28,4 @@ type ToFollowResponse = {
     success: boolean
 }
 
-export { type FollowResponse, type WhoToFollowResponse, type ToFollowResponse }
+export { type FollowResponse, type FollowDetailResponse, type WhoToFollowResponse, type ToFollowResponse }

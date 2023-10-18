@@ -24,7 +24,11 @@ const routes = [
         }
     }},
     { path: '/home', component: Home },
-    { path: '/users/:id', component: Profile },
+    { path: '/users/:id', component: Profile, children: [
+        { path: 'following', component: Profile },
+        { path: 'followers', component: Profile },
+        { path: 'likes', component: Profile },
+    ] },
     { path: '/leaderboard', component: Leaderboard },
     { path: '/trending', component: Trending },
     { path: '/xweets/:id', component: Xweet },

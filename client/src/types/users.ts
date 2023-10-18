@@ -1,6 +1,9 @@
-import { AuthResponse } from './auth'
+import { User } from './auth'
 
-type UserResponse = Omit<AuthResponse, 'message'>
+type UserResponse = {
+    data: User
+    success: boolean
+}
 
 type TopDailyUser = {
     user_id: number

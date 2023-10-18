@@ -47,6 +47,9 @@ def get_timeline():
     "/users/<int:user_id>/profile-timeline", methods=["GET"], strict_slashes=False
 )
 def get_profile_timeline(user_id):
+    start = int(request.args.get("start", 0))
+    size = int(request.args.get("size", 10))
+
     own_xweets = db.session.execute(
         db.select(Xweet)
         .join(User, Xweet.user_id == User.user_id)
@@ -84,7 +87,11 @@ def get_profile_timeline(user_id):
         timeline, key=lambda xweet: xweet["created_at"], reverse=True
     )
 
-    return jsonify({"success": True, "data": sorted_timeline}), 200
+    end = min(start + size, len(sorted_timeline))
+
+    sliced_timeline = sorted_timeline[start:end]
+
+    return jsonify({"success": True, "data": sliced_timeline}), 200
 
 
 @routes.route("/users/<int:user_id>/timeline", methods=["GET"], strict_slashes=False)

@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import UserToFollow from './UserToFollow.vue';
+import Empty from '@/components/App/Empty.vue';
 import useAuthStore from '@/stores/useAuthStore';
 import { sendReqCookie } from '@/utils/axiosInstances';
-import { FollowResponse, WhoToFollowResponse } from '@/types/follows';
+import { FollowDetailResponse, WhoToFollowResponse } from '@/types/follows';
 
 const authStore = useAuthStore()
 
@@ -17,7 +18,7 @@ const getActiveUsers = async (): Promise<WhoToFollowResponse | undefined> => {
     }
 }
 
-const getFollow = async (): Promise<FollowResponse | undefined> => {
+const getFollow = async (): Promise<FollowDetailResponse | undefined> => {
     try {
         const following = await sendReqCookie.get(`/api/users/${authStore.getSignedInUserId}/following`)
         const followers = await sendReqCookie.get(`/api/users/${authStore.getSignedInUserId}/followers`)
@@ -49,7 +50,7 @@ const userNotFollowed = data.filter(user => {
             <span class="font-semibold text-white">Who to Follow</span>
             <font-awesome-icon icon="fa-regular fa-user" class="text-white" />
         </div>
-        <div class="flex flex-col justify-center gap-2 overflow-scroll">
+        <div class="flex flex-col justify-center gap-2 px-4 overflow-scroll">
             <UserToFollow
                 v-for="user in userNotFollowed" 
                 :key="user.user_id"
@@ -58,6 +59,7 @@ const userNotFollowed = data.filter(user => {
                 :username="user.username"
                 :last-xweet="user.body"
                 :profile-pic="user.profile_pic" />
+            <Empty v-if="userNotFollowed.length === 0" msg="There is no user to follow for now" />
         </div>
     </section>
 </template>
