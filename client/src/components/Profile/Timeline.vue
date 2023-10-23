@@ -18,9 +18,6 @@ defineProps<{
     y: number
     showNotice: (category: 'success' | 'error', msg: string) => void
 }>()
-const emit = defineEmits<{
-    (e: 'show-notice', category: 'success' | 'error', msg: string): void
-}>()
 
 const authStore = useAuthStore()
 
@@ -41,7 +38,7 @@ const rexweets: Ref<number[]> = ref([])
 
 if (authStore.getIsAuthenticated) {
     const likesData = await useFetchList<LikeDetail>(
-        `/api/users/${authStore.getSignedInUserId}/likes?start=${start.value}`, true
+        `/api/users/${authStore.getSignedInUserId}/likes`, true
         )
     const rexweetsData = await useFetchList<RexweetDetail>(
         `/api/users/${authStore.getSignedInUserId}/rexweets`, true

@@ -8,7 +8,7 @@ export enum Tabs {
 </script>
 
 <script setup lang="ts">
-import { ref, reactive } from 'vue';
+import { ref, Ref } from 'vue';
 import { useRoute } from 'vue-router';
 import { useScroll } from '@vueuse/core';
 
@@ -16,7 +16,7 @@ import Header from './Header.vue';
 import Toggle from './Toggle.vue';
 import Timeline from './Timeline.vue';
 import UserList from './UserList.vue';
-import LikeList from './LikeList.vue';
+import Likes from './Likes.vue';
 import ProfileForm from './ProfileForm.vue';
 import Popup from '@/components/App/Popup.vue';
 import Modal from '@/components/App/Modal.vue';
@@ -24,6 +24,7 @@ import useAuthStore from '@/stores/useAuthStore';
 import { User } from '@/types/auth';
 import { useFetchList, useFetchObject } from '@/composables/useFetch';
 import useCount, { Features } from '@/composables/useCount';
+import useNotify from '@/composables/useNotify'
 
 const authStore = useAuthStore()
 
@@ -46,24 +47,14 @@ const profileFollowersCount = profileFollowers.list.value.length
 const userFollowing = await useFetchList<User>(`/api/users/${authStore.getSignedInUserId}/following`, true)
 const userFollowed = userFollowing.list.value.some(following => following.user_id === profile.obj.value?.user_id)
 
-const notification = reactive<{
-    isNotified: boolean,
-    category?: 'success' | 'error'
+let notification: Ref<{
+    isNotified: boolean
+    category: "success" | "error" | undefined | null
     msg: string
-}>({
-    isNotified: false,
-    msg: ''
-})
+}>
 
 const showNotice = (category: 'success' | 'error', msg: string) => {
-    notification.isNotified = true
-    notification.category = category
-    notification.msg = msg
-
-    setTimeout(() => {
-        notification.isNotified = false
-        notification.msg = ''
-    }, 3000)
+    notification = useNotify(category, msg)
 }
 
 const showModal = ref(false)
@@ -87,16 +78,14 @@ const showModal = ref(false)
     <Toggle :active-tab="activeTab" @set-active-tab="tab => { activeTab = tab }" />
     <Timeline v-show="activeTab === Tabs.Xweets"
         :y="scrollTimeline.y.value"
-        :show-notice="showNotice"
-        @show-notice="showNotice" />
+        :show-notice="showNotice" />
     <UserList v-show="activeTab === Tabs.Following"
         :data="profileFollowing.list.value" />
     <UserList v-show="activeTab === Tabs.Followers"
         :data="profileFollowers.list.value" />
-    <LikeList v-show="activeTab === Tabs.Likes"
+    <Likes v-show="activeTab === Tabs.Likes"
         :y="scrollLike.y.value"
-        :show-notice="showNotice"
-        @show-notice="showNotice" />
+        :show-notice="showNotice" />
     <Modal :show="showModal" @clicked-outside="showModal = false">
         <ProfileForm
             :user-id="profile.obj.value?.user_id"
@@ -112,6 +101,5 @@ const showModal = ref(false)
     <Popup
         :show="notification.isNotified"
         :category="notification.category" 
-        :message="notification.msg" 
-        />
+        :message="notification.msg" />
 </template>

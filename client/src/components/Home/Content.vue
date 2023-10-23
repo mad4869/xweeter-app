@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, reactive } from 'vue';
+import { ref, Ref } from 'vue';
 import { useScroll } from '@vueuse/core';
 
 import Timeline from './Timeline.vue'
@@ -8,6 +8,7 @@ import Sep from '@/components/App/Sep.vue';
 import Popup from '@/components/App/Popup.vue'
 import Modal from '@/components/App/Modal.vue';
 import ConfirmDialog from '@/components/App/ConfirmDialog.vue';
+import useNotify from '@/composables/useNotify'
 import useAuthStore from '@/stores/useAuthStore';
 import { countStore } from '@/stores/useCountStore'
 import { sendReqCookie } from'@/utils/axiosInstances'
@@ -18,24 +19,14 @@ const authStore = useAuthStore()
 const el = ref<HTMLElement | null>(null)
 const { y } = useScroll(el)
 
-const notification = reactive<{
-    isNotified: boolean,
-    category?: 'success' | 'error'
+let notification: Ref<{
+    isNotified: boolean
+    category: "success" | "error" | undefined | null
     msg: string
-}>({
-    isNotified: false,
-    msg: ''
-})
+}>
 
 const showNotice = (category: 'success' | 'error', msg: string) => {
-    notification.isNotified = true
-    notification.category = category
-    notification.msg = msg
-
-    setTimeout(() => {
-        notification.isNotified = false
-        notification.msg = ''
-    }, 3000)
+    notification = useNotify(category, msg)
 }
 
 const showModal = ref(false)

@@ -3,8 +3,8 @@ import { TransitionRoot } from '@headlessui/vue';
 
 defineProps<{
     show: boolean,
+    category: 'success' | 'error' | undefined | null
     message: string,
-    category?: 'success' | 'error'
 }>()
 
 const colors = {

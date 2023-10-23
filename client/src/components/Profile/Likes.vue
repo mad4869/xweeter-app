@@ -16,9 +16,6 @@ defineProps<{
     y: number
     showNotice: (category: 'success' | 'error', msg: string) => void
 }>()
-const emit = defineEmits<{
-    (e: 'show-notice', category: 'success' | 'error', msg: string): void
-}>()
 
 const authStore = useAuthStore()
 
@@ -109,3 +106,13 @@ watch(() => arrivedState.bottom, async () => {
             msg="There are no likes yet" />
     </section>
 </template>
+
+<style scoped>
+.scrollbar-hide::-webkit-scrollbar {
+    display: none;
+}
+.scrollbar-hide {
+    -ms-overflow-style: none; 
+    scrollbar-width: none;
+}
+</style>

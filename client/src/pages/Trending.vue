@@ -1,47 +1,34 @@
 <script setup lang="ts">
-import { useRoute } from 'vue-router';
+import { ref } from 'vue';
 
 import Layout from '@/components/App/Layout/index.vue'
 import SidebarRight from '@/components/App/Layout/SidebarRight.vue';
 import SidebarLeft from '@/components/App/Layout/SidebarLeft.vue';
 import Skeleton from '@/components/App/Skeleton/index.vue'
-import Xweet from '@/components/App/Xweet/index.vue';
-import Sep from '@/components/App/Sep.vue';
+import Modal from '@/components/App/Modal.vue';
+import NewXweet from '@/components/App/Xweet/NewXweet.vue';
+import Content from '@/components/Trending/Content.vue';
 import useAuthStore from '@/stores/useAuthStore';
-import { XweetDetail } from '@/types/xweets';
-import { useFetchList } from '@/composables/useFetch';
+import { countStore } from '@/stores/useCountStore';
 
 const authStore = useAuthStore()
 await authStore.getUser()
 
-const route = useRoute()
-
-const trending = await useFetchList<XweetDetail>(`/api/hashtags/${route.query.tag}`, false)
+const showModal = ref(false)
 </script>
 
 <template>
     <Suspense>
         <Layout>
             <template #sidebarLeft>
-                <SidebarLeft />
+                <SidebarLeft @show-new-xweet="showModal = true" />
             </template>
-            <Sep title="Topic:" :subtitle="`${$route.query.tag}`" is-sticky />
-            <Xweet v-for="xweet in trending.list.value"
-                :key="xweet.xweet_id"
-                :id="xweet.xweet_id"
-                :userId="xweet.user_id"
-                :fullname="xweet.full_name" 
-                :username="xweet.username" 
-                :body="xweet.body" 
-                :media="xweet.media"
-                :profilePic="xweet.profile_pic" 
-                :createdAt="xweet.created_at" 
-                :updated-at="xweet.updated_at" 
-                :is-rexweet="false"
-                :is-reply="false"
-                :is-own="xweet.user_id === authStore.getSignedInUserId" 
-                :rexweeted="false"
-                :liked="false" />
+            <Content />
+            <Modal :show="showModal" @clicked-outside="showModal = false">
+                <NewXweet in-modal 
+                    @increment-xweet-count="countStore.incrementXweetsCount()"
+                    @close-modal="showModal = false" />
+            </Modal>
             <template #sidebarRight>
                 <SidebarRight />
             </template>
