@@ -21,10 +21,9 @@ import ProfileForm from './ProfileForm.vue';
 import Popup from '@/components/App/Popup.vue';
 import Modal from '@/components/App/Modal.vue';
 import useAuthStore from '@/stores/useAuthStore';
-import { sendReqCookie, sendReqWoCookie } from '@/utils/axiosInstances';
-import { UserResponse } from '@/types/users';
-import { FollowResponse, FollowDetailResponse } from '@/types/follows';
-import { XweetsResponse } from '@/types/xweets';
+import { User } from '@/types/auth';
+import { useFetchList, useFetchObject } from '@/composables/useFetch';
+import useCount, { Features } from '@/composables/useCount';
 
 const authStore = useAuthStore()
 
@@ -37,66 +36,15 @@ const scrollLike = useScroll(likeRef)
 
 const activeTab = ref(Tabs.Xweets)
 
-const getProfile = async () => {
-    try {
-        const { data } = await sendReqWoCookie.get<UserResponse | undefined>(
-            `/api/users/${route.params.id}`
-        )
-        if (data?.success) {
-            return data.data
-        }
-    } catch (err) {
-        console.error(err)
-    }
-}
+const profile = await useFetchObject<User>(`/api/users/${route.params.id}`, false)
+const profileXweetsCount = await useCount('users', parseInt(route.params.id as string), Features.Xweets)
+const profileFollowing = await useFetchList<User>(`/api/users/${route.params.id}/following`, false)
+const profileFollowers = await useFetchList<User>(`/api/users/${route.params.id}/followers`, false)
+const profileFollowingCount = profileFollowing.list.value.length
+const profileFollowersCount = profileFollowers.list.value.length
 
-const profile = await getProfile()
-
-const getProfileXweets = async () => {
-    try {
-        const { data } = await sendReqWoCookie.get<XweetsResponse | undefined>(
-            `/api/users/${route.params.id}/xweets`
-        )
-        if (data?.success) {
-            return data.data
-        }
-    } catch (err) {
-        console.error(err)
-    }
-}
-
-const xweets = await getProfileXweets() || []
-
-const getSignedUserFollowing = async (): Promise<FollowResponse | undefined> => {
-    try {
-        const { data } = await sendReqCookie.get(`/api/users/${authStore.getSignedInUserId}/following`)
-        if (data) {
-            return data
-        }
-    } catch (err) {
-        console.error(err)
-    }
-}
-
-const userFollowingData = await getSignedUserFollowing()
-const userFollowed = userFollowingData?.data.some(following => following.user_id === profile?.user_id)
-
-const getProfileFollowingFollowers = async (): Promise<FollowDetailResponse | undefined> => {
-    try {
-        const followingData = await sendReqCookie.get(`/api/users/${route.params.id}/following`)
-        const followersData = await sendReqCookie.get(`/api/users/${route.params.id}/followers`)
-        if (followingData && followersData) {
-            return {
-                following: followingData.data,
-                followers: followersData.data
-            }
-        }
-    } catch (err) {
-        console.error(err)
-    }
-}
-
-const { following, followers } = await getProfileFollowingFollowers() || { following: [], followers: [] }
+const userFollowing = await useFetchList<User>(`/api/users/${authStore.getSignedInUserId}/following`, true)
+const userFollowed = userFollowing.list.value.some(following => following.user_id === profile.obj.value?.user_id)
 
 const notification = reactive<{
     isNotified: boolean,
@@ -118,65 +66,48 @@ const showNotice = (category: 'success' | 'error', msg: string) => {
     }, 3000)
 }
 
-const handleProfilePic = (
-    isSuccess: boolean,
-    isError: boolean,
-    notifMsg: string
-) => {
-    notification.isNotified = true
-    notification.msg = notifMsg
-
-    if (isSuccess) {
-        notification.category = 'success'
-
-        setTimeout(() => {
-            notification.isNotified = false
-        }, 3000)
-    } else if (isError) {
-        notification.category = 'error'
-    }
-}
-
 const showModal = ref(false)
 </script>
 
 <template>
     <Header
-        :is-own="profile?.user_id === authStore.getSignedInUserId"
-        :user-id="profile?.user_id"
-        :fullname="profile?.full_name"
-        :username="profile?.username"
-        :bio="profile?.bio"
-        :profile-pic="profile?.profile_pic"
-        :header-pic="profile?.header_pic"
-        :xweets-count="xweets.length"
-        :following-count="(following as FollowResponse).data.length"
-        :followers-count="(followers as FollowResponse).data.length"
+        :is-own="profile.obj.value?.user_id === authStore.getSignedInUserId"
+        :user-id="profile.obj.value?.user_id"
+        :fullname="profile.obj.value?.full_name"
+        :username="profile.obj.value?.username"
+        :bio="profile.obj.value?.bio"
+        :profile-pic="profile.obj.value?.profile_pic"
+        :header-pic="profile.obj.value?.header_pic"
+        :xweets-count="profileXweetsCount"
+        :following-count="profileFollowingCount"
+        :followers-count="profileFollowersCount"
         :is-followed="userFollowed"
-        @change-profile-pic="handleProfilePic"
-        @show-edit-profile="() => { showModal = true }" />
+        @show-notice="showNotice"
+        @show-edit-profile="showModal = true" />
     <Toggle :active-tab="activeTab" @set-active-tab="tab => { activeTab = tab }" />
     <Timeline v-show="activeTab === Tabs.Xweets"
         :y="scrollTimeline.y.value"
         :show-notice="showNotice"
         @show-notice="showNotice" />
     <UserList v-show="activeTab === Tabs.Following"
-        :data="(following as FollowResponse).data" />
+        :data="profileFollowing.list.value" />
     <UserList v-show="activeTab === Tabs.Followers"
-        :data="(followers as FollowResponse).data" />
+        :data="profileFollowers.list.value" />
     <LikeList v-show="activeTab === Tabs.Likes"
         :y="scrollLike.y.value"
         :show-notice="showNotice"
         @show-notice="showNotice" />
-    <Modal :show="showModal" @clicked-outside="() => { showModal = false }">
+    <Modal :show="showModal" @clicked-outside="showModal = false">
         <ProfileForm
-            :user-id="profile?.user_id"
-            :username="profile?.username"
-            :fullname="profile?.full_name"
-            :email="profile?.email"
-            :bio="profile?.bio"
-            :profile-pic="profile?.profile_pic"
-            :header-pic="profile?.header_pic" />
+            :user-id="profile.obj.value?.user_id"
+            :username="profile.obj.value?.username"
+            :fullname="profile.obj.value?.full_name"
+            :email="profile.obj.value?.email"
+            :bio="profile.obj.value?.bio"
+            :profile-pic="profile.obj.value?.profile_pic"
+            :header-pic="profile.obj.value?.header_pic"
+            @close-modal="showModal = false"
+            @show-notice="showNotice" />
     </Modal>
     <Popup
         :show="notification.isNotified"

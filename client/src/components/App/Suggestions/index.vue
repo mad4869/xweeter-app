@@ -1,44 +1,20 @@
 <script setup lang="ts">
 import UserToFollow from './UserToFollow.vue';
 import Empty from '@/components/App/Empty.vue';
+import { useFetchList } from '@/composables/useFetch';
 import useAuthStore from '@/stores/useAuthStore';
-import { sendReqCookie } from '@/utils/axiosInstances';
-import { FollowDetailResponse, WhoToFollowResponse } from '@/types/follows';
+import { User } from '@/types/auth';
+import { WhoToFollow } from '@/types/follows';
 
 const authStore = useAuthStore()
 
-const getActiveUsers = async (): Promise<WhoToFollowResponse | undefined> => {
-    try {
-        const { data } = await sendReqCookie.get('/api/users/most-active')
-        if (data) {
-            return data
-        }
-    } catch (err) {
-        console.error(err)
-    }
-}
+const mostActiveUsers = await useFetchList<WhoToFollow>('/api/users/most-active', true)
+const followingList = await useFetchList<User>(`/api/users/${authStore.getSignedInUserId}/following`, true)
 
-const getFollow = async (): Promise<FollowDetailResponse | undefined> => {
-    try {
-        const following = await sendReqCookie.get(`/api/users/${authStore.getSignedInUserId}/following`)
-        const followers = await sendReqCookie.get(`/api/users/${authStore.getSignedInUserId}/followers`)
-        if (following.data && followers.data) {
-            return {
-                following: following.data, 
-                followers: followers.data
-            }
-        }
-    } catch (err) {
-        console.error(err)
-    }
-}
-
-const { data } = (await getActiveUsers()) || { data: [] }
-const followData = await getFollow()
-const userNotFollowed = data.filter(user => {
+const userToFollow = mostActiveUsers.list.value.filter(user => {
     return (
         user.user_id !== authStore.getSignedInUserId &&
-        !followData?.following.data.some(followed => followed.user_id === user.user_id)
+        !followingList.list.value.some(followed => followed.user_id === user.user_id)
     )
 })
 </script>
@@ -52,14 +28,14 @@ const userNotFollowed = data.filter(user => {
         </div>
         <div class="flex flex-col justify-center gap-2 px-4 overflow-scroll">
             <UserToFollow
-                v-for="user in userNotFollowed" 
+                v-for="user in userToFollow" 
                 :key="user.user_id"
                 :id="user.user_id" 
                 :fullname="user.full_name" 
                 :username="user.username"
                 :last-xweet="user.body"
                 :profile-pic="user.profile_pic" />
-            <Empty v-if="userNotFollowed.length === 0" msg="There is no user to follow for now" />
+            <Empty v-if="userToFollow.length === 0" msg="There is no user to follow for now" />
         </div>
     </section>
 </template>

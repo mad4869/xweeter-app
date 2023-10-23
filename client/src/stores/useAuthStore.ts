@@ -38,6 +38,9 @@ const useAuthStore = defineStore('auth', {
                 try {
                     const { data } = await authService.post<AuthResponse | undefined>('/api/signin', credentials)
                     if (data?.success) {
+                        this.isAuthenticated = true
+                        this.errorMsg = ''
+                        
                         window.location.reload()
                     }
                 } catch (error) {

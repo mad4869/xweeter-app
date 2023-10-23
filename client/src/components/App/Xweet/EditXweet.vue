@@ -59,10 +59,6 @@ const editXweet = async () => {
         console.error(err)
     }
 }
-
-const setMedia = (fileUrl: string) => {
-    newMedia.value = fileUrl
-}
 </script>
 
 <template>
@@ -80,6 +76,6 @@ const setMedia = (fileUrl: string) => {
             :char-count="charCount"
             :max-char-count="MAX_CHAR_COUNT"
             :media="newMedia"
-            @set-media="setMedia" />
+            @set-media="(fileUrl: string) => { newMedia = fileUrl }" />
     </section>
 </template>

@@ -25,4 +25,4 @@ type RexweetDetailResponse = {
     success: boolean
 }
 
-export { type RexweetResponse, type RexweetDetailResponse }
+export { type RexweetResponse, type RexweetDetail, type RexweetDetailResponse }

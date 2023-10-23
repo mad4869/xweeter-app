@@ -22,7 +22,7 @@ const { userId, profilePic, headerPic, isFollowed } = defineProps<{
 }>()
 
 const emit = defineEmits<{
-    (e: 'change-profile-pic', isSuccess: boolean, isError: boolean, notifMsg: string): void,
+    (e: 'show-notice', category: 'success' | 'error', msg: string): void,
     (e: 'show-edit-profile'): void
 }>()
 
@@ -31,8 +31,6 @@ const authStore = useAuthStore()
 const pfp = ref(profilePic)
 const header = ref(headerPic)
 const userFollowed = ref(isFollowed)
-const isSuccess = ref(false)
-const isError = ref(false)
 const isLoading = ref(false)
 const isEditable = ref(false)
 
@@ -56,8 +54,10 @@ const changeImage = async () => {
             payload = { profile_pic: pfp.value, header_pic: header.value }
         } else if (pfp.value !== profilePic) {
             payload = { profile_pic: pfp.value }
-        } else {
+        } else if (header.value !== headerPic) {
             payload = { header_pic: header.value }
+        } else {
+            payload = {}
         }
 
         const { data } = await sendReqCookie.put<UserResponse | undefined>(
@@ -66,26 +66,16 @@ const changeImage = async () => {
 
         if (data?.success) {
             isLoading.value = false
-            isSuccess.value = true
             isEditable.value = false
-            emit('change-profile-pic', isSuccess.value, isError.value, 'Your picture has been changed')
 
-            setTimeout(() => {
-                isSuccess.value = false
-            }, 3000)
+            emit('show-notice', 'success', 'Your profile images have been updated')
         }
     } catch (err) {
         isLoading.value = false
         isEditable.value = false
-        isError.value = true
         pfp.value = profilePic
-        emit('change-profile-pic', isSuccess.value, isError.value, 'Error occured during process. Please try again.')
 
-        setTimeout(() => {
-            isError.value = false
-        }, 3000)
-
-        console.error(err)
+        emit('show-notice', 'error', 'Error occured during process. Please try again')
     }
 }
 
@@ -104,7 +94,7 @@ const follow = async () => {
     } catch (err) {
         isLoading.value = false
 
-        console.error(err)
+        emit('show-notice', 'error', 'Error occured during process. Please try again')
     }
 }
 </script>

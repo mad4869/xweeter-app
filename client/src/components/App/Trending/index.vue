@@ -1,20 +1,10 @@
 <script setup lang="ts">
 import Hashtag from './Hashtag.vue';
-import { sendReqWoCookie } from '@/utils/axiosInstances';
-import { TrendingResponse } from '@/types/hashtags'
+import Empty from '@/components/App/Empty.vue';
+import { Trending } from '@/types/hashtags'
+import { useFetchList } from '@/composables/useFetch';
 
-const getTrending = async (): Promise<TrendingResponse | undefined> => {
-    try {
-        const { data } = await sendReqWoCookie.get('/api/trending')
-        if (data) {
-            return data
-        }
-    } catch (err) {
-        console.error(err)
-    }
-}
-
-const { data } = (await getTrending()) || { data: [] }
+const hashtags = await useFetchList<Trending>('api/trending', false)
 </script>
 
 <template>
@@ -24,12 +14,13 @@ const { data } = (await getTrending()) || { data: [] }
             <span class="font-semibold text-white">Trending</span>
             <font-awesome-icon icon="fa-solid fa-globe" class="text-white" />
         </div>
-        <div class="overflow-scroll">
+        <div class="px-4 overflow-scroll">
             <Hashtag 
-                v-for="hashtag in data" 
+                v-for="hashtag in hashtags.list.value" 
                 :key="hashtag.hashtag_id" 
                 :body="hashtag.body"
                 :xweet-count="hashtag.xweet_count" />
+            <Empty v-if="hashtags.list.value.length === 0" msg="There are no trending topics for now" />
         </div>
     </section>
 </template>

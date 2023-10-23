@@ -2,12 +2,12 @@
 import { TopDailyUser } from '@/types/users'
 
 defineProps<{
-    data: TopDailyUser[],
+    data: TopDailyUser[] | undefined,
 }>()
 </script>
 
 <template>
-    <section class="h-table">
+    <section class="dark:text-sky-600 h-table">
         <table class="table-auto w-full border-separate text-sky-800 text-center dark:text-white">
             <thead class="bg-sky-800">
                 <tr>

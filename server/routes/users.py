@@ -80,35 +80,37 @@ def get_most_active_users():
 @routes.route("/users/most-active-daily", methods=["GET"], strict_slashes=False)
 def get_daily_top_users():
     page = int(request.args.get("page", 1))
-    size = int(request.args.get("size", 0))
-    offset = (page - 1) * size if size > 0 else 0
+    per_page = int(request.args.get("per_page", 10))
 
     query = (
-        db.select(
+        db.session.query(
             User.user_id,
             User.username,
             User.full_name,
             db.func.count(Xweet.xweet_id).label("xweet_count"),
         )
-        .join(Xweet, User.user_id == Xweet.user_id)
+        .join(Xweet)
         .filter(db.func.date(Xweet.created_at) == db.func.date(db.func.now()))
         .group_by(User.user_id, User.username, User.full_name)
-        .offset(offset)
     )
 
-    if size > 0:
-        query = query.limit(size)
+    results = query.paginate(page=page, per_page=per_page)
 
-    users = db.session.execute(query).fetchall()
-    data = [
+    users = [
         {
-            "user_id": user[0],
-            "username": user[1],
-            "full_name": user[2],
-            "xweet_count": user[3],
+            "user_id": user.user_id,
+            "username": user.username,
+            "full_name": user.full_name,
+            "xweet_count": user.xweet_count,
         }
-        for user in users
+        for user in results.items
     ]
+
+    data = {
+        "users": users,
+        "total_pages": results.pages,
+        "total_users": results.total,
+    }
 
     return jsonify({"success": True, "data": data}), 200
 

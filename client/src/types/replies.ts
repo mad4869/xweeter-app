@@ -22,4 +22,4 @@ type RepliesResponse = {
     success: boolean
 }
 
-export { type RepliesResponse }
+export { type Reply, type RepliesResponse }

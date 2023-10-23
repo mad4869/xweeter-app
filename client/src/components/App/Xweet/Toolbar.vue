@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import useFile from '@/composables/useFile';
+
 defineProps<{
     mode: 'new-xweet' | 'modal-new-xweet' | 'edit-xweet' | 'reply-xweet'
     submitFunc: () => Promise<void>
@@ -35,20 +37,10 @@ const modeMap = {
     }
 }
 
-const addFile = (e: Event) => {
-    const target = e.target as HTMLInputElement
-    const file = target.files?.[0]
-
+const addFile = async (e: Event) => {
+    const file =  await useFile(e)
     if (file) {
-        const reader = new FileReader()
-
-        reader.onload = (e: ProgressEvent<FileReader>) => {
-            if (e.target instanceof FileReader) {
-                emit('set-media', e.target.result as string)
-            }
-        }
-
-        reader.readAsDataURL(file)
+        emit('set-media', file)
     }
 }
 

@@ -1,17 +1,16 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
 import { RouterLink } from 'vue-router';
+import { useDateFormat } from '@vueuse/core';
 
 import ImageViewer from './ImageViewer.vue';
 import EditXweet from './EditXweet.vue';
 import useRenderXweet from '@/composables/useRenderXweet';
-import { useCountReplies } from '@/composables/useCount';
 import useTimestamp from '@/composables/useTimestamp';
 import useAuthStore from '@/stores/useAuthStore';
 import { sendReqCookie } from '@/utils/axiosInstances';
 import { RexweetResponse } from '@/types/rexweets';
 import { LikeResponse } from '@/types/likes'
-import { UpdateTimeline } from '@/types/timeline';
 
 const { id, username, body, media, userId, createdAt, updatedAt, rexweeted, liked } = defineProps<{
     id: number
@@ -34,7 +33,6 @@ const { id, username, body, media, userId, createdAt, updatedAt, rexweeted, like
 }>()
 
 const emit = defineEmits<{
-    (e: 'update-timeline', event: UpdateTimeline, xweet_id?: number): void,
     (e: 'show-notice', category: 'success' | 'error', msg: string): void,
     (e: 'reply', xweet_id: number | null): void
     (e: 'delete', xweet_id: number): void
@@ -52,7 +50,7 @@ const xweetText = computed(() => useRenderXweet(xweet.value))
 const xweetMedia = ref(media)
 const xweetTimestamp = ref(useTimestamp(createdAt))
 const xweetUpdatedTimestamp = ref(useTimestamp(updatedAt))
-const xweetRepliesCount = ref(await useCountReplies(id))
+const xweetRepliesCount = ref(0)
 
 const rexweet = async () => {
     isRexweeted.value = true
@@ -131,8 +129,15 @@ const updateXweet = (newBody: string, newMedia?: string, updateDate?: string) =>
             <div 
                 class="flex justify-between items-center text-xs text-sky-900">
                 <p class="flex items-center gap-1">
-                    <span class="cursor-help" :title="createdAt">{{ xweetTimestamp }}</span>
-                    <em v-if="xweetUpdatedTimestamp">- Updated {{ xweetUpdatedTimestamp }}</em>
+                    <span class="cursor-help" :title="useDateFormat(createdAt, 'D-M-YYYY HH:mm').value">
+                        {{ xweetTimestamp }}
+                    </span>
+                    <em 
+                        v-if="xweetUpdatedTimestamp" 
+                        class="cursor-help" 
+                        :title="useDateFormat(updatedAt, 'D-M-YYYY HH:mm').value">
+                        - Updated {{ xweetUpdatedTimestamp }}
+                    </em>
                 </p>
                 <span class="flex justify-center items-center gap-4 text-sm">
                     <span v-if="authStore.getIsAuthenticated" class="flex items-center gap-1">

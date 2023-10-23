@@ -17,4 +17,4 @@ type TrendingResponse = {
     data: Trending[]
 }
 
-export { type HashtagResponse, type TrendingResponse }
+export { type HashtagResponse, type Trending, type TrendingResponse }

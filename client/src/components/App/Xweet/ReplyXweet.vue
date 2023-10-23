@@ -53,15 +53,11 @@ const replyXweet = async () => {
                 
                 countStore.incrementRepliesCount()
                 emit('close-reply')
-            }, 3000)
+            }, 1000)
         }
     } catch (err) {
         console.error(err)
     }
-}
-
-const setMedia = (fileUrl: string) => {
-    media.value = fileUrl
 }
 </script>
 
@@ -89,6 +85,6 @@ const setMedia = (fileUrl: string) => {
             :char-count="charCount"
             :max-char-count="MAX_CHAR_COUNT"
             :media="media"
-            @set-media="setMedia" />
+            @set-media="(fileUrl: string) => { media = fileUrl }" />
     </TransitionRoot>
 </template>

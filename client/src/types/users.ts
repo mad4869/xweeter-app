@@ -12,9 +12,15 @@ type TopDailyUser = {
     xweet_count: number
 }
 
-type TopDailyResponse = {
-    data: TopDailyUser[]
+type TopDailyUserData = {
+    users: TopDailyUser[],
+    total_users: number,
+    total_pages: number
+}
+
+type TopDailyUserResponse = {
+    data: TopDailyUserData
     success: boolean
 }
 
-export { type UserResponse, type TopDailyUser, type TopDailyResponse }
+export { type UserResponse, type TopDailyUser, type TopDailyUserData, type TopDailyUserResponse }

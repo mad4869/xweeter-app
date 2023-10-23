@@ -1,15 +1,34 @@
-import { sendReqWoCookie } from "@/utils/axiosInstances"
-import { RepliesResponse } from "@/types/replies"
+import { ref } from 'vue'
 
-const useCountReplies = async (xweetId: number): Promise<number | undefined> => {
+import { sendReqWoCookie } from "@/utils/axiosInstances"
+
+export enum Features {
+    Xweets = 'xweets',
+    Replies = 'replies',
+    Rexweets = 'rexweets',
+    Likes = 'likes',
+    Following = 'following',
+    Followers = 'followers'
+}
+
+const useCount = async (subject: 'users' | 'xweets', id: number | undefined, feature: Features) => {
+    const count = ref<number>()
+
+    if (!id) {
+        return count
+    }
+
     try {
-        const { data } = await sendReqWoCookie.get<RepliesResponse | undefined>(`/api/xweets/${xweetId}/replies`)
+        const { data } = await sendReqWoCookie.get(`/api/${subject}/${id}/${feature}`)
             if (data?.success) {
-                return data.data.length
+
+                count.value = data.data.length
             }
     } catch (err) {
         console.error(err)
     }
+
+    return count
 }
 
-export { useCountReplies }
+export default useCount

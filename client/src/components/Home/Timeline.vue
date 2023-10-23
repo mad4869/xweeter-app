@@ -1,138 +1,80 @@
 <script setup lang="ts">
-import { ref, reactive, watch } from 'vue';
+import { ref, watch, Ref } from 'vue';
 import { useScroll } from '@vueuse/core';
 
 import Xweet from '@/components/App/Xweet/index.vue';
 import ReplyXweet from '@/components/App/Xweet/ReplyXweet.vue';
 import MoreXweet from '@/components/App/Xweet/MoreXweet.vue';
 import Empty from '@/components/App/Empty.vue';
-import Modal from '@/components/App/Modal.vue';
-import ConfirmDialog from '@/components/App/ConfirmDialog.vue';
+import { useFetchList } from '@/composables/useFetch';
 import useAuthStore from '@/stores/useAuthStore';
-import { countStore } from '@/stores/useCountStore'
-import { XweetResponse, XweetsResponse } from '@/types/xweets';
-import { UpdateTimeline } from '@/types/timeline';
-import { LikeDetailResponse } from '@/types/likes'
-import { RexweetDetailResponse } from '@/types/rexweets'
+import { XweetDetail } from '@/types/xweets';
+import { LikeDetail } from '@/types/likes';
+import { RexweetDetail } from '@/types/rexweets'
 import socket from '@/utils/socket';
-import { sendReqCookie, sendReqWoCookie } from '@/utils/axiosInstances';
 
-defineProps<{
+const { isFiltered } = defineProps<{
     y: number
+    isFiltered: boolean
     showNotice: (category: 'success' | 'error', msg: string) => void
 }>()
 const emit = defineEmits<{
     (e: 'show-notice', category: 'success' | 'error', msg: string): void
+    (e: 'show-delete-modal', xweetId: number): void
 }>()
 
 const authStore = useAuthStore()
 
-const start = ref(0)
-const getTimeline = async () => {
-    try {
-        if (authStore.getIsAuthenticated) {
-            const { data } = await sendReqCookie.get<XweetsResponse | undefined>(
-                `/api/users/${authStore.getSignedInUserId}/timeline?start=${start.value}`
-            )
-            if (data?.success) {
-                return data.data
-            }
-        } else {
-            const { data } = await sendReqWoCookie.get<XweetsResponse | undefined>(`/api/timeline`)
-            if (data?.success) {
-                return data.data
-            }
-        }
-    } catch (err) {
-        console.error(err)
-    }
-}
+const isLoading = ref(false)
 
-const initialTimeline = await getTimeline() || []
-const timeline = reactive(initialTimeline)
+const start = ref(0)
+let timeline: Ref<XweetDetail[]> = ref([])
+const likes: Ref<number[]> = ref([])
+const rexweets: Ref<number[]> = ref([])
+
+if (authStore.getIsAuthenticated) {
+    const timelineData = await useFetchList<XweetDetail>(
+        `/api/users/${authStore.getSignedInUserId}/timeline?start=${start.value}`, true
+        )
+    const likesData = await useFetchList<LikeDetail>(
+        `/api/users/${authStore.getSignedInUserId}/likes?start=${start.value}`, true
+        )
+    const rexweetsData = await useFetchList<RexweetDetail>(
+        `/api/users/${authStore.getSignedInUserId}/rexweets`, true
+    )
+
+    timeline = timelineData.list
+
+    likesData.list.value.forEach(like => {
+        likes.value.push(like.xweet_id)
+    })
+    rexweetsData.list.value.forEach(rexweet => {
+        rexweets.value.push(rexweet.xweet_id)
+    })
+} else {
+    const timelineData = await useFetchList<XweetDetail>(
+        `/api/timeline`, false
+        )
+    timeline = timelineData.list
+}
 
 socket.on('add_to_timeline', (xweet) => {
-    timeline.unshift(xweet)
-})
-
-const updateTimeline = (event: UpdateTimeline, xweet_id?: number | null) => {
-    if (event === UpdateTimeline.Delete) {
-        const index = timeline.findIndex(xweet => xweet.xweet_id === xweet_id)
-        if (index !== -1) {
-            timeline.splice(index, 1)
-        }
-    }
-
-    if (event === UpdateTimeline.Restore) {
-        timeline.length = 0
-        timeline.push(...initialTimeline)
-    }
-}
-
-const getLikesRexweets = async () => {
-    try {
-        if (authStore.getIsAuthenticated) {
-            const likes = await sendReqCookie.get<LikeDetailResponse | undefined>(
-                `/api/users/${authStore.getSignedInUserId}/likes`
-            )
-            const rexweets = await sendReqCookie.get<RexweetDetailResponse | undefined>(
-                `/api/users/${authStore.getSignedInUserId}/rexweets`
-            )
-            if (likes.data && rexweets.data) {
-                const likesData = likes.data
-                const rexweetsData = rexweets.data
-
-                return {
-                    likesData: likesData.data,
-                    rexweetsData: rexweetsData.data
-                }
-            }
-        }
-    } catch (err) {
-        console.error(err)
-    }
-}
-
-const likes = reactive<number[]>([])
-const rexweets = reactive<number[]>([])
-const { likesData, rexweetsData } = (await getLikesRexweets()) || { data: [] }
-likesData?.forEach(like => {
-    likes.push(like.xweet_id)
-})
-rexweetsData?.forEach(rexweet => {
-    rexweets.push(rexweet.xweet_id)
+    timeline.value.unshift(xweet)
 })
 
 const xweetToReply = ref<number | null>()
 const xweetToDelete = ref<number | null>()
-const showModal = ref(false)
-const isLoading = ref(false)
-const isError = ref(false)
 
-const deleteXweet = async (xweet_id?: number | null) => {
-    isLoading.value = true
+const setDeletedXweet = (xweetId: number) => {
+    emit('show-delete-modal', xweetId)
+    
+    xweetToDelete.value = xweetId
+}
 
-    try {
-        const { data } = await sendReqCookie.delete<XweetResponse | undefined>(
-            `/api/users/${authStore.getSignedInUserId}/xweets/${xweet_id}`
-        )
-
-        if (data?.success) {
-            isLoading.value = false
-            showModal.value = false
-            
-            updateTimeline(UpdateTimeline.Delete, xweetToDelete.value)
-            countStore.decrementXweetsCount()
-            emit('show-notice', 'error', 'You have deleted the xweet')
-        }
-    } catch (err) {
-        isError.value = true
-
-        setTimeout(() => {
-            isError.value = false
-        }, 2000)
-
-        console.error(err)
+if (isFiltered) {
+    const index = timeline.value.findIndex(xweet => xweet.xweet_id === xweetToDelete.value)
+    if (index !== -1) {
+        timeline.value.splice(index, 1)
     }
 }
 
@@ -145,13 +87,16 @@ watch(() => arrivedState.bottom, async () => {
         start.value+= 10
         isLoading.value = true
     
-        const newTimeline = await getTimeline() || []
+        const newTimelineData = await useFetchList<XweetDetail>(
+            `/api/users/${authStore.getSignedInUserId}/timeline?start=${start.value}`, true
+        )
+        const newTimeline = newTimelineData.list
         isLoading.value = false
     
-        if (newTimeline.length === 0) {
+        if (newTimeline.value.length === 0) {
             needMoreXweet.value = false
         } else {
-            timeline.push(...newTimeline)
+            timeline.value.push(...newTimeline.value)
         }
     }
 })
@@ -175,14 +120,13 @@ watch(() => arrivedState.bottom, async () => {
                 :is-own="xweet.user_id === authStore.getSignedInUserId" 
                 :rexweeted="rexweets.includes(xweet.xweet_id)"
                 :liked="likes.includes(xweet.xweet_id)"
-                @update-timeline="updateTimeline"
                 @show-notice="showNotice"
-                @reply="(xweetId) => { xweetToReply = xweetId }"
-                @delete="(xweetId) => { showModal = true; xweetToDelete = xweetId }" />
+                @reply="xweetId => { xweetToReply = xweetId }"
+                @delete="setDeletedXweet" />
             <ReplyXweet 
                 :show="xweetToReply === xweet.xweet_id"
                 :xweet-id="xweet.xweet_id"
-                @close-reply="() => { xweetToReply = null }" />
+                @close-reply="xweetToReply = null" />
         </div>
         <MoreXweet v-if="needMoreXweet" :is-loading="isLoading" />
         <Empty 
@@ -190,17 +134,6 @@ watch(() => arrivedState.bottom, async () => {
             msg="This is where your timeline would appear" 
             submsg="Start following some people to get contents to your desire!" />
     </section>
-    <Modal :show="showModal" @clicked-outside="() => { showModal = false }">
-        <ConfirmDialog
-            title="Delete Xweet"
-            confirm-msg="Are you sure you want to delete this xweet?"
-            :confirm-fn="deleteXweet"
-            :payload="xweetToDelete"
-            error-msg="Failed to delete xweet. Please try again"
-            :is-loading="isLoading"
-            :is-error="isError"
-            @close-modal="() => { showModal = false }" />
-    </Modal>
 </template>
 
 <style scoped>

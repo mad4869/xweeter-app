@@ -6,6 +6,7 @@ import { required, email as isEmail } from '@vuelidate/validators'
 import InputField from '@/components/App/InputField.vue';
 import { sendReqCookie } from '@/utils/axiosInstances';
 import { UserResponse } from '@/types/users';
+import useFile from '@/composables/useFile';
 
 const { userId, username, fullname, email, bio, profilePic, headerPic } = defineProps<{
     userId?: number,
@@ -15,6 +16,10 @@ const { userId, username, fullname, email, bio, profilePic, headerPic } = define
     bio?: string | null,
     profilePic?: string,
     headerPic?: string
+}>()
+const emit = defineEmits<{
+    (e: 'show-notice', category: 'success' | 'error', msg: string): void
+    (e: 'close-modal'): void
 }>()
 
 const userProfile = reactive({
@@ -37,45 +42,12 @@ const v$ = useVuelidate(rules, userProfile)
 
 const isLoading = ref(false)
 
-const editProfilePic = (e: Event) => {
-    const target = e.target as HTMLInputElement
-    const file = target.files?.[0]
-
-    if (file) {
-        const reader = new FileReader()
-
-        reader.onload = (e: ProgressEvent<FileReader>) => {
-            if (e.target instanceof FileReader) {
-                userProfile.profile_pic = e.target.result as string
-            }
-        }
-
-        reader.readAsDataURL(file)
-    }
+const editProfilePic = async (e: Event) => {
+    userProfile.profile_pic = await useFile(e)
 }
 
-const editHeader = (e: Event) => {
-    const target = e.target as HTMLInputElement
-    const file = target.files?.[0]
-
-    if (file) {
-        const reader = new FileReader()
-
-        reader.onload = (e: ProgressEvent<FileReader>) => {
-            if (e.target instanceof FileReader) {
-                userProfile.header_pic = e.target.result as string
-            }
-        }
-
-        reader.readAsDataURL(file)
-    }
-}
-
-const removeProfilePic = () => {
-    userProfile.profile_pic = ''
-}
-const removeHeader = () => {
-    userProfile.header_pic = ''
+const editHeader = async (e: Event) => {
+    userProfile.header_pic = await useFile(e)
 }
 
 const editProfile = async () => {
@@ -88,27 +60,15 @@ const editProfile = async () => {
 
         if (data?.success) {
             isLoading.value = false
-            // isSuccess.value = true
-            // notifMsg.value = 'Your profile picture has been changed'
-            // emit('change-profile-pic', isSuccess.value, isError.value, notifMsg.value)
 
-            // setTimeout(() => {
-            //     isSuccess.value = false
-            // }, 3000)
+            emit('close-modal')
+            emit('show-notice', 'success', 'Your profile has been updated')
         }
     } catch (err) {
-        // isLoading.value = false
-        // isEditable.value = false
-        // isError.value = true
-        // pfp.value = profile_pic
-        // notifMsg.value = 'Error occured during process. Please try again.'
-        // emit('change-profile-pic', isSuccess.value, isError.value, notifMsg.value)
+        isLoading.value = false
 
-        // setTimeout(() => {
-        //     isError.value = false
-        // }, 3000)
-
-        console.error(err)
+        emit('close-modal')
+        emit('show-notice', 'error', 'Error occured during process. Please try again')
     }
 }
 </script>
@@ -169,7 +129,7 @@ const editProfile = async () => {
                     icon="fa-regular fa-circle-xmark" 
                     title="Remove the image"
                     class="absolute -top-1 -right-1 text-xs text-sky-800 cursor-pointer dark:text-white hidden group-hover:block"
-                    @click.prevent="removeProfilePic" />
+                    @click="userProfile.profile_pic = ''" />
             </div>
         </div>
         <div class="flex justify-between items-center w-full">
@@ -192,7 +152,7 @@ const editProfile = async () => {
                     icon="fa-regular fa-circle-xmark" 
                     title="Remove the image"
                     class="absolute -top-1 -right-1 text-xs text-sky-800 cursor-pointer dark:text-white hidden group-hover:block"
-                    @click.prevent="removeHeader" />
+                    @click="userProfile.header_pic = ''" />
             </div>
         </div>
         <button 

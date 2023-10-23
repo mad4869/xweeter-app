@@ -28,4 +28,10 @@ type ToFollowResponse = {
     success: boolean
 }
 
-export { type FollowResponse, type FollowDetailResponse, type WhoToFollowResponse, type ToFollowResponse }
+export { 
+    type FollowResponse, 
+    type FollowDetailResponse, 
+    type WhoToFollow, 
+    type WhoToFollowResponse, 
+    type ToFollowResponse 
+}

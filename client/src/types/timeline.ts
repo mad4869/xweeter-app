@@ -1,9 +1,3 @@
-enum UpdateTimeline {
-    Add,
-    Delete,
-    Restore
-}
-
 type ProfileTimeline = {
     xweet_id: number
     user_id: number
@@ -26,4 +20,4 @@ type ProfileTimelineResponse = {
     success: boolean
 }
 
-export { UpdateTimeline, type ProfileTimeline, type ProfileTimelineResponse }
+export { type ProfileTimeline, type ProfileTimelineResponse }

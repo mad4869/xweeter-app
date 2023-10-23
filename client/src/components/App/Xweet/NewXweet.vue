@@ -54,20 +54,16 @@ const addXweet = async () => {
             body.value = ''
             media.value = ''
 
-            setInterval(() => {
+            setTimeout(() => {
                 isSuccess.value = false
                 if (inModal) {
                     emit('close-modal')
                 }
-            }, 2000)
+            }, 1000)
         }
     } catch (err) {
         console.error(err)
     }
-}
-
-const setMedia = (fileUrl: string) => {
-    media.value = fileUrl
 }
 </script>
 
@@ -88,6 +84,6 @@ const setMedia = (fileUrl: string) => {
             :char-count="charCount"
             :max-char-count="MAX_CHAR_COUNT"
             :media="media"
-            @set-media="setMedia" />
+            @set-media="(fileUrl: string) => { media = fileUrl }" />
     </section>
 </template>

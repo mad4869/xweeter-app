@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 
-const {pages} = defineProps<{
-    pages: number
+const { pages } = defineProps<{
+    pages: number | undefined
 }>()
 
 const activePage = ref(1)
@@ -11,7 +11,7 @@ const changePage = (page: number) => {
     activePage.value = page
 }
 const nextPage = () => {
-    if (activePage.value < pages) {
+    if (activePage.value < (pages ?? 0)) {
         activePage.value++
     }
 }
@@ -27,19 +27,19 @@ const prevPage = () => {
         <font-awesome-icon 
             icon="fa-regular fa-square-caret-left" 
             class="text-sky-800 cursor-pointer"
-            @click.prevent="prevPage" />
+            @click="prevPage" />
         <div class="flex items-center gap-1">
             <div 
                 v-for="page in pages"
                 class="px-2 text-white cursor-pointer"
                 :class="page === activePage ? 'bg-sky-800 rounded' : ''"
-                @click.prevent="changePage(page)">
+                @click="changePage(page)">
                 {{ page }}
             </div>
         </div>
         <font-awesome-icon 
             icon="fa-regular fa-square-caret-right" 
             class="text-sky-800 cursor-pointer"
-            @click.prevent="nextPage" />
+            @click="nextPage" />
     </section>
 </template>

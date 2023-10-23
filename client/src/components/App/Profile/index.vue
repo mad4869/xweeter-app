@@ -1,9 +1,9 @@
 <script setup lang="ts">
+import { Ref } from 'vue';
+
 import useAuthStore from '@/stores/useAuthStore';
-import { countStore } from '@/stores/useCountStore'
-import { sendReqCookie } from '@/utils/axiosInstances';
-import { FollowDetailResponse, FollowResponse } from '@/types/follows'
-import { XweetsResponse } from '@/types/xweets';
+import { countStore } from '@/stores/useCountStore';
+import useCount, { Features } from '@/composables/useCount';
 
 const emit = defineEmits<{
     (e: 'show-new-xweet'): void
@@ -11,40 +11,17 @@ const emit = defineEmits<{
 
 const authStore = useAuthStore()
 
-const getXweets = async (): Promise<XweetsResponse | undefined> => {
-    try {
-        if (authStore.getIsAuthenticated) {
-            const { data } = await sendReqCookie.get(`/api/users/${authStore.getSignedInUserId}/xweets`)
-            if (data) {
-                return data
-            }
-        }
-    } catch (err) {
-        console.error(err)
-    }
+let xweetsCount: Ref<number | undefined>
+let followingCount: Ref<number | undefined>
+let followersCount: Ref<number | undefined>
+
+if (authStore.getIsAuthenticated) {
+    xweetsCount =  await useCount('users', authStore.getSignedInUserId, Features.Xweets)
+    countStore.xweetsCount = xweetsCount.value as number
+
+    followingCount = await useCount('users', authStore.getSignedInUserId, Features.Following)
+    followersCount = await useCount('users', authStore.getSignedInUserId, Features.Followers)
 }
-
-const { data } = (await getXweets()) || { data: [] }
-countStore.xweetsCount = data.length
-
-const getFollow = async (): Promise<FollowDetailResponse | undefined> => {
-    try {
-        if (authStore.getIsAuthenticated) {
-            const following = await sendReqCookie.get(`/api/users/${authStore.getSignedInUserId}/following`)
-            const followers = await sendReqCookie.get(`/api/users/${authStore.getSignedInUserId}/followers`)
-            if (following.data && followers.data) {
-                return {
-                    following: following.data, 
-                    followers: followers.data
-                }
-            }
-        }
-    } catch (err) {
-        console.error(err)
-    }
-}
-
-const { following, followers } = await getFollow() || { following: [], followers: [] }
 </script>
 
 <template>
@@ -75,13 +52,13 @@ const { following, followers } = await getFollow() || { following: [], followers
         <div 
             class="flex flex-col items-center justify-center w-full row-start-3 text-lg border-b border-solid text-sky-800 border-sky-600/20 dark:text-white">
             <div class="flex items-center justify-center w-full gap-2">
-                <strong class="flex-1 text-right">{{ (following as FollowResponse).data.length }}</strong>
+                <strong class="flex-1 text-right">{{ followingCount }}</strong>
                 <span class="flex-[2] text-white/50">Following</span>
             </div>
             <div class="flex items-center justify-center w-full gap-2">
-                <strong class="flex-1 text-right">{{ (followers as FollowResponse).data.length }}</strong>
+                <strong class="flex-1 text-right">{{ followersCount }}</strong>
                 <span class="flex-[2] text-white/50">
-                    {{ (followers as FollowResponse).data.length === 1 ? 'Follower' : 'Followers' }}
+                    {{ followersCount === 1 ? 'Follower' : 'Followers' }}
                 </span>
             </div>
         </div>

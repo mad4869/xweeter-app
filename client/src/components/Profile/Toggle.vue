@@ -24,5 +24,4 @@ defineEmits<{
 .active {
     @apply bg-sky-600 text-white font-semibold transition-colors
 }
-
 </style>
