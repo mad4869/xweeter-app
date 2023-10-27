@@ -8,7 +8,7 @@ import useAuthStore from '@/stores/useAuthStore';
 import { XweetDetail } from '@/types/xweets';
 
 defineProps<{
-    data: XweetDetail | undefined
+    data: XweetDetail | undefined | null
 }>()
 
 const authStore = useAuthStore()

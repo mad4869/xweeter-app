@@ -23,7 +23,11 @@ let notification: Ref<{
     isNotified: boolean
     category: "success" | "error" | undefined | null
     msg: string
-}>
+}> = ref({ 
+    isNotified: false, 
+    category: undefined, 
+    msg: '' 
+    })
 
 const showNotice = (category: 'success' | 'error', msg: string) => {
     notification = useNotify(category, msg)

@@ -32,10 +32,10 @@ if (authStore.getIsAuthenticated) {
     const userLikesData = await useFetchList<LikeDetail>(`/api/users/${authStore.getSignedInUserId}/likes`, true)
     const userRexweetsData = await useFetchList<RexweetDetail>(`/api/users/${authStore.getSignedInUserId}/rexweets`, true)
     
-    userLikesData.list.value.forEach(like => {
+    userLikesData.list.value?.forEach(like => {
         userLikes.value.push(like.xweet_id)
     })
-    userRexweetsData.list.value.forEach(rexweet => {
+    userRexweetsData.list.value?.forEach(rexweet => {
         userRexweets.value.push(rexweet.xweet_id)
     })
 }
@@ -47,7 +47,7 @@ const likeRef = ref<HTMLElement | null>(null)
 const { arrivedState } = useScroll(likeRef)
 
 const needMoreXweet = ref(true)
-if (likes.value.length <= 4) {
+if ((likes.value?.length ?? 0) <= 4) {
     needMoreXweet.value = false
 }
 
@@ -62,10 +62,10 @@ watch(() => arrivedState.bottom, async () => {
         const newLikes = newLikesData.list
         isLoading.value = false
     
-        if (newLikes.value.length === 0) {
+        if (newLikes.value?.length === 0) {
             needMoreXweet.value = false
         } else {
-            likes.value.push(...newLikes.value)
+            likes.value?.push(...newLikes.value as LikeDetail[])
         }
     }
 })
@@ -102,7 +102,7 @@ watch(() => arrivedState.bottom, async () => {
         </div>
         <MoreXweet v-if="needMoreXweet" :is-loading="isLoading" />
         <Empty 
-            v-if="likes.length === 0"
+            v-if="likes?.length === 0"
             msg="There are no likes yet" />
     </section>
 </template>

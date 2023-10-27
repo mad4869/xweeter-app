@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import Empty from '@/components/App/Empty.vue';
 import { User } from '@/types/auth'
 
 defineProps<{
@@ -26,5 +27,6 @@ defineProps<{
                 <p class="text-xs text-white">{{ user.bio }}</p>
             </div>
         </div>
+        <Empty v-if="data.length === 0" msg="There are no users yet" />
     </section>
 </template>

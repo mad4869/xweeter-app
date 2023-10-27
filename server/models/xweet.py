@@ -10,6 +10,8 @@ class Xweet(db.Model):
     user_id = db.Column(db.Integer(), db.ForeignKey("users.user_id"))
     body = db.Column(db.String(140))
     media = db.Column(db.Text())
+    media_name = db.Column(db.Text())
+    media_updated_at = db.Column(db.DateTime())
     created_at = db.Column(db.DateTime(), nullable=False, default=datetime.now)
     updated_at = db.Column(db.DateTime())
     replies = db.Relationship(

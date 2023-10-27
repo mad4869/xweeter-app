@@ -23,7 +23,6 @@ def get_users():
 
 
 @routes.route("/users/most-active", methods=["GET"], strict_slashes=False)
-# @jwt_required()
 def get_most_active_users():
     most_active_users = (
         db.session.query(
@@ -92,6 +91,7 @@ def get_daily_top_users():
         .join(Xweet)
         .filter(db.func.date(Xweet.created_at) == db.func.date(db.func.now()))
         .group_by(User.user_id, User.username, User.full_name)
+        .order_by(db.func.count(Xweet.xweet_id).desc())
     )
 
     results = query.paginate(page=page, per_page=per_page)

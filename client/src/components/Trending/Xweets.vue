@@ -36,10 +36,10 @@ if (authStore.getIsAuthenticated) {
         `/api/users/${authStore.getSignedInUserId}/rexweets`, true
     )
 
-    userLikesData.list.value.forEach(like => {
+    userLikesData.list.value?.forEach(like => {
         userLikes.value.push(like.xweet_id)
     })
-    userRexweetsData.list.value.forEach(rexweet => {
+    userRexweetsData.list.value?.forEach(rexweet => {
         userRexweets.value.push(rexweet.xweet_id)
     })
 }
@@ -62,10 +62,10 @@ watch(() => arrivedState.bottom, async () => {
         const newTrending = newTrendingData.list
         isLoading.value = false
     
-        if (newTrending.value.length === 0) {
+        if (newTrending.value?.length === 0) {
             needMoreXweet.value = false
         } else {
-            trending.value.push(...newTrending.value)
+            trending.value?.push(...newTrending.value as XweetDetail[])
         }
     }
 })
@@ -98,7 +98,7 @@ watch(() => arrivedState.bottom, async () => {
         </div>
         <MoreXweet v-if="needMoreXweet" :is-loading="isLoading" />
         <Empty 
-            v-if="trending.length === 0"
+            v-if="trending?.length === 0"
             msg="There are no xweets regarding this topic yet" />
     </section>
 </template>

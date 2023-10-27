@@ -1,5 +1,8 @@
 from flask import Flask
 from flask_admin.contrib.sqla import ModelView
+import schedule
+import time
+import threading
 
 from .extensions import *
 from .models import *
@@ -27,6 +30,23 @@ def create_app():
     admin.add_view(ModelView(Like, db.session))
     admin.add_view(ModelView(Reply, db.session))
     admin.add_view(ModelView(Hashtag, db.session))
+
+    def scheduled_task():
+        with app.app_context():
+            from .utils.update_file import update_file_url
+
+            update_file_url()
+
+    schedule.every(60).seconds.do(scheduled_task)
+
+    def run_scheduler():
+        while True:
+            schedule.run_pending()
+            time.sleep(2)
+
+    scheduler_thread = threading.Thread(target=run_scheduler)
+    scheduler_thread.daemon = True
+    scheduler_thread.start()
 
     return app
 

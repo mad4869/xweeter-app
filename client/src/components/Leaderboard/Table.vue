@@ -2,7 +2,8 @@
 import { TopDailyUser } from '@/types/users'
 
 defineProps<{
-    data: TopDailyUser[] | undefined,
+    data: TopDailyUser[] | undefined
+    totalData: number | undefined
 }>()
 </script>
 
@@ -26,11 +27,15 @@ defineProps<{
                 </tr>
             </tbody>
         </table>
+        <p>
+            Showing {{ (totalData as number) > 0 ? 1 : 0 }} {{ (totalData as number) > 1 ? `- ${totalData}` : '' }} of 
+            {{ totalData }} {{ totalData === 1 ? 'entry' : 'entries' }}
+        </p>
     </section>
 </template>
 
 <style scoped>
 .h-table {
-    min-height: calc(100vh - 14rem);
+    min-height: calc(100vh - 20rem);
 }
 </style>

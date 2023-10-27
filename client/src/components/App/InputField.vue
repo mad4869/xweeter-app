@@ -10,6 +10,9 @@ defineProps<{
     labelText: string,
     icon: string
 }>()
+defineEmits<{
+    (e: 'update:modelValue', value: string): void
+}>()
 </script>
 
 <template>

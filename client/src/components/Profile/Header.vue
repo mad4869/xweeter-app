@@ -177,7 +177,7 @@ const follow = async () => {
             <div class="flex flex-col gap-4 max-w-[50%]">
                 <div>
                     <p class="text-sky-600 font-bold">{{ fullname }}</p>
-                    <p class="text-sky-800 text-sm">@{{ username }}</p>
+                    <p class="text-sky-600 text-sm">@{{ username }}</p>
                 </div>
                 <p v-if="bio" class="text-xs text-sky-800 dark:text-white">{{ bio }}</p>
             </div>

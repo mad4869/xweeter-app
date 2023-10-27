@@ -5,7 +5,7 @@ import useAuthStore from '@/stores/useAuthStore';
 import { countStore } from '@/stores/useCountStore';
 import useCount, { Features } from '@/composables/useCount';
 
-const emit = defineEmits<{
+defineEmits<{
     (e: 'show-new-xweet'): void
 }>()
 
@@ -17,7 +17,7 @@ let followersCount: Ref<number | undefined>
 
 if (authStore.getIsAuthenticated) {
     xweetsCount =  await useCount('users', authStore.getSignedInUserId, Features.Xweets)
-    countStore.xweetsCount = xweetsCount.value as number
+    countStore.xweetsCount = xweetsCount.value ?? 0
 
     followingCount = await useCount('users', authStore.getSignedInUserId, Features.Following)
     followersCount = await useCount('users', authStore.getSignedInUserId, Features.Followers)
@@ -47,7 +47,7 @@ if (authStore.getIsAuthenticated) {
         <div
             class="flex flex-col items-center justify-center w-full row-start-2 gap-1 text-lg border-b border-solid text-sky-800 border-sky-600/20 dark:text-white">
             <strong class="text-3xl">{{ countStore.xweetsCount }}</strong>
-            <span class="text-white/50">Xweets</span>
+            <span class="text-white/50">{{ countStore.xweetsCount === 1 ? 'Xweet' : 'Xweets' }}</span>
         </div>
         <div 
             class="flex flex-col items-center justify-center w-full row-start-3 text-lg border-b border-solid text-sky-800 border-sky-600/20 dark:text-white">

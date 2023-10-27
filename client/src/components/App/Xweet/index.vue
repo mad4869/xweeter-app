@@ -112,22 +112,22 @@ const updateXweet = (newBody: string, newMedia?: string, updateDate?: string) =>
 
 <template>
     <section
-        class="px-4 py-4 flex justify-center gap-4 bg-sky-600/10 backdrop-blur-lg border border-solid border-sky-800 rounded-xl">
+        class="flex justify-center gap-4 px-4 py-4 border border-solid bg-sky-600/10 backdrop-blur-lg border-sky-800 rounded-xl">
         <router-link
             :to="`/users/${!isRexweet ? userId : ogUserId}`"
             class="flex-1 flex flex-col items-center gap-2 px-4 border-r border-solid border-sky-600/20">
             <img 
                 :src="!isRexweet ? profilePic : ogProfilePic"
-                class="w-10 h-10 border border-solid border-sky-800 rounded-full object-cover" 
+                class="object-cover w-10 h-10 border border-solid rounded-full border-sky-800" 
                 loading="lazy" />
-            <div class="flex flex-col justify-center items-center text-center">
-                <p class=" text-sky-600 font-semibold">{{ !isRexweet ? fullname : ogFullname }}</p>
-                <p class="text-sm text-sky-800">@{{ !isRexweet ? username : ogUsername }}</p>
+            <div class="flex flex-col items-center justify-center text-center">
+                <p class="font-semibold text-sky-600">{{ !isRexweet ? fullname : ogFullname }}</p>
+                <p class="text-sm text-sky-800 break-all">@{{ !isRexweet ? username : ogUsername }}</p>
             </div>
         </router-link>
-        <div class="flex flex-col gap-2 w-4/5 h-full">
+        <div class="flex flex-col w-4/5 h-full gap-2">
             <div 
-                class="flex justify-between items-center text-xs text-sky-900">
+                class="flex items-center justify-between text-xs text-sky-900">
                 <p class="flex items-center gap-1">
                     <span class="cursor-help" :title="useDateFormat(createdAt, 'D-M-YYYY HH:mm').value">
                         {{ xweetTimestamp }}
@@ -139,7 +139,7 @@ const updateXweet = (newBody: string, newMedia?: string, updateDate?: string) =>
                         - Updated {{ xweetUpdatedTimestamp }}
                     </em>
                 </p>
-                <span class="flex justify-center items-center gap-4 text-sm">
+                <span class="flex items-center justify-center gap-4 text-sm">
                     <span v-if="authStore.getIsAuthenticated" class="flex items-center gap-1">
                         <font-awesome-icon
                             v-if="!isRepliable"
@@ -150,7 +150,7 @@ const updateXweet = (newBody: string, newMedia?: string, updateDate?: string) =>
                         <font-awesome-icon
                             v-else
                             icon="fa-solid fa-comment"
-                            class="transition-transform cursor-pointer text-sky-600 scale-105"
+                            class="transition-transform scale-105 cursor-pointer text-sky-600"
                             title="Cancel reply"
                             @click="switchRepliable" />
                         <router-link 
@@ -177,7 +177,7 @@ const updateXweet = (newBody: string, newMedia?: string, updateDate?: string) =>
                     <font-awesome-icon
                         v-if="authStore.getIsAuthenticated && isLiked"
                         icon="fa-solid fa-heart"
-                        class="cursor-pointer text-sky-600 scale-105"
+                        class="scale-105 cursor-pointer text-sky-600"
                         title="Unlike this xweet" />
                     <font-awesome-icon
                         v-if="authStore.getIsAuthenticated && isOwn && !isEditable"
@@ -189,7 +189,7 @@ const updateXweet = (newBody: string, newMedia?: string, updateDate?: string) =>
                     <font-awesome-icon
                         v-if="authStore.getIsAuthenticated && isOwn && isEditable"
                         icon="fa-solid fa-pen-to-square"
-                        class="cursor-pointer text-sky-600 scale-105"
+                        class="scale-105 cursor-pointer text-sky-600"
                         title="Cancel edit"
                         @click="() => { isEditable = false }" />
                     <font-awesome-icon
@@ -222,7 +222,7 @@ const updateXweet = (newBody: string, newMedia?: string, updateDate?: string) =>
                                 :src="xweetMedia" 
                                 v-if="xweetMedia"
                                 alt="Media" 
-                                class="max-h-60 rounded-md cursor-zoom-in" 
+                                class="rounded-md max-h-60 cursor-zoom-in" 
                                 loading="lazy"
                                 @click="() => { isImageEnlarged = true }">
                         </div>

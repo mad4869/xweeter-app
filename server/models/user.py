@@ -1,17 +1,16 @@
 from datetime import datetime
 
-from .. import db, bcrypt, mc
 from .follow import follow
-
-BUCKET = "xweeter"
+from .. import db, bcrypt, mc
+from ..constants import MINIO_BUCKET, DEFAULT_PFP_FILE, DEFAULT_HEADER_FILE
 
 
 def get_default_pfp():
-    return mc.presigned_get_object(BUCKET, "default_pfp.jpg")
+    return mc.presigned_get_object(MINIO_BUCKET, DEFAULT_PFP_FILE)
 
 
 def get_default_header():
-    return mc.presigned_get_object(BUCKET, "default_header.png")
+    return mc.presigned_get_object(MINIO_BUCKET, DEFAULT_HEADER_FILE)
 
 
 class User(db.Model):
@@ -25,6 +24,10 @@ class User(db.Model):
     role = db.Column(db.String(50), nullable=False, default="user")
     profile_pic = db.Column(db.Text(), default=get_default_pfp())
     header_pic = db.Column(db.Text(), default=get_default_header())
+    profile_pic_name = db.Column(db.Text(), default=DEFAULT_PFP_FILE)
+    header_pic_name = db.Column(db.Text(), default=DEFAULT_HEADER_FILE)
+    profile_pic_updated_at = db.Column(db.DateTime(), default=datetime.now())
+    header_pic_updated_at = db.Column(db.DateTime(), default=datetime.now())
     created_at = db.Column(db.DateTime(), nullable=False, default=datetime.now())
     updated_at = db.Column(db.DateTime())
     xweets = db.Relationship(

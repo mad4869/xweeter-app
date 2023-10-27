@@ -28,7 +28,7 @@ const authStore = useAuthStore()
 const isLoading = ref(false)
 
 const start = ref(0)
-let timeline: Ref<XweetDetail[]> = ref([])
+let timeline: Ref<XweetDetail[] | null | undefined> = ref([])
 const likes: Ref<number[]> = ref([])
 const rexweets: Ref<number[]> = ref([])
 
@@ -45,10 +45,10 @@ if (authStore.getIsAuthenticated) {
 
     timeline = timelineData.list
 
-    likesData.list.value.forEach(like => {
+    likesData.list?.value?.forEach(like => {
         likes.value.push(like.xweet_id)
     })
-    rexweetsData.list.value.forEach(rexweet => {
+    rexweetsData.list?.value?.forEach(rexweet => {
         rexweets.value.push(rexweet.xweet_id)
     })
 } else {
@@ -59,7 +59,7 @@ if (authStore.getIsAuthenticated) {
 }
 
 socket.on('add_to_timeline', (xweet) => {
-    timeline.value.unshift(xweet)
+    timeline.value?.unshift(xweet)
 })
 
 const xweetToReply = ref<number | null>()
@@ -72,15 +72,15 @@ const setDeletedXweet = (xweetId: number) => {
 }
 
 if (isFiltered) {
-    const index = timeline.value.findIndex(xweet => xweet.xweet_id === xweetToDelete.value)
+    const index = timeline.value?.findIndex(xweet => xweet.xweet_id === xweetToDelete.value)
     if (index !== -1) {
-        timeline.value.splice(index, 1)
+        timeline.value?.splice((index as number), 1)
     }
 }
 
 const el = ref<HTMLElement | null>(null)
 const { arrivedState } = useScroll(el)
-const needMoreXweet = ref(true)
+const needMoreXweet = ref((timeline.value?.length ?? 0) > 2)
 
 watch(() => arrivedState.bottom, async () => {
     if (needMoreXweet) {
@@ -93,10 +93,10 @@ watch(() => arrivedState.bottom, async () => {
         const newTimeline = newTimelineData.list
         isLoading.value = false
     
-        if (newTimeline.value.length === 0) {
+        if (newTimeline.value?.length === 0) {
             needMoreXweet.value = false
         } else {
-            timeline.value.push(...newTimeline.value)
+            timeline.value?.push(...newTimeline.value as XweetDetail[])
         }
     }
 })
@@ -130,7 +130,7 @@ watch(() => arrivedState.bottom, async () => {
         </div>
         <MoreXweet v-if="needMoreXweet" :is-loading="isLoading" />
         <Empty 
-            v-if="timeline.length === 0"
+            v-if="timeline?.length === 0"
             msg="This is where your timeline would appear" 
             submsg="Start following some people to get contents to your desire!" />
     </section>

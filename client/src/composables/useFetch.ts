@@ -1,15 +1,15 @@
-import { ref, Ref, toRef } from 'vue'
+import { ref, Ref, toRef, toValue } from 'vue'
 import { AxiosError } from 'axios'
 
 import { sendReqCookie, sendReqWoCookie } from "@/utils/axiosInstances"
 
-const useFetchObject = async<T> (url: string, authenthicated: boolean) => {
-    const obj = ref<T | undefined>()
-    const error = ref<string>()
+const useFetchObject = async<T> (url: string | Ref<string>, authenthicated: boolean) => {
+    const obj = ref<T | null>()
+    const error = ref<string | null>()
 
     if (authenthicated) {
         try {
-            const { data } = await sendReqCookie.get(url)
+            const { data } = await sendReqCookie.get(toValue(url))
                 if (data?.success) {
                     obj.value = data.data as T
                 }
@@ -18,7 +18,7 @@ const useFetchObject = async<T> (url: string, authenthicated: boolean) => {
         }
     } else {
         try {
-            const { data } = await sendReqWoCookie.get(url)
+            const { data } = await sendReqWoCookie.get(toValue(url))
                 if (data?.success) {
                     obj.value = data.data as T
                 }
@@ -30,13 +30,13 @@ const useFetchObject = async<T> (url: string, authenthicated: boolean) => {
     return { obj, error }
 }
 
-const useFetchList = async<T> (url: string, authenthicated: boolean) => {
-    const list: Ref<T[]> = toRef(ref([]))
-    const error = ref<string>()
+const useFetchList = async<T> (url: string | Ref<string>, authenthicated: boolean) => {
+    const list: Ref<T[] | null | undefined> = toRef(ref())
+    const error = ref<string | null>()
 
     if (authenthicated) {
         try {
-            const { data } = await sendReqCookie.get(url)
+            const { data } = await sendReqCookie.get(toValue(url))
                 if (data?.success) {
                     list.value = data.data as T[]
                 }
@@ -45,7 +45,7 @@ const useFetchList = async<T> (url: string, authenthicated: boolean) => {
         }
     } else {
         try {
-            const { data } = await sendReqWoCookie.get(url)
+            const { data } = await sendReqWoCookie.get(toValue(url))
                 if (data?.success) {
                     list.value = data.data as T[]
                 }

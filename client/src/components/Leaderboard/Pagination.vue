@@ -1,23 +1,23 @@
 <script setup lang="ts">
-import { ref } from 'vue';
-
-const { pages } = defineProps<{
+const { activePage, pages } = defineProps<{
+    activePage: number
     pages: number | undefined
 }>()
-
-const activePage = ref(1)
+const emit = defineEmits<{
+    (e: 'update:active-page', value: number): void
+}>()
 
 const changePage = (page: number) => {
-    activePage.value = page
+    emit('update:active-page', page)
 }
 const nextPage = () => {
-    if (activePage.value < (pages ?? 0)) {
-        activePage.value++
+    if (activePage < (pages ?? 0)) {
+        emit('update:active-page', activePage + 1)
     }
 }
 const prevPage = () => {
-    if (activePage.value > 1) {
-        activePage.value--
+    if (activePage > 1) {
+        emit('update:active-page', activePage - 1)
     }
 }
 </script>

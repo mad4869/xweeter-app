@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Ref } from 'vue';
+import { ref, Ref } from 'vue';
 
 import Xweets from './Xweets.vue';
 import Sep from '@/components/App/Sep.vue';
@@ -10,7 +10,11 @@ let notification: Ref<{
     isNotified: boolean
     category: "success" | "error" | undefined | null
     msg: string
-}>
+}> = ref({ 
+    isNotified: false, 
+    category: undefined, 
+    msg: '' 
+    })
 
 const showNotice = (category: 'success' | 'error', msg: string) => {
     notification = useNotify(category, msg)

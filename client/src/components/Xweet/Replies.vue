@@ -15,7 +15,7 @@ const replies = await useFetchList<Reply>(`/api/xweets/${route.params.id}/replie
 </script>
 
 <template>
-    <Sep v-if="replies.list.value.length > 0" title="Replies" is-sticky />
+    <Sep v-if="(replies.list.value?.length ?? 0) > 0" title="Replies" is-sticky />
     <section class="flex flex-col gap-2">
         <Xweet v-for="reply in replies.list.value"
             :key="reply.xweet_id"

@@ -41,17 +41,21 @@ const profile = await useFetchObject<User>(`/api/users/${route.params.id}`, fals
 const profileXweetsCount = await useCount('users', parseInt(route.params.id as string), Features.Xweets)
 const profileFollowing = await useFetchList<User>(`/api/users/${route.params.id}/following`, false)
 const profileFollowers = await useFetchList<User>(`/api/users/${route.params.id}/followers`, false)
-const profileFollowingCount = profileFollowing.list.value.length
-const profileFollowersCount = profileFollowers.list.value.length
+const profileFollowingCount = profileFollowing.list.value?.length
+const profileFollowersCount = profileFollowers.list.value?.length
 
 const userFollowing = await useFetchList<User>(`/api/users/${authStore.getSignedInUserId}/following`, true)
-const userFollowed = userFollowing.list.value.some(following => following.user_id === profile.obj.value?.user_id)
+const userFollowed = userFollowing.list.value?.some(following => following.user_id === profile.obj.value?.user_id)
 
 let notification: Ref<{
     isNotified: boolean
     category: "success" | "error" | undefined | null
     msg: string
-}>
+}> = ref({ 
+    isNotified: false, 
+    category: undefined, 
+    msg: '' 
+    })
 
 const showNotice = (category: 'success' | 'error', msg: string) => {
     notification = useNotify(category, msg)
@@ -80,9 +84,9 @@ const showModal = ref(false)
         :y="scrollTimeline.y.value"
         :show-notice="showNotice" />
     <UserList v-show="activeTab === Tabs.Following"
-        :data="profileFollowing.list.value" />
+        :data="profileFollowing.list.value ?? []" />
     <UserList v-show="activeTab === Tabs.Followers"
-        :data="profileFollowers.list.value" />
+        :data="profileFollowers.list.value ?? []" />
     <Likes v-show="activeTab === Tabs.Likes"
         :y="scrollLike.y.value"
         :show-notice="showNotice" />

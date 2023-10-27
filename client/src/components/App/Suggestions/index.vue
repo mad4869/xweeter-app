@@ -11,10 +11,10 @@ const authStore = useAuthStore()
 const mostActiveUsers = await useFetchList<WhoToFollow>('/api/users/most-active', true)
 const followingList = await useFetchList<User>(`/api/users/${authStore.getSignedInUserId}/following`, true)
 
-const userToFollow = mostActiveUsers.list.value.filter(user => {
+const userToFollow = mostActiveUsers.list?.value?.filter(user => {
     return (
         user.user_id !== authStore.getSignedInUserId &&
-        !followingList.list.value.some(followed => followed.user_id === user.user_id)
+        !followingList.list?.value?.some(followed => followed.user_id === user.user_id)
     )
 })
 </script>
@@ -35,7 +35,7 @@ const userToFollow = mostActiveUsers.list.value.filter(user => {
                 :username="user.username"
                 :last-xweet="user.body"
                 :profile-pic="user.profile_pic" />
-            <Empty v-if="userToFollow.length === 0" msg="There is no user to follow for now" />
+            <Empty v-if="userToFollow?.length === 0" msg="There is no user to follow for now" />
         </div>
     </section>
 </template>

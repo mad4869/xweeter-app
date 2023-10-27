@@ -30,7 +30,7 @@ const timelineData = await useFetchList<ProfileTimeline>(
 const timeline = timelineData.list
 
 socket.on('add_to_timeline', (xweet) => {
-    timeline.value.unshift(xweet)
+    timeline.value?.unshift(xweet)
 })
 
 const likes: Ref<number[]> = ref([])
@@ -44,10 +44,10 @@ if (authStore.getIsAuthenticated) {
         `/api/users/${authStore.getSignedInUserId}/rexweets`, true
     )
 
-    likesData.list.value.forEach(like => {
+    likesData.list.value?.forEach(like => {
         likes.value.push(like.xweet_id)
     })
-    rexweetsData.list.value.forEach(rexweet => {
+    rexweetsData.list.value?.forEach(rexweet => {
         rexweets.value.push(rexweet.xweet_id)
     })
 }
@@ -58,7 +58,7 @@ const isLoading = ref(false)
 
 const timelineRef = ref<HTMLElement | null>(null)
 const { arrivedState } = useScroll(timelineRef)
-const needMoreXweet = ref(true)
+const needMoreXweet = ref((timeline.value?.length ?? 0) > 2)
 
 watch(() => arrivedState.bottom, async () => {
     if (needMoreXweet) {
@@ -71,10 +71,10 @@ watch(() => arrivedState.bottom, async () => {
         const newTimeline = newTimelineData.list
         isLoading.value = false
     
-        if (newTimeline.value.length === 0) {
+        if (newTimeline.value?.length === 0) {
             needMoreXweet.value = false
         } else {
-            timeline.value.push(...newTimeline.value)
+            timeline.value?.push(...newTimeline.value as ProfileTimeline[])
         }
     }
 })
@@ -111,9 +111,9 @@ watch(() => arrivedState.bottom, async () => {
         </div>
         <MoreXweet v-if="needMoreXweet" :is-loading="isLoading" />
         <Empty 
-            v-if="timeline.length === 0"
-            msg="This is where your timeline would appear" 
-            submsg="Start following some people to get contents to your desire!" />
+            v-if="timeline?.length === 0"
+            msg="This is where your profile timeline would appear" 
+            submsg="Start writing your xweets!" />
     </section>
 </template>
 
