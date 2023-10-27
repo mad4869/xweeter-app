@@ -12,7 +12,7 @@ export enum Features {
 }
 
 const useCount = async (subject: 'users' | 'xweets', id: number | undefined, feature: Features) => {
-    const count = ref<number>()
+    const count = ref<number>(0)
 
     if (!id) {
         return count

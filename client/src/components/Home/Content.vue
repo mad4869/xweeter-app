@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, Ref } from 'vue';
+import { ref } from 'vue';
 import { useScroll } from '@vueuse/core';
 
 import Timeline from './Timeline.vue'
@@ -19,23 +19,19 @@ const authStore = useAuthStore()
 const el = ref<HTMLElement | null>(null)
 const { y } = useScroll(el)
 
-let notification: Ref<{
-    isNotified: boolean
-    category: "success" | "error" | undefined | null
-    msg: string
-}> = ref({ 
+const notification = ref({ 
     isNotified: false, 
     category: undefined, 
     msg: '' 
     })
 
 const showNotice = (category: 'success' | 'error', msg: string) => {
-    notification = useNotify(category, msg)
+    useNotify(notification, category, msg)
 }
 
 const showModal = ref(false)
-
 const xweetToDelete = ref<number | null>()
+
 const isLoading = ref(false)
 const isError = ref(false)
 const isSuccess = ref(false)
@@ -52,13 +48,13 @@ const deleteXweet = async (xweet_id?: number | null) => {
             isLoading.value = false
             isSuccess.value = true
             showModal.value = false
-            xweetToDelete.value = null
             
             countStore.decrementXweetsCount()
             showNotice('error', 'Your xweet has been deleted')
 
             setTimeout(() => {
                 isSuccess.value = false
+                xweetToDelete.value = null
             }, 2000)
         }
     } catch (err) {
@@ -84,9 +80,9 @@ const showDeleteModal = (xweetId: number) => {
     <Timeline 
         :y="y"
         :is-filtered="isSuccess"
-        :show-notice="showNotice" 
-        @show-notice="showNotice" 
-        @show-delete-modal="showDeleteModal" />
+        :deleted-xweet="xweetToDelete"
+        :show-delete-modal="showDeleteModal"
+        :show-notice="showNotice" />
     <Modal :show="showModal" @clicked-outside="showModal = false">
         <ConfirmDialog
             title="Delete Xweet"

@@ -1,23 +1,19 @@
 <script setup lang="ts">
-import { ref, Ref } from 'vue';
+import { ref } from 'vue';
 
 import Xweets from './Xweets.vue';
 import Sep from '@/components/App/Sep.vue';
 import Popup from '@/components/App/Popup.vue';
 import useNotify from '@/composables/useNotify'
 
-let notification: Ref<{
-    isNotified: boolean
-    category: "success" | "error" | undefined | null
-    msg: string
-}> = ref({ 
+const notification = ref({ 
     isNotified: false, 
     category: undefined, 
     msg: '' 
     })
 
 const showNotice = (category: 'success' | 'error', msg: string) => {
-    notification = useNotify(category, msg)
+    useNotify(notification, category, msg)
 }
 </script>
 

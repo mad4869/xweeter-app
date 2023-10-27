@@ -1,10 +1,28 @@
 <script setup lang="ts">
+import { watch } from 'vue';
+
 import { TopDailyUser } from '@/types/users'
 
-defineProps<{
+const props = defineProps<{
     data: TopDailyUser[] | undefined
-    totalData: number | undefined
+    dataLength: number | undefined
+    dataTotal: number | undefined
+    page: number
+    entries: number
 }>()
+
+let initialIndex = 0
+let lastIndex = 0
+
+watch(() => [props.page, props.entries, props.dataLength], () => {
+    initialIndex = props.page === 1 ? 1 : props.entries + 1
+    lastIndex = (props.dataLength as number) >= props.entries ? 
+                (props.dataLength as number) * props.page : 
+                props.dataTotal ?? 0
+}, {
+    immediate: true
+})
+
 </script>
 
 <template>
@@ -19,7 +37,7 @@ defineProps<{
             </thead>
             <tbody class="bg-sky-800/30">
                 <tr v-for="(user, index) in data">
-                    <td>{{ index + 1 }}</td>
+                    <td>{{ page === 1 ? index + 1 : index + 1 + entries }}</td>
                     <td class="hover:text-sky-600" :title="`View @${user.username}'s profile'`">
                         <router-link :to="`/users/${user.user_id}`">@{{ user.username }}</router-link>
                     </td>
@@ -28,8 +46,8 @@ defineProps<{
             </tbody>
         </table>
         <p>
-            Showing {{ (totalData as number) > 0 ? 1 : 0 }} {{ (totalData as number) > 1 ? `- ${totalData}` : '' }} of 
-            {{ totalData }} {{ totalData === 1 ? 'entry' : 'entries' }}
+            Showing {{ initialIndex }} {{ initialIndex < lastIndex ? `- ${lastIndex}` : '' }} of 
+            {{ dataTotal }} {{ dataTotal === 1 ? 'entry' : 'entries' }}
         </p>
     </section>
 </template>

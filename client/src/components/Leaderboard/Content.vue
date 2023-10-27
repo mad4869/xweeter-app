@@ -19,9 +19,14 @@ const topUsersData = await useFetchObject<TopDailyUserData>(
 const topUsers = ref(topUsersData.obj.value?.users)
 const totalPages = ref(topUsersData.obj.value?.total_pages)
 
-watch([page, entries], async () => {
+watch(() => [page.value, entries.value], async ([newPage, newEntries], [_, oldEntries]) => {
+    if (newEntries !== oldEntries) {
+        newPage = 1
+        page.value = 1
+    }
+
     const newTopUsersData = await useFetchObject<TopDailyUserData>(
-            `/api/users/most-active-daily?page=${page.value}&per_page=${entries.value}`, false
+            `/api/users/most-active-daily?page=${newPage}&per_page=${newEntries}`, false
             )
     topUsers.value = newTopUsersData.obj.value?.users
     totalPages.value = newTopUsersData.obj.value?.total_pages
@@ -41,6 +46,11 @@ const filteredTopUsers = computed(() => {
     <Sep is-sticky title="Top Daily Users" />
     <Dropdown v-model:entries="entries" />
     <SearchBar v-model:keywords="keywords" />
-    <Table :data="filteredTopUsers" :total-data="filteredTopUsers?.length" />
+    <Table 
+        :data="filteredTopUsers" 
+        :data-length="filteredTopUsers?.length" 
+        :data-total="topUsersData.obj.value?.total_users"
+        :page="page"
+        :entries="entries" />
     <Pagination v-model:active-page="page" :pages="totalPages" />
 </template>

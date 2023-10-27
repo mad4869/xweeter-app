@@ -162,18 +162,32 @@ The frontend is built using __Vue__ as the Javascript framework and __Tailwind C
 
 ### 4. Delete a tweet
 
-![Delete a tweet](docs/test/delete-task-1.png)
-![Show the delete modal](docs/test/delete-task-1.png)
-![Delete a task successfully](docs/test/delete-task-2.png)
+![Delete a tweet](docs/test/delete_xweet.png)
+![Show the delete modal](docs/test/delete_xweet_modal.png)
+![Delete a task successfully](docs/test/delete_xweet_success.png)
 
 ### 5. Upload an image and attach it to a tweet
 
 ![Send a tweet with picture](docs/test/upload_image.png)
 ![Send a tweet with picture successfully](docs/test/upload_image_success.png)
 
-### 6. Leaderboard for most active users
+### 6. Like a tweet and view the count of the likes
+
+![Like a tweet](docs/test/like_xweet.png)
+![Like a tweet successfully and view the count increases](docs/test/like_xweet_success.png)
+
+### 7. Leaderboard for most active users
 
 ![Leaderboard](docs/test/leaderboard.png)
+
+### 8. Admin page for user with admin role
+
+![Admin page](docs/test/admin_page.png)
+
+### 9. Retrieve more tweets when necessary
+
+![More tweets](docs/test/more_xweet.png)
+![More tweets loaded](docs/test/more_xweet_success.png)
 
 ## Conclusion
 

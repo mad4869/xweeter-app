@@ -7,7 +7,9 @@ from ..models import Xweet, User, Like
 
 
 @routes.route(
-    "/xweets/<int:xweet_id>/likes", methods=["GET", "POST"], strict_slashes=False
+    "/xweets/<int:xweet_id>/likes",
+    methods=["GET", "POST", "DELETE"],
+    strict_slashes=False,
 )
 # @jwt_required()
 def access_likes_by_xweet(xweet_id):
@@ -29,6 +31,27 @@ def access_likes_by_xweet(xweet_id):
             )
         else:
             return jsonify({"success": True, "data": like.serialize()}), 201
+
+    elif request.method == "DELETE":
+        like = db.session.execute(
+            db.select(Like).filter(Like.xweet_id == xweet_id)
+        ).scalar_one_or_none()
+
+        try:
+            db.session.delete(like)
+            db.session.commit()
+        except:
+            db.session.rollback()
+
+            return (
+                jsonify({"success": False, "message": "Failed to unlike the xweet"}),
+                500,
+            )
+        else:
+            return (
+                jsonify({"success": True, "data": like.serialize()}),
+                201,
+            )
 
     likes = db.session.execute(
         db.select(Like)

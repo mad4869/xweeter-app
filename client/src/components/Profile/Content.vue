@@ -8,7 +8,7 @@ export enum Tabs {
 </script>
 
 <script setup lang="ts">
-import { ref, Ref } from 'vue';
+import { ref } from 'vue';
 import { useRoute } from 'vue-router';
 import { useScroll } from '@vueuse/core';
 
@@ -47,18 +47,14 @@ const profileFollowersCount = profileFollowers.list.value?.length
 const userFollowing = await useFetchList<User>(`/api/users/${authStore.getSignedInUserId}/following`, true)
 const userFollowed = userFollowing.list.value?.some(following => following.user_id === profile.obj.value?.user_id)
 
-let notification: Ref<{
-    isNotified: boolean
-    category: "success" | "error" | undefined | null
-    msg: string
-}> = ref({ 
+const notification = ref({ 
     isNotified: false, 
     category: undefined, 
     msg: '' 
     })
 
 const showNotice = (category: 'success' | 'error', msg: string) => {
-    notification = useNotify(category, msg)
+    useNotify(notification, category, msg)
 }
 
 const showModal = ref(false)

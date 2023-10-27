@@ -1,16 +1,12 @@
-import { ref } from "vue"
+import { Ref } from "vue"
 
-const useNotify = (category: 'success' | 'error', msg: string) => {
-    const notification = ref<{
-        isNotified: boolean,
-        category: 'success' | 'error' | undefined | null
-        msg: string
-    }>({
-        isNotified: false,
-        category: undefined,
-        msg: ''
-    })
+type Notification = {
+    isNotified: boolean,
+    category: 'success' | 'error' | undefined | null
+    msg: string
+}
 
+const useNotify = (notification: Ref<Notification>, category: 'success' | 'error', msg: string) => {
     notification.value.isNotified = true
     notification.value.category = category
     notification.value.msg = msg
@@ -20,8 +16,6 @@ const useNotify = (category: 'success' | 'error', msg: string) => {
         notification.value.category = null
         notification.value.msg = ''
     }, 3000)
-
-    return notification
 }
 
 export default useNotify

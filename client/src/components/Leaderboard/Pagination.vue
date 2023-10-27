@@ -1,5 +1,5 @@
 <script setup lang="ts">
-const { activePage, pages } = defineProps<{
+const props = defineProps<{
     activePage: number
     pages: number | undefined
 }>()
@@ -11,13 +11,13 @@ const changePage = (page: number) => {
     emit('update:active-page', page)
 }
 const nextPage = () => {
-    if (activePage < (pages ?? 0)) {
-        emit('update:active-page', activePage + 1)
+    if (props.activePage < (props.pages ?? 0)) {
+        emit('update:active-page', props.activePage + 1)
     }
 }
 const prevPage = () => {
-    if (activePage > 1) {
-        emit('update:active-page', activePage - 1)
+    if (props.activePage > 1) {
+        emit('update:active-page', props.activePage - 1)
     }
 }
 </script>

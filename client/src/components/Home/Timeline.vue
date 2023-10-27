@@ -13,14 +13,12 @@ import { LikeDetail } from '@/types/likes';
 import { RexweetDetail } from '@/types/rexweets'
 import socket from '@/utils/socket';
 
-const { isFiltered } = defineProps<{
+const props = defineProps<{
     y: number
     isFiltered: boolean
+    deletedXweet?: number | null
+    showDeleteModal: (xweetId: number) => void
     showNotice: (category: 'success' | 'error', msg: string) => void
-}>()
-const emit = defineEmits<{
-    (e: 'show-notice', category: 'success' | 'error', msg: string): void
-    (e: 'show-delete-modal', xweetId: number): void
 }>()
 
 const authStore = useAuthStore()
@@ -62,21 +60,16 @@ socket.on('add_to_timeline', (xweet) => {
     timeline.value?.unshift(xweet)
 })
 
-const xweetToReply = ref<number | null>()
-const xweetToDelete = ref<number | null>()
-
-const setDeletedXweet = (xweetId: number) => {
-    emit('show-delete-modal', xweetId)
-    
-    xweetToDelete.value = xweetId
-}
-
-if (isFiltered) {
-    const index = timeline.value?.findIndex(xweet => xweet.xweet_id === xweetToDelete.value)
-    if (index !== -1) {
-        timeline.value?.splice((index as number), 1)
+watch(() => props.isFiltered, () => {
+    if (props.isFiltered) {
+        const index = timeline.value?.findIndex(xweet => xweet.xweet_id === props.deletedXweet)
+        if (index !== -1) {
+            timeline.value?.splice((index as number), 1)
+        }
     }
-}
+})
+
+const xweetToReply = ref<number | null>()
 
 const el = ref<HTMLElement | null>(null)
 const { arrivedState } = useScroll(el)
@@ -122,7 +115,7 @@ watch(() => arrivedState.bottom, async () => {
                 :liked="likes.includes(xweet.xweet_id)"
                 @show-notice="showNotice"
                 @reply="xweetId => { xweetToReply = xweetId }"
-                @delete="setDeletedXweet" />
+                @delete="showDeleteModal" />
             <ReplyXweet 
                 :show="xweetToReply === xweet.xweet_id"
                 :xweet-id="xweet.xweet_id"

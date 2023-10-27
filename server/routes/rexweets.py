@@ -7,7 +7,9 @@ from ..models import Xweet, User, Rexweet
 
 
 @routes.route(
-    "/xweets/<int:xweet_id>/rexweets", methods=["GET", "POST"], strict_slashes=False
+    "/xweets/<int:xweet_id>/rexweets",
+    methods=["GET", "POST", "DELETE"],
+    strict_slashes=False,
 )
 @jwt_required()
 def access_rexweets_by_xweets(xweet_id):
@@ -29,6 +31,27 @@ def access_rexweets_by_xweets(xweet_id):
             )
         else:
             return jsonify({"success": True, "data": rexweet.serialize()}), 201
+
+    elif request.method == "DELETE":
+        rexweet = db.session.execute(
+            db.select(Rexweet).filter(Rexweet.xweet_id == xweet_id)
+        ).scalar_one_or_none()
+
+        try:
+            db.session.delete(rexweet)
+            db.session.commit()
+        except:
+            db.session.rollback()
+
+            return (
+                jsonify({"success": False, "message": "Failed to unrexweet"}),
+                500,
+            )
+        else:
+            return (
+                jsonify({"success": True, "data": rexweet.serialize()}),
+                201,
+            )
 
     rexweets = db.session.execute(
         db.select(Rexweet)
