@@ -28,8 +28,8 @@ defineProps<{
             </div>
         </router-link>
         <div 
-            class="flex flex-col justify-center w-full gap-1 px-2 py-1 text-xs rounded-sm bg-white/5">
-            <span class="px-1 rounded bg-slate-800 w-fit py text-slate-600">Last Xweet</span>
+            class="flex flex-col justify-center w-full gap-1 px-2 py-1 text-xs rounded-sm bg-sky-900 dark:bg-white/5">
+            <span class="px-1 rounded bg-sky-800 dark:bg-slate-800 w-fit py text-sky-400 dark:text-slate-600">Last Xweet</span>
             <p class="px-1 italic text-white">{{ lastXweet }}</p>
         </div>
     </section>

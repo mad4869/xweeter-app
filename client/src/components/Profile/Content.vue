@@ -9,7 +9,7 @@ export enum Tabs {
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { useScroll } from '@vueuse/core';
 
 import Header from './Header.vue';
@@ -28,14 +28,26 @@ import useNotify from '@/composables/useNotify'
 
 const authStore = useAuthStore()
 
-const route = useRoute()
-
 const timelineRef = ref<HTMLElement | null>(null)
 const likeRef = ref<HTMLElement | null>(null)
 const scrollTimeline = useScroll(timelineRef)
 const scrollLike = useScroll(likeRef)
 
-const activeTab = ref(Tabs.Xweets)
+const route = useRoute()
+const router = useRouter()
+
+const activeTab = ref(route.query.tab || Tabs.Xweets)
+const setActiveTab = (tab: Tabs) => {
+    if (tab === Tabs.Xweets) {
+        router.push('')
+    } else {
+        router.push({ query: { tab } })
+    }
+
+    router.afterEach(() => {
+        activeTab.value = route.query.tab || Tabs.Xweets
+    })
+}
 
 const profile = await useFetchObject<User>(`/api/users/${route.params.id}`, false)
 const profileXweetsCount = await useCount('users', parseInt(route.params.id as string), Features.Xweets)
@@ -74,8 +86,9 @@ const showModal = ref(false)
         :followers-count="profileFollowersCount"
         :is-followed="userFollowed"
         @show-notice="showNotice"
-        @show-edit-profile="showModal = true" />
-    <Toggle :active-tab="activeTab" @set-active-tab="tab => { activeTab = tab }" />
+        @show-edit-profile="showModal = true"
+        @set-active-tab="setActiveTab" />
+    <Toggle :active-tab="activeTab" @set-active-tab="setActiveTab" />
     <Timeline v-show="activeTab === Tabs.Xweets"
         :y="scrollTimeline.y.value"
         :show-notice="showNotice" />

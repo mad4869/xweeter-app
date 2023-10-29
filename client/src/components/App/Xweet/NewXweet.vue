@@ -69,8 +69,8 @@ const addXweet = async () => {
 
 <template>
     <section 
-        class="relative flex flex-col justify-between items-center min-w-[50vw] px-12 border border-solid border-sky-800 rounded-xl">
-        <span class="w-full py-4 text-2xl text-sky-950 dark:text-white">New Xweet</span>
+        class="bg-sky-600 relative flex flex-col justify-between items-center min-w-[50vw] px-12 border border-solid border-sky-800 rounded-xl dark:bg-transparent">
+        <span class="w-full py-4 text-2xl text-white">New Xweet</span>
         <TextEditor
             :input-name="!inModal ? 'new-xweet' : 'modal-new-xweet'"
             v-model="body"

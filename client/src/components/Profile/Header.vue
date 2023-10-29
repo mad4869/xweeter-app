@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 
+import { Tabs } from './Content.vue'
 import useAuthStore from '@/stores/useAuthStore';
 import { sendReqCookie } from '@/utils/axiosInstances';
 import { UserResponse } from '@/types/users'
@@ -24,6 +25,7 @@ const { userId, profilePic, headerPic, isFollowed } = defineProps<{
 const emit = defineEmits<{
     (e: 'show-notice', category: 'success' | 'error', msg: string): void,
     (e: 'show-edit-profile'): void
+    (e: 'set-active-tab', tab: Tabs): void
 }>()
 
 const authStore = useAuthStore()
@@ -100,17 +102,17 @@ const follow = async () => {
 </script>
 
 <template>
-    <section class="relative grid grid-rows-5 h-[50vh] rounded-lg overflow-hidden">
-        <div class=" relative row-span-3 group/header">
+    <section class="relative grid grid-rows-5 h-[55vh] rounded-lg overflow-hidden">
+        <div class="relative row-span-3 group/header">
             <img 
                 :src="header" 
-                class="w-full h-full object-cover"
+                class="object-cover w-full h-full"
                 alt="Header" 
                 loading="lazy">
             <label
                 v-if="isOwn" 
                 for="change-header"
-                class="absolute right-4 top-4 px-2 py-1 bg-sky-600/50 backdrop-blur-md text-xs text-white font-semibold rounded-md cursor-pointer hidden group-hover/header:flex items-center hover:bg-sky-600"
+                class="absolute items-center hidden px-2 py-1 text-xs font-semibold text-white rounded-md cursor-pointer right-4 top-4 bg-sky-600/50 backdrop-blur-md group-hover/header:flex hover:bg-sky-600"
                 title="Change your header">
                 Change
                 <input 
@@ -121,18 +123,18 @@ const follow = async () => {
                     @change="manageHeader">
             </label>
         </div>
-        <div class="absolute flex justify-between items-center w-full bottom-[14vh] px-12">
+        <div class="absolute flex justify-between items-center w-full bottom-[16vh] px-12">
             <label 
                 for="change-profile-pic" 
                 title="Change your profile picture" 
-                class="relative w-20 h-20 border border-solid border-sky-600 rounded-full shadow-xl overflow-hidden group/pfp">
+                class="relative w-20 h-20 overflow-hidden border border-solid rounded-full shadow-xl border-sky-600 group/pfp">
                 <img 
                     :src="pfp" 
-                    class="w-full h-full object-cover"
+                    class="object-cover w-full h-full"
                     alt="Profile Pic" 
                     loading="lazy">
                 <div 
-                    class="absolute left-0 top-0 w-full h-full bg-slate-600/10 backdrop-blur-sm text-xs text-white font-semibold cursor-pointer hidden group-hover/pfp:flex justify-center items-center">
+                    class="absolute top-0 left-0 items-center justify-center hidden w-full h-full text-xs font-semibold text-white cursor-pointer bg-slate-600/10 backdrop-blur-sm group-hover/pfp:flex">
                     Change
                 </div>
                 <input 
@@ -145,14 +147,14 @@ const follow = async () => {
             <div class="flex items-center gap-2">
                 <button
                     v-if="isOwn"
-                    class="bg-sky-600 px-4 py-1 text-white font-medium border-2 border-solid border-sky-800 rounded-md hover:bg-sky-800 hover:border-sky-600"
+                    class="px-4 py-1 font-medium bg-white border-2 border-solid rounded-md dark:text-white text-sky-600 dark:bg-sky-600 dark:border-sky-800 dark:hover:bg-sky-800 dark:hover:border-sky-600 hover:bg-slate-200"
                     title="Edit your profile"
                     @click="$emit('show-edit-profile')">
                     Edit
                 </button>
                 <button
                     v-else-if="!isOwn && !userFollowed"
-                    class="bg-sky-600 px-4 py-1 text-white font-medium border-2 border-solid border-sky-800 rounded-md hover:bg-sky-800 hover:border-sky-600"
+                    class="px-4 py-1 font-medium text-white border-2 border-solid rounded-md bg-sky-600 border-sky-800 hover:bg-sky-800 hover:border-sky-600"
                     title="Follow this user"
                     @click.prevent="follow">
                     <font-awesome-icon icon="fa-solid fa-spinner" spin-pulse v-if="isLoading" />
@@ -160,34 +162,38 @@ const follow = async () => {
                 </button>
                 <div
                     v-else-if="!isOwn && userFollowed"
-                    class="bg-slate-600 px-4 py-1 text-slate-400 font-medium rounded-md cursor-not-allowed"
+                    class="px-4 py-1 font-medium rounded-md cursor-not-allowed bg-slate-600 text-slate-400"
                     title="You already followed this user">
                     Followed
                 </div>
                 <button
                     v-if="isEditable"
-                    class="bg-sky-600 px-2 py-1 text-white font-medium border-2 border-solid border-sky-800 rounded-full"
+                    class="px-2 py-1 font-medium text-white border-2 border-solid rounded-full bg-sky-600 border-sky-800"
                     title="Confirm change"
                     @click="changeImage">
                     <font-awesome-icon icon="fa-solid fa-check" class="text-sm" />
                 </button>
             </div>
         </div>
-        <div class="row-start-4 row-span-2 flex justify-between items-center pt-12 px-12 bg-white/10 leading-4">
-            <div class="flex flex-col gap-4 max-w-[50%]">
+        <div class="flex items-center justify-between row-span-2 row-start-4 px-12 pt-8 leading-4 bg-sky-600 dark:bg-white/10">
+            <div class="flex flex-col gap-4 max-w-[50%] text-white">
                 <div>
-                    <p class="text-sky-600 font-bold">{{ fullname }}</p>
-                    <p class="text-sky-600 text-sm">@{{ username }}</p>
+                    <p class="text-2xl font-bold dark:text-sky-600">{{ fullname }}</p>
+                    <p class="text-sm dark:text-sky-600">@{{ username }}</p>
                 </div>
-                <p v-if="bio" class="text-xs text-sky-800 dark:text-white">{{ bio }}</p>
+                <p v-if="bio" class="text-xs">{{ bio }}</p>
             </div>
-            <div class="flex flex-col justify-center items-end gap-4 text-white">
-                <div>
+            <div class="flex flex-col items-end justify-center gap-4 text-white cursor-pointer">
+                <div @click="$emit('set-active-tab', Tabs.Xweets)" title="View xweets">
                     <p class="text-xl"><strong>{{ xweetsCount }}</strong> <span class="text-white/50">Xweets</span></p>
                 </div>
-                <div class="flex justify-center items-center gap-4">
-                    <p><strong>{{ followingCount }}</strong> <span class="text-white/50">Following</span></p>
-                    <p><strong>{{ followersCount }}</strong> <span class="text-white/50">Followers</span></p>
+                <div class="flex items-center justify-center gap-4" title="View following">
+                    <div @click="$emit('set-active-tab', Tabs.Following)">
+                        <strong>{{ followingCount }}</strong> <span class="text-white/50">Following</span>
+                    </div>
+                    <div @click="$emit('set-active-tab', Tabs.Followers)" title="View followers">
+                        <strong>{{ followersCount }}</strong> <span class="text-white/50">Followers</span>
+                    </div>
                 </div>
             </div>
         </div>

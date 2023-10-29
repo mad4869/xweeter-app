@@ -11,7 +11,7 @@ defineEmits<{
 
 <template>
     <nav
-        class="sticky top-0 z-20 grid grid-cols-4 px-20 py-4 mx-auto border-b border-solid place-items-center bg-slate-200/90 backdrop-blur text-sky-800 border-sky-600 dark:bg-slate-900/90 dark:text-white dark:shadow-md dark:shadow-sky-600/50">
+        class="sticky top-0 z-20 grid grid-cols-4 px-20 py-4 mx-auto text-white border-b border-solid place-items-center bg-sky-600/90 backdrop-blur border-sky-900 dark:bg-slate-900/90 dark:text-white dark:shadow-md dark:shadow-sky-600/50">
         <div class="col-span-1"></div>
         <div class="flex items-center justify-center col-span-2">
             <router-link to="/home" title="Home">

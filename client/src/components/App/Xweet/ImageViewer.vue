@@ -13,11 +13,17 @@ defineProps<{
     body?: string
     fileUrl?: string
     isOwn: boolean
+    isRexweeted: boolean
     isLiked: boolean
+    rexweetCount: number
+    likeCount: number
 }>()
 
 const emit = defineEmits<{
     (e: 'clicked-outside'): void
+    (e: 'rexweet'): void
+    (e: 'like-xweet'): void
+    (e: 'unlike-xweet'): void
 }>()
 
 const authStore = useAuthStore()
@@ -54,7 +60,7 @@ onClickOutside(imgRef, () => {
             </div>
         </div>
         <div 
-            class="flex justify-center items-center gap-4 w-[50vw] px-8 py-2 bg-slate-900/70 text-white rounded-lg">
+            class="flex justify-center items-center gap-4 w-[50vw] px-8 py-2 bg-white/30 dark:bg-slate-900/70 text-sky-900 dark:text-white rounded-lg">
             <aside class="flex items-center justify-center">
                 <img 
                     :src="profilePic" 
@@ -64,31 +70,51 @@ onClickOutside(imgRef, () => {
             </aside>
             <div class="flex flex-col items-center flex-1">
                 <div class="flex items-center justify-between w-full">
-                    <div class="flex gap-2 text-sm text-sky-400">
+                    <div class="flex gap-2 text-sm text-sky-800">
                         <span class="font-bold">{{ fullname }}</span>
                         <span>@{{ username }}</span>
                     </div>
-                    <div class="flex items-center justify-center gap-4">
-                        <font-awesome-icon 
-                            v-if="authStore.getIsAuthenticated && !isOwn"
-                            icon="fa-solid fa-retweet" 
-                            class="text-sm transition-transform cursor-pointer hover:text-sky-600 hover:scale-105"
-                            title="Rexweet" />
+                    <div class="flex items-center justify-center gap-4 text-sky-400 dark:text-sky-900">
+                        <span class="flex items-center gap-1">
+                            <font-awesome-icon 
+                                icon="fa-solid fa-retweet" 
+                                class="transition-transform"
+                                :class="{
+                                    'text-sky-600 scale-105': isRexweeted,
+                                    'cursor-pointer hover:text-sky-600 hover:scale-105': !isOwn,
+                                    'cursor-not-allowed': isOwn
+                                    }"
+                                :title="!isOwn && !isRexweeted ? 'Rexweet' :
+                                        isOwn ? 'You can\'t rexweet your own xweet' :
+                                        'Unrexweet'"
+                                @click="$emit('rexweet')" />
+                            <span 
+                                v-if="rexweetCount" 
+                                class="text-xs"
+                                :class="isRexweeted ? 'text-sky-600' : 'text-sky-400 dark:text-sky-900'">
+                                {{ rexweetCount }}
+                            </span>
+                        </span>
+                        <span class="flex items-center gap-1">
                         <font-awesome-icon 
                             v-if="authStore.getIsAuthenticated && !isLiked"
                             icon="fa-regular fa-heart"
-                            class="text-sm transition-transform cursor-pointer hover:text-sky-600 hover:scale-105"
-                            title="Like Xweet" />
+                            class="transition-transform cursor-pointer hover:text-sky-600 hover:scale-105"
+                            title="Like this xweet"
+                            @click="$emit('like-xweet')" />
                         <font-awesome-icon
                             v-if="authStore.getIsAuthenticated && isLiked"
                             icon="fa-solid fa-heart"
-                            class="text-sm transition-transform scale-105 cursor-pointer text-sky-600"
-                            title="Unlike Xweet" />
-                        <font-awesome-icon
-                            v-if="authStore.getIsAuthenticated && isOwn"
-                            icon="fa-regular fa-trash-can"
-                            class="text-sm transition-transform cursor-pointer hover:text-red-600 hover:scale-105"
-                            title="Delete Xweet"/>
+                            class="scale-105 cursor-pointer text-sky-600"
+                            title="Unlike this xweet"
+                            @click="$emit('unlike-xweet')" />
+                        <span 
+                            v-if="likeCount" 
+                            class="text-xs"
+                            :class="isLiked ? 'text-sky-600' : 'text-sky-800'">
+                            {{ likeCount }}
+                        </span>
+                        </span>
                     </div>
                 </div>
                 <span class="w-full">{{ body }}</span>

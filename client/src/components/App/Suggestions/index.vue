@@ -21,7 +21,7 @@ const userToFollow = mostActiveUsers.list?.value?.filter(user => {
 
 <template>
     <section 
-        class="flex flex-col flex-1 gap-4 overflow-hidden border border-solid border-sky-800 rounded-xl">
+        class="flex flex-col flex-1 gap-2 overflow-hidden border border-solid border-sky-800 rounded-xl">
         <div class="flex items-center justify-between px-4 py-2 bg-sky-600">
             <span class="font-semibold text-white">Who to Follow</span>
             <font-awesome-icon icon="fa-regular fa-user" class="text-white" />

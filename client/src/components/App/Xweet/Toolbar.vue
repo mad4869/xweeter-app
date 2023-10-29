@@ -54,7 +54,7 @@ const removeFile = () => {
         <div class="flex items-center gap-2 h-full">
             <label :for="`${mode}-add-image`" title="Add image to your xweet">
                 <span
-                    class="flex items-center gap-2 px-2 py-1 bg-sky-800/50 text-xs text-white rounded-md transition-colors cursor-pointer hover:bg-sky-800 dark:bg-sky-400/50 dark:hover:bg-sky-400">
+                    class="flex items-center gap-2 px-2 py-1 bg-sky-800/70 text-xs text-white rounded-md transition-colors cursor-pointer hover:bg-sky-800 dark:bg-sky-400/50 dark:hover:bg-sky-400">
                     <font-awesome-icon icon="fa-solid fa-images" />
                     <h6>Image</h6>
                 </span>
@@ -74,12 +74,12 @@ const removeFile = () => {
                     @click.prevent="removeFile" />
             </div>
         </div>
-        <div class="flex items-center h-full px-2 text-center dark:text-white">
+        <div class="flex items-center h-full px-2 text-center text-white">
             <Transition mode="out-in">
                 <p v-if="charCount <= maxCharCount && !isSuccess && !isLoading" class="text-xs">
                     <span>{{ charCount }}</span>
                     /
-                    <span class="text-sky-800 dark:text-sky-600">{{ maxCharCount }}</span>
+                    <span class="font-medium dark:text-sky-600 dark:font-normal">{{ maxCharCount }}</span>
                 </p>
                 <p v-else-if="charCount > maxCharCount" class="text-red-600 fade-in dark:text-red-400">
                     Your xweet exceeds the maximum number of characters
@@ -97,7 +97,7 @@ const removeFile = () => {
             <input 
                 type="button" 
                 :value="modeMap[mode].btn"
-                class="px-4 py-1 bg-sky-600 text-white font-semibold rounded-md transition-colors duration-200 cursor-pointer hover:bg-sky-800 active:shadow-inner disabled:bg-slate-800 disabled:text-slate-600 disabled:cursor-not-allowed"
+                class="px-4 py-1 bg-white dark:bg-sky-600 text-sky-600 dark:text-white font-semibold rounded-md transition-colors duration-200 cursor-pointer dark:hover:bg-sky-800 active:shadow-inner disabled:bg-sky-700 dark:disabled:bg-slate-800 dark:disabled:text-slate-600 disabled:cursor-not-allowed"
                 :disabled="charCount > maxCharCount || (charCount === 0 && !media) || isLoading" 
                 :title="modeMap[mode].tooltip" 
                 @mousedown.prevent="submitFunc">

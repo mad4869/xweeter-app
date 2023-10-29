@@ -24,9 +24,13 @@ defineProps<{
                     <span class="font-semibold">{{ user.full_name }}</span>
                     <span class="text-sm">@{{ user.username }}</span>
                 </p>
-                <p class="text-xs text-white">{{ user.bio }}</p>
+                <p 
+                    class="text-xs" 
+                    :class="user.bio ? 'text-sky-800 dark:text-white' : 'text-slate-400 dark:text-slate-700'">
+                    {{ user.bio || 'No bio' }}
+                </p>
             </div>
         </div>
-        <Empty v-if="data.length === 0" msg="There are no users yet" />
+        <Empty v-if="data.length === 0" submsg="There are no users yet" />
     </section>
 </template>

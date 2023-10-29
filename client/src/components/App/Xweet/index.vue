@@ -13,7 +13,7 @@ import { sendReqCookie } from '@/utils/axiosInstances';
 import { RexweetResponse } from '@/types/rexweets';
 import { LikeResponse } from '@/types/likes'
 
-const { id, username, body, media, userId, createdAt, updatedAt, rexweeted, liked } = defineProps<{
+const { id, username, body, media, userId, createdAt, updatedAt, isOwn, rexweeted, liked } = defineProps<{
     id: number
     userId: number
     fullname?: string
@@ -57,40 +57,42 @@ const xweetRexweetsCount = await useCount('xweets', id, Features.Rexweets)
 const xweetLikesCount = await useCount('xweets', id, Features.Likes)
 
 const rexweet = async () => {
-    isRexweeted.value = !isRexweeted.value
-
-    if (isRexweeted.value) {
-        xweetRexweetsCount.value++
-        try {
-            const { data } = await sendReqCookie.post<RexweetResponse | undefined>(
-                `/api/xweets/${id}/rexweets`, { userId: authStore.getSignedInUserId }
-            )
+    if (!isOwn) {
+        isRexweeted.value = !isRexweeted.value
     
-            if (data?.success) {
-                emit('show-notice', 'success', `You rexweeted ${username}'s xweet`)
+        if (isRexweeted.value) {
+            xweetRexweetsCount.value++
+            try {
+                const { data } = await sendReqCookie.post<RexweetResponse | undefined>(
+                    `/api/xweets/${id}/rexweets`, { userId: authStore.getSignedInUserId }
+                )
+        
+                if (data?.success) {
+                    emit('show-notice', 'success', `You rexweeted ${username}'s xweet`)
+                }
+            } catch (err) {
+                isRexweeted.value = false
+                xweetRexweetsCount.value--
+        
+                emit('show-notice', 'error', 'Failed to rexweet: error occured during the process')
             }
-        } catch (err) {
-            isRexweeted.value = false
+        } else {
             xweetRexweetsCount.value--
     
-            emit('show-notice', 'error', 'Failed to rexweet: error occured during the process')
-        }
-    } else {
-        xweetRexweetsCount.value--
-
-        try {
-            const { data } = await sendReqCookie.delete<RexweetResponse | undefined>(
-                `/api/xweets/${id}/rexweets`
-            )
-
-            if (data?.success) {
-                emit('show-notice', 'success', `You unrexweeted ${username}'s xweet`)
+            try {
+                const { data } = await sendReqCookie.delete<RexweetResponse | undefined>(
+                    `/api/xweets/${id}/rexweets`
+                )
+    
+                if (data?.success) {
+                    emit('show-notice', 'success', `You unrexweeted ${username}'s xweet`)
+                }
+            } catch (err) {
+                isRexweeted.value = true
+                xweetRexweetsCount.value++
+    
+                emit('show-notice', 'error', 'Failed to unrexweet: error occured during the process')
             }
-        } catch (err) {
-            isRexweeted.value = true
-            xweetRexweetsCount.value++
-
-            emit('show-notice', 'error', 'Failed to unrexweet: error occured during the process')
         }
     }
 }
@@ -199,7 +201,7 @@ const updateXweet = (newBody: string, newMedia?: string, updateDate?: string) =>
                         <router-link 
                             :to="`/xweets/${id}`"
                             v-if="xweetRepliesCount"  
-                            class="text-xs text-sky-600" 
+                            class="text-xs" 
                             title="View replies">
                             {{ xweetRepliesCount }}
                         </router-link>
@@ -207,11 +209,22 @@ const updateXweet = (newBody: string, newMedia?: string, updateDate?: string) =>
                     <span class="flex items-center gap-1">
                         <font-awesome-icon 
                             icon="fa-solid fa-retweet" 
-                            class="transition-transform cursor-pointer hover:text-sky-600 hover:scale-105"
-                            :class="isRexweeted ? 'text-sky-600 scale-105' : ''"
-                            title="Rexweet"
+                            class="transition-transform"
+                            :class="{
+                                'text-sky-600 scale-105': isRexweeted,
+                                'cursor-pointer hover:text-sky-600 hover:scale-105': !isOwn,
+                                'cursor-not-allowed': isOwn
+                                }"
+                            :title="!isOwn && !isRexweeted ? 'Rexweet' :
+                                    isOwn ? 'You can\'t rexweet your own xweet' :
+                                    'Unrexweet'"
                             @click="rexweet" />
-                        <span v-if="xweetRexweetsCount" class="text-xs text-sky-600">{{ xweetRexweetsCount }}</span>
+                        <span 
+                            v-if="xweetRexweetsCount" 
+                            class="text-xs"
+                            :class="isRexweeted ? 'text-sky-600' : 'text-sky-800'">
+                            {{ xweetRexweetsCount }}
+                        </span>
                     </span>
                     <span class="flex items-center gap-1">
                         <font-awesome-icon 
@@ -226,7 +239,12 @@ const updateXweet = (newBody: string, newMedia?: string, updateDate?: string) =>
                             class="scale-105 cursor-pointer text-sky-600"
                             title="Unlike this xweet"
                             @click="unlikeXweet" />
-                        <span v-if="xweetLikesCount" class="text-xs text-sky-600">{{ xweetLikesCount }}</span>
+                        <span 
+                            v-if="xweetLikesCount" 
+                            class="text-xs"
+                            :class="isLiked ? 'text-sky-600' : 'text-sky-800'">
+                            {{ xweetLikesCount }}
+                        </span>
                     </span>
                     <font-awesome-icon
                         v-if="authStore.getIsAuthenticated && isOwn && !isEditable"
@@ -260,7 +278,7 @@ const updateXweet = (newBody: string, newMedia?: string, updateDate?: string) =>
                                     :is="word.type" 
                                     :to="word.to"
                                     :title="word.type === RouterLink ? `View ${word.text}` : ''" 
-                                    :class="word.type === RouterLink ? 'text-sky-600 hover:text-sky-400' : ''">
+                                    :class="word.type === RouterLink ? 'text-sky-400 dark:text-sky-600 hover:text-sky-900 dark:hover:text-sky-400' : 'text-sky-900 dark:text-white'">
                                     {{ word.text }}
                                 </component>
                                 <span v-if="index < xweet.length - 1" v-html="`&nbsp;`" />
@@ -296,8 +314,14 @@ const updateXweet = (newBody: string, newMedia?: string, updateDate?: string) =>
         :profile-pic="profilePic!"
         :file-url="xweetMedia!" 
         :is-own="isOwn"
+        :is-rexweeted="isRexweeted"
         :is-liked="isLiked"
-        @clicked-outside="() => { isImageEnlarged = false }"
+        :rexweet-count="xweetRexweetsCount"
+        :like-count="xweetLikesCount"
+        @clicked-outside="isImageEnlarged = false"
+        @rexweet="rexweet"
+        @like-xweet="likeXweet"
+        @unlike-xweet="unlikeXweet"
         />
 </template>
 
