@@ -31,8 +31,8 @@ const prevPage = () => {
         <div class="flex items-center gap-1">
             <div 
                 v-for="page in pages"
-                class="px-2 text-white cursor-pointer"
-                :class="page === activePage ? 'bg-sky-800 rounded' : ''"
+                class="px-2 text-sky-800 dark:text-white cursor-pointer"
+                :class="page === activePage ? 'bg-sky-800 text-white rounded' : ''"
                 @click="changePage(page)">
                 {{ page }}
             </div>

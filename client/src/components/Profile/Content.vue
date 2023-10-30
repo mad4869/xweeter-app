@@ -20,11 +20,15 @@ import Likes from './Likes.vue';
 import ProfileForm from './ProfileForm.vue';
 import Popup from '@/components/App/Popup.vue';
 import Modal from '@/components/App/Modal.vue';
-import useAuthStore from '@/stores/useAuthStore';
-import { User } from '@/types/auth';
-import { useFetchList, useFetchObject } from '@/composables/useFetch';
+import ConfirmDialog from '@/components/App/ConfirmDialog.vue';
 import useCount, { Features } from '@/composables/useCount';
 import useNotify from '@/composables/useNotify'
+import { useFetchList, useFetchObject } from '@/composables/useFetch';
+import useAuthStore from '@/stores/useAuthStore';
+import { countStore } from '@/stores/useCountStore'
+import { sendReqCookie } from'@/utils/axiosInstances'
+import { User } from '@/types/auth';
+import { XweetResponse } from '@/types/xweets';
 
 const authStore = useAuthStore()
 
@@ -69,7 +73,48 @@ const showNotice = (category: 'success' | 'error', msg: string) => {
     useNotify(notification, category, msg)
 }
 
-const showModal = ref(false)
+const isLoading = ref(false)
+const isError = ref(false)
+const isSuccess = ref(false)
+
+const formModal = ref(false)
+const deleteModal = ref(false)
+const xweetToDelete = ref<number | null>()
+
+const deleteXweet = async (xweet_id?: number | null) => {
+    isLoading.value = true
+
+    try {
+        const { data } = await sendReqCookie.delete<XweetResponse | undefined>(
+            `/api/users/${authStore.getSignedInUserId}/xweets/${xweet_id}`
+        )
+
+        if (data?.success) {
+            isLoading.value = false
+            isSuccess.value = true
+            deleteModal.value = false
+            
+            countStore.decrementXweetsCount()
+            showNotice('error', 'Your xweet has been deleted')
+
+            setTimeout(() => {
+                isSuccess.value = false
+                xweetToDelete.value = null
+            }, 2000)
+        }
+    } catch (err) {
+        isError.value = true
+
+        setTimeout(() => {
+            isError.value = false
+        }, 2000)
+    }
+}
+
+const showDeleteModal = (xweetId: number) => {
+    deleteModal.value = true
+    xweetToDelete.value = xweetId
+}
 </script>
 
 <template>
@@ -86,11 +131,14 @@ const showModal = ref(false)
         :followers-count="profileFollowersCount"
         :is-followed="userFollowed"
         @show-notice="showNotice"
-        @show-edit-profile="showModal = true"
+        @show-edit-profile="formModal = true"
         @set-active-tab="setActiveTab" />
     <Toggle :active-tab="activeTab" @set-active-tab="setActiveTab" />
     <Timeline v-show="activeTab === Tabs.Xweets"
         :y="scrollTimeline.y.value"
+        :is-filtered="isSuccess"
+        :deleted-xweet="xweetToDelete"
+        :show-delete-modal="showDeleteModal"
         :show-notice="showNotice" />
     <UserList v-show="activeTab === Tabs.Following"
         :data="profileFollowing.list.value ?? []" />
@@ -99,7 +147,7 @@ const showModal = ref(false)
     <Likes v-show="activeTab === Tabs.Likes"
         :y="scrollLike.y.value"
         :show-notice="showNotice" />
-    <Modal :show="showModal" @clicked-outside="showModal = false">
+    <Modal :show="formModal" @clicked-outside="formModal = false">
         <ProfileForm
             :user-id="profile.obj.value?.user_id"
             :username="profile.obj.value?.username"
@@ -108,8 +156,19 @@ const showModal = ref(false)
             :bio="profile.obj.value?.bio"
             :profile-pic="profile.obj.value?.profile_pic"
             :header-pic="profile.obj.value?.header_pic"
-            @close-modal="showModal = false"
+            @close-modal="formModal = false"
             @show-notice="showNotice" />
+    </Modal>
+    <Modal :show="deleteModal" @clicked-outside="deleteModal = false">
+        <ConfirmDialog
+            title="Delete Xweet"
+            confirm-msg="Are you sure you want to delete this xweet?"
+            :confirm-fn="deleteXweet"
+            :payload="xweetToDelete"
+            error-msg="Failed to delete xweet. Please try again"
+            :is-loading="isLoading"
+            :is-error="isError"
+            @close-modal="deleteModal = false" />
     </Modal>
     <Popup
         :show="notification.isNotified"

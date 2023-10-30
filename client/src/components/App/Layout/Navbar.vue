@@ -59,7 +59,7 @@ defineEmits<{
 
 <style scoped>
 .active {
-    @apply text-sky-600
+    @apply text-slate-900 dark:text-sky-600
 }
 .navbar-menu {
     @apply px-2 py-1 rounded-md cursor-pointer transition-colors ease-in hover:backdrop-blur-md

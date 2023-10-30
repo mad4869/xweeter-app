@@ -14,8 +14,11 @@ import { RexweetDetail } from '@/types/rexweets'
 import socket from '@/utils/socket';
 import { useFetchList } from '@/composables/useFetch';
 
-defineProps<{
+const props = defineProps<{
     y: number
+    isFiltered: boolean
+    deletedXweet?: number | null
+    showDeleteModal: (xweetId: number) => void
     showNotice: (category: 'success' | 'error', msg: string) => void
 }>()
 
@@ -23,11 +26,14 @@ const authStore = useAuthStore()
 
 const route = useRoute()
 
+const isLoading = ref(false)
+
 const start = ref(0)
 const timelineData = await useFetchList<ProfileTimeline>(
     `/api/users/${route.params.id}/profile-timeline?start=${start.value}`, false
     )
 const timeline = timelineData.list
+console.log(timeline.value)
 
 socket.on('add_to_timeline', (xweet) => {
     timeline.value?.unshift(xweet)
@@ -52,13 +58,29 @@ if (authStore.getIsAuthenticated) {
     })
 }
 
+watch(() => props.isFiltered, () => {
+    if (props.isFiltered) {
+        const index = timeline.value?.findIndex(xweet => xweet.xweet_id === props.deletedXweet)
+        if (index !== -1) {
+            timeline.value?.splice((index as number), 1)
+        }
+    }
+})
+
 const xweetToReply = ref<number | null>()
-// const xweetToDelete = ref<number | null>()
-const isLoading = ref(false)
+const xweetHasBeenReplied = ref(false)
+const closeReply = () => {
+    xweetToReply.value = null
+    xweetHasBeenReplied.value = true
+
+    setTimeout(() => {
+        xweetHasBeenReplied.value = false
+    }, 2000)
+}
 
 const timelineRef = ref<HTMLElement | null>(null)
 const { arrivedState } = useScroll(timelineRef)
-const needMoreXweet = ref((timeline.value?.length ?? 0) > 2)
+const needMoreXweet = ref((timeline.value?.length ?? 0) > 4)
 
 watch(() => arrivedState.bottom, async () => {
     if (needMoreXweet) {
@@ -92,22 +114,26 @@ watch(() => arrivedState.bottom, async () => {
                 :body="xweet.body" 
                 :media="xweet.media"
                 :profilePic="xweet.profile_pic" 
-                :createdAt="xweet.created_at" 
-                :updated-at="xweet.updated_at"
+                :createdAt="xweet.og_created_at || xweet.created_at" 
+                :updated-at="xweet.og_updated_at || xweet.updated_at"
                 :og-user-id="xweet.og_user_id"
                 :og-fullname="xweet.og_full_name"
                 :og-username="xweet.og_username"
                 :og-profile-pic="xweet.og_profile_pic" 
                 :is-rexweet="xweet.rexweet_id !== undefined"
-                :is-own="xweet.user_id === authStore.getSignedInUserId" 
+                :is-own="!xweet.rexweet_id ? 
+                xweet.user_id === authStore.getSignedInUserId : 
+                xweet.og_user_id === authStore.getSignedInUserId"
+                :is-replied="xweetHasBeenReplied" 
                 :rexweeted="rexweets.includes(xweet.xweet_id)"
                 :liked="likes.includes(xweet.xweet_id)"
                 @show-notice="showNotice"
-                @reply="(xweetId) => { xweetToReply = xweetId }" />
+                @reply="(xweetId) => { xweetToReply = xweetId }"
+                @delete="showDeleteModal" />
             <ReplyXweet 
                 :show="xweetToReply === xweet.xweet_id"
                 :xweet-id="xweet.xweet_id"
-                @close-reply="() => { xweetToReply = null }" />
+                @close-reply="closeReply" />
         </div>
         <MoreXweet v-if="needMoreXweet" :is-loading="isLoading" />
         <Empty 

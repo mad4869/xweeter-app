@@ -21,6 +21,8 @@ const authStore = useAuthStore()
 
 const route = useRoute()
 
+const isLoading = ref(false)
+
 const start = ref(0)
 const likesData = await useFetchList<LikeDetail>(`/api/users/${route.params.id}/likes?start=${start.value}`, false)
 const likes = likesData.list
@@ -41,15 +43,19 @@ if (authStore.getIsAuthenticated) {
 }
 
 const xweetToReply = ref<number | null>()
-const isLoading = ref(false)
+const xweetHasBeenReplied = ref(false)
+const closeReply = () => {
+    xweetToReply.value = null
+    xweetHasBeenReplied.value = true
+
+    setTimeout(() => {
+        xweetHasBeenReplied.value = false
+    }, 2000)
+}
 
 const likeRef = ref<HTMLElement | null>(null)
 const { arrivedState } = useScroll(likeRef)
-
-const needMoreXweet = ref(true)
-if ((likes.value?.length ?? 0) <= 4) {
-    needMoreXweet.value = false
-}
+const needMoreXweet = ref((likes.value?.length ?? 0) > 4)
 
 watch(() => arrivedState.bottom, async () => {
     if (needMoreXweet) {
@@ -83,14 +89,15 @@ watch(() => arrivedState.bottom, async () => {
                 :body="xweet.body" 
                 :media="xweet.media"
                 :profilePic="xweet.profile_pic" 
-                :createdAt="xweet.created_at" 
-                :updated-at="xweet.updated_at"
+                :createdAt="xweet.og_created_at" 
+                :updated-at="xweet.og_updated_at"
                 :og-user-id="xweet.og_user_id"
                 :og-fullname="xweet.og_full_name"
                 :og-username="xweet.og_username"
                 :og-profile-pic="xweet.og_profile_pic" 
-                :is-rexweet="false"
-                :is-own="xweet.user_id === authStore.getSignedInUserId" 
+                :is-like="true"
+                :is-own="xweet.og_user_id === authStore.getSignedInUserId" 
+                :is-replied="xweetHasBeenReplied"
                 :rexweeted="userRexweets.includes(xweet.xweet_id)"
                 :liked="userLikes.includes(xweet.xweet_id)"
                 @show-notice="showNotice"
@@ -98,12 +105,12 @@ watch(() => arrivedState.bottom, async () => {
             <ReplyXweet 
                 :show="xweetToReply === xweet.xweet_id"
                 :xweet-id="xweet.xweet_id"
-                @close-reply="xweetToReply = null" />
+                @close-reply="closeReply" />
         </div>
         <MoreXweet v-if="needMoreXweet" :is-loading="isLoading" />
         <Empty 
             v-if="likes?.length === 0"
-            msg="There are no likes yet" />
+            submsg="There are no likes yet" />
     </section>
 </template>
 

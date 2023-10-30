@@ -70,10 +70,19 @@ watch(() => props.isFiltered, () => {
 })
 
 const xweetToReply = ref<number | null>()
+const xweetHasBeenReplied = ref(false)
+const closeReply = () => {
+    xweetToReply.value = null
+    xweetHasBeenReplied.value = true
+
+    setTimeout(() => {
+        xweetHasBeenReplied.value = false
+    }, 2000)
+}
 
 const el = ref<HTMLElement | null>(null)
 const { arrivedState } = useScroll(el)
-const needMoreXweet = ref((timeline.value?.length ?? 0) > 2)
+const needMoreXweet = ref((timeline.value?.length ?? 0) > 4)
 
 watch(() => arrivedState.bottom, async () => {
     if (needMoreXweet) {
@@ -111,6 +120,7 @@ watch(() => arrivedState.bottom, async () => {
                 :updated-at="xweet.updated_at" 
                 :is-rexweet="false"
                 :is-own="xweet.user_id === authStore.getSignedInUserId" 
+                :is-replied="xweetHasBeenReplied"
                 :rexweeted="rexweets.includes(xweet.xweet_id)"
                 :liked="likes.includes(xweet.xweet_id)"
                 @show-notice="showNotice"
@@ -119,7 +129,7 @@ watch(() => arrivedState.bottom, async () => {
             <ReplyXweet 
                 :show="xweetToReply === xweet.xweet_id"
                 :xweet-id="xweet.xweet_id"
-                @close-reply="xweetToReply = null" />
+                @close-reply="closeReply" />
         </div>
         <MoreXweet v-if="needMoreXweet" :is-loading="isLoading" />
         <Empty 

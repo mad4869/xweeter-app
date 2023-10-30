@@ -80,6 +80,14 @@ def get_profile_timeline(user_id):
         rexweet_data["og_username"] = rexweet.xweets.users.username
         rexweet_data["og_full_name"] = rexweet.xweets.users.full_name
         rexweet_data["og_profile_pic"] = rexweet.xweets.users.profile_pic
+        rexweet_data["og_created_at"] = rexweet.xweets.created_at.strftime(
+            "%Y-%m-%d %H:%M:%S"
+        )
+        rexweet_data["og_updated_at"] = (
+            rexweet.xweets.updated_at.strftime("%Y-%m-%d %H:%M:%S")
+            if rexweet.xweets.updated_at
+            else rexweet.xweets.updated_at
+        )
         rexweets_data.append(rexweet_data)
 
     timeline = list(chain(own_xweets_data, rexweets_data))

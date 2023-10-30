@@ -10,7 +10,7 @@ class Reply(db.Model):
     xweet_id = db.Column(db.Integer(), db.ForeignKey("xweets.xweet_id"))
     body = db.Column(db.String(140), nullable=False)
     media = db.Column(db.Text())
-    created_at = db.Column(db.DateTime(), nullable=False, default=datetime.now())
+    created_at = db.Column(db.DateTime(), nullable=False, default=datetime.now)
     updated_at = db.Column(db.DateTime())
 
     def serialize(self):

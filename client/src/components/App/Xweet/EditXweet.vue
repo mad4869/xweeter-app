@@ -8,11 +8,13 @@ import useAuthStore from '@/stores/useAuthStore';
 import { MAX_CHAR_COUNT } from '@/utils/constants';
 import { sendReqCookie } from '@/utils/axiosInstances';
 import { XweetResponse } from '@/types/xweets'
+import { ReplyResponse } from '@/types/replies';
 
 const { xweet_id, body, fileUrl } = defineProps<{
     xweet_id: number,
     body: string
     fileUrl?: string
+    isReply?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -59,6 +61,31 @@ const editXweet = async () => {
         console.error(err)
     }
 }
+
+const editReply = async () => {
+    isLoading.value = true
+
+    try {
+        const { data } = await sendReqCookie.put<ReplyResponse | undefined>(
+            `/api/users/${authStore.getSignedInUserId}/replies/${xweet_id}`, payload.value
+        )
+
+        if (data?.success) {
+            isLoading.value = false
+            isSuccess.value = true
+            newBody.value = ''
+            newMedia.value = ''
+            
+            setTimeout(() => {
+                isSuccess.value = false
+
+                emit('update-xweet', data.data.body, data.data.media, data.data.updated_at)
+            }, 1000)
+        }
+    } catch (err) {
+        console.error(err)
+    }
+}
 </script>
 
 <template>
@@ -70,12 +97,12 @@ const editXweet = async () => {
             :max-char-count="MAX_CHAR_COUNT" />
         <Toolbar
             mode="edit-xweet"
-            :submit-func="editXweet"
+            :submit-func="!isReply ? editXweet : editReply"
             :is-loading="isLoading"
             :is-success="isSuccess"
             :char-count="charCount"
             :max-char-count="MAX_CHAR_COUNT"
             :media="newMedia"
-            @set-media="(fileUrl: string) => { newMedia = fileUrl }" />
+            @set-media="(fileUrl) => { newMedia = fileUrl }" />
     </section>
 </template>

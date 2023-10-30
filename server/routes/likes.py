@@ -1,5 +1,6 @@
 from flask import request, jsonify
 from flask_jwt_extended import jwt_required
+from datetime import datetime
 
 from . import routes
 from ..extensions import db
@@ -8,51 +9,11 @@ from ..models import Xweet, User, Like
 
 @routes.route(
     "/xweets/<int:xweet_id>/likes",
-    methods=["GET", "POST", "DELETE"],
+    methods=["GET"],
     strict_slashes=False,
 )
 # @jwt_required()
-def access_likes_by_xweet(xweet_id):
-    if request.method == "POST":
-        data = request.get_json()
-        user_id = data.get("userId")
-
-        like = Like(user_id=user_id, xweet_id=xweet_id)
-
-        try:
-            db.session.add(like)
-            db.session.commit()
-        except:
-            db.session.rollback()
-
-            return (
-                jsonify({"success": False, "message": "Failed to like xweet"}),
-                500,
-            )
-        else:
-            return jsonify({"success": True, "data": like.serialize()}), 201
-
-    elif request.method == "DELETE":
-        like = db.session.execute(
-            db.select(Like).filter(Like.xweet_id == xweet_id)
-        ).scalar_one_or_none()
-
-        try:
-            db.session.delete(like)
-            db.session.commit()
-        except:
-            db.session.rollback()
-
-            return (
-                jsonify({"success": False, "message": "Failed to unlike the xweet"}),
-                500,
-            )
-        else:
-            return (
-                jsonify({"success": True, "data": like.serialize()}),
-                201,
-            )
-
+def get_likes_by_xweet(xweet_id):
     likes = db.session.execute(
         db.select(Like)
         .join(Xweet, Like.xweet_id == Xweet.xweet_id)
@@ -74,6 +35,10 @@ def access_likes_by_xweet(xweet_id):
                 "og_username": like.xweets.users.username,
                 "og_full_name": like.xweets.users.full_name,
                 "og_profile_pic": like.xweets.users.profile_pic,
+                "og_created_at": like.xweets.created_at.strftime("%Y-%m-%d %H:%M:%S"),
+                "og_updated_at": like.xweets.updated_at.strftime("%Y-%m-%d %H:%M:%S")
+                if like.xweets.updated_at
+                else like.xweets.updated_at,
             }
         )
         data.append(serial)
@@ -108,14 +73,60 @@ def get_likes_by_user(user_id):
                 "og_username": like.xweets.users.username,
                 "og_full_name": like.xweets.users.full_name,
                 "og_profile_pic": like.xweets.users.profile_pic,
+                "og_created_at": like.xweets.created_at.strftime("%Y-%m-%d %H:%M:%S"),
+                "og_updated_at": like.xweets.updated_at.strftime("%Y-%m-%d %H:%M:%S")
+                if like.xweets.updated_at
+                else like.xweets.updated_at,
             }
         )
         data.append(serial)
 
-    sorted_data = sorted(data, key=lambda xweet: xweet["created_at"], reverse=True)
+    end = min(start + size, len(data))
 
-    end = min(start + size, len(sorted_data))
-
-    sliced_data = sorted_data[start:end]
+    sliced_data = data[start:end]
 
     return jsonify({"success": True, "data": sliced_data}), 200
+
+
+@routes.route(
+    "/users/<int:user_id>/xweets/<int:xweet_id>/likes",
+    methods=["POST", "DELETE"],
+    strict_slashes=False,
+)
+def access_likes_by_user_xweet(user_id, xweet_id):
+    if request.method == "POST":
+        like = Like(user_id=user_id, xweet_id=xweet_id)
+
+        try:
+            db.session.add(like)
+            db.session.commit()
+        except:
+            db.session.rollback()
+
+            return (
+                jsonify({"success": False, "message": "Failed to like xweet"}),
+                500,
+            )
+        else:
+            return jsonify({"success": True, "data": like.serialize()}), 201
+
+    elif request.method == "DELETE":
+        like = db.session.execute(
+            db.select(Like).filter(Like.xweet_id == xweet_id, Like.user_id == user_id)
+        ).scalar_one_or_none()
+
+        try:
+            db.session.delete(like)
+            db.session.commit()
+        except:
+            db.session.rollback()
+
+            return (
+                jsonify({"success": False, "message": "Failed to unlike the xweet"}),
+                500,
+            )
+        else:
+            return (
+                jsonify({"success": True, "data": like.serialize()}),
+                201,
+            )

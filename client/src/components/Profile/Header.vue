@@ -154,9 +154,9 @@ const follow = async () => {
                 </button>
                 <button
                     v-else-if="!isOwn && !userFollowed"
-                    class="px-4 py-1 font-medium text-white border-2 border-solid rounded-md bg-sky-600 border-sky-800 hover:bg-sky-800 hover:border-sky-600"
+                    class="px-4 py-1 font-medium bg-white border-2 border-solid rounded-md dark:text-white text-sky-600 dark:bg-sky-600 dark:border-sky-800 dark:hover:bg-sky-800 dark:hover:border-sky-600 hover:bg-slate-200"
                     title="Follow this user"
-                    @click.prevent="follow">
+                    @click="follow">
                     <font-awesome-icon icon="fa-solid fa-spinner" spin-pulse v-if="isLoading" />
                     {{ !isLoading ? 'Follow' : '' }}
                 </button>
@@ -168,7 +168,7 @@ const follow = async () => {
                 </div>
                 <button
                     v-if="isEditable"
-                    class="px-2 py-1 font-medium text-white border-2 border-solid rounded-full bg-sky-600 border-sky-800"
+                    class="px-2 py-1 font-medium bg-white border-2 border-solid rounded-full dark:text-white text-sky-600 dark:bg-sky-600 dark:border-sky-800 dark:hover:bg-sky-800 dark:hover:border-sky-600 hover:bg-slate-200"
                     title="Confirm change"
                     @click="changeImage">
                     <font-awesome-icon icon="fa-solid fa-check" class="text-sm" />

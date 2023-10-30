@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { RouterLink } from 'vue-router';
 import { useDateFormat } from '@vueuse/core';
 
@@ -13,7 +13,7 @@ import { sendReqCookie } from '@/utils/axiosInstances';
 import { RexweetResponse } from '@/types/rexweets';
 import { LikeResponse } from '@/types/likes'
 
-const { id, username, body, media, userId, createdAt, updatedAt, isOwn, rexweeted, liked } = defineProps<{
+const props = defineProps<{
     id: number
     userId: number
     fullname?: string
@@ -27,8 +27,11 @@ const { id, username, body, media, userId, createdAt, updatedAt, isOwn, rexweete
     ogUsername?: string
     ogFullname?: string
     ogProfilePic?: string
-    isRexweet: boolean
     isOwn: boolean
+    isRexweet?: boolean
+    isLike?: boolean
+    isReply?: boolean
+    isReplied?: boolean
     rexweeted: boolean
     liked: boolean
 }>()
@@ -42,33 +45,33 @@ const emit = defineEmits<{
 const authStore = useAuthStore()
 
 const isImageEnlarged = ref(false)
-const isRexweeted = ref(rexweeted)
-const isLiked = ref(liked)
+const isRexweeted = ref(props.rexweeted)
+const isLiked = ref(props.liked)
 const isEditable = ref(false)
 const isRepliable = ref(false)
 
-const xweet = ref(body)
+const xweet = ref(props.body)
 const xweetText = computed(() => useRenderXweet(xweet.value))
-const xweetMedia = ref(media)
-const xweetTimestamp = ref(useTimestamp(createdAt))
-const xweetUpdatedTimestamp = ref(useTimestamp(updatedAt))
-const xweetRepliesCount = await useCount('xweets', id, Features.Replies)
-const xweetRexweetsCount = await useCount('xweets', id, Features.Rexweets)
-const xweetLikesCount = await useCount('xweets', id, Features.Likes)
+const xweetMedia = ref(props.media)
+const xweetTimestamp = ref(useTimestamp(props.createdAt))
+const xweetUpdatedTimestamp = ref(useTimestamp(props.updatedAt))
+const xweetRepliesCount = await useCount('xweets', props.id, Features.Replies)
+const xweetRexweetsCount = await useCount('xweets', props.id, Features.Rexweets)
+const xweetLikesCount = await useCount('xweets', props.id, Features.Likes)
 
 const rexweet = async () => {
-    if (!isOwn) {
+    if (!props.isOwn) {
         isRexweeted.value = !isRexweeted.value
     
         if (isRexweeted.value) {
             xweetRexweetsCount.value++
             try {
                 const { data } = await sendReqCookie.post<RexweetResponse | undefined>(
-                    `/api/xweets/${id}/rexweets`, { userId: authStore.getSignedInUserId }
+                    `/api/users/${authStore.getSignedInUserId}/xweets/${props.id}/rexweets`
                 )
         
                 if (data?.success) {
-                    emit('show-notice', 'success', `You rexweeted ${username}'s xweet`)
+                    emit('show-notice', 'success', `You rexweeted ${props.isRexweet || props.isLike ? props.ogUsername : props.username}'s xweet`)
                 }
             } catch (err) {
                 isRexweeted.value = false
@@ -81,11 +84,11 @@ const rexweet = async () => {
     
             try {
                 const { data } = await sendReqCookie.delete<RexweetResponse | undefined>(
-                    `/api/xweets/${id}/rexweets`
+                    `/api/users/${authStore.getSignedInUserId}/xweets/${props.id}/rexweets`
                 )
     
                 if (data?.success) {
-                    emit('show-notice', 'success', `You unrexweeted ${username}'s xweet`)
+                    emit('show-notice', 'success', `You unrexweeted ${props.isRexweet || props.isLike ? props.ogUsername : props.username}'s xweet`)
                 }
             } catch (err) {
                 isRexweeted.value = true
@@ -101,11 +104,17 @@ const switchRepliable = () => {
     isRepliable.value = !isRepliable.value
     
     if (isRepliable.value) {
-        emit('reply', id)
+        emit('reply', props.id)
     } else {
         emit('reply', null)
     }
 }
+
+watch(() => props.isReplied, () => {
+    if (props.isReplied) {
+        isRepliable.value = false
+    }
+})
 
 const likeXweet = async () => {
     isLiked.value = true
@@ -113,11 +122,11 @@ const likeXweet = async () => {
 
     try {
         const { data } = await sendReqCookie.post<LikeResponse | undefined>(
-            `/api/xweets/${id}/likes`, { userId: authStore.getSignedInUserId }
+            `/api/users/${authStore.getSignedInUserId}/xweets/${props.id}/likes`
         )
 
         if (data?.success) {
-            emit('show-notice', 'success', `You liked ${username}'s xweet`)
+            emit('show-notice', 'success', `You liked ${props.isRexweet || props.isLike ? props.ogUsername : props.username}'s xweet`)
         }
     } catch (err) {
         isLiked.value = false
@@ -133,11 +142,11 @@ const unlikeXweet = async () => {
 
     try {
         const { data } = await sendReqCookie.delete<LikeResponse | undefined>(
-            `/api/xweets/${id}/likes`
+            `/api/users/${authStore.getSignedInUserId}/xweets/${props.id}/likes`
         )
 
         if (data?.success) {
-            emit('show-notice', 'success', `You unliked ${username}'s xweet`)
+            emit('show-notice', 'success', `You unliked ${props.isRexweet || props.isLike ? props.ogUsername : props.username}'s xweet`)
         }
     } catch (err) {
         isLiked.value = true
@@ -159,15 +168,15 @@ const updateXweet = (newBody: string, newMedia?: string, updateDate?: string) =>
     <section
         class="flex justify-center gap-4 px-4 py-4 border border-solid bg-sky-600/10 backdrop-blur-lg border-sky-800 rounded-xl">
         <router-link
-            :to="`/users/${!isRexweet ? userId : ogUserId}`"
+            :to="`/users/${isRexweet || isLike ? ogUserId : userId}`"
             class="flex flex-col items-center flex-1 w-20 gap-2 px-4 border-r border-solid border-sky-600/20 wrap-balance">
             <img 
-                :src="!isRexweet ? profilePic : ogProfilePic"
+                :src="isRexweet || isLike ? ogProfilePic : profilePic"
                 class="object-cover w-10 h-10 border border-solid rounded-full border-sky-800" 
                 loading="lazy" />
             <div class="flex flex-col items-center justify-center text-center">
-                <p class="font-semibold text-sky-600">{{ !isRexweet ? fullname : ogFullname }}</p>
-                <p class="text-sm text-sky-800">@{{ !isRexweet ? username : ogUsername }}</p>
+                <p class="font-semibold text-sky-600">{{ isRexweet || isLike ? ogFullname : fullname }}</p>
+                <p class="text-sm text-sky-800">@{{ isRexweet || isLike ? ogUsername : username }}</p>
             </div>
         </router-link>
         <div class="flex flex-col w-4/5 h-full gap-2">
@@ -185,7 +194,7 @@ const updateXweet = (newBody: string, newMedia?: string, updateDate?: string) =>
                     </em>
                 </p>
                 <span class="flex items-center justify-center gap-4 text-sm">
-                    <span v-if="authStore.getIsAuthenticated" class="flex items-center gap-1">
+                    <span v-if="authStore.getIsAuthenticated && !isReply" class="flex items-center gap-1">
                         <font-awesome-icon
                             v-if="!isRepliable"
                             icon="fa-regular fa-comment"
@@ -206,7 +215,7 @@ const updateXweet = (newBody: string, newMedia?: string, updateDate?: string) =>
                             {{ xweetRepliesCount }}
                         </router-link>
                     </span>
-                    <span class="flex items-center gap-1">
+                    <span v-if="!isReply" class="flex items-center gap-1">
                         <font-awesome-icon 
                             icon="fa-solid fa-retweet" 
                             class="transition-transform"
@@ -226,7 +235,7 @@ const updateXweet = (newBody: string, newMedia?: string, updateDate?: string) =>
                             {{ xweetRexweetsCount }}
                         </span>
                     </span>
-                    <span class="flex items-center gap-1">
+                    <span v-if="!isReply" class="flex items-center gap-1">
                         <font-awesome-icon 
                             v-if="authStore.getIsAuthenticated && !isLiked"
                             icon="fa-regular fa-heart"
@@ -250,7 +259,7 @@ const updateXweet = (newBody: string, newMedia?: string, updateDate?: string) =>
                         v-if="authStore.getIsAuthenticated && isOwn && !isEditable"
                         icon="fa-regular fa-pen-to-square"
                         class="transition-transform cursor-pointer hover:text-sky-600 hover:scale-105"
-                        title="Edit this xweet"
+                        :title="!isReply ? 'Edit this xweet' : 'Edit this reply'"
                         @click="() => { isEditable = true }"
                         />
                     <font-awesome-icon
@@ -263,7 +272,7 @@ const updateXweet = (newBody: string, newMedia?: string, updateDate?: string) =>
                         v-if="authStore.getIsAuthenticated && isOwn"
                         icon="fa-regular fa-trash-can"
                         class="transition-transform cursor-pointer hover:text-red-600 hover:scale-105"
-                        title="Delete this xweet"
+                        :title="!isReply ? 'Delete this xweet' : 'Delete this reply'"
                         @click="$emit('delete', id)"
                         />
                 </span>
@@ -299,7 +308,8 @@ const updateXweet = (newBody: string, newMedia?: string, updateDate?: string) =>
                         :key="id"
                         :xweet_id="id" 
                         :body="xweet" 
-                        :file-url="xweetMedia" 
+                        :file-url="xweetMedia"
+                        :is-reply="isReply" 
                         @update-xweet="updateXweet" />
                 </Transition>
             </div>
@@ -310,12 +320,13 @@ const updateXweet = (newBody: string, newMedia?: string, updateDate?: string) =>
         :show="isImageEnlarged" 
         :username="username!"
         :fullname="fullname!"
-        :body="body"
+        :body="xweet"
         :profile-pic="profilePic!"
         :file-url="xweetMedia!" 
         :is-own="isOwn"
         :is-rexweeted="isRexweeted"
         :is-liked="isLiked"
+        :is-reply="isReply"
         :rexweet-count="xweetRexweetsCount"
         :like-count="xweetLikesCount"
         @clicked-outside="isImageEnlarged = false"

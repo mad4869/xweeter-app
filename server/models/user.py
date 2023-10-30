@@ -26,9 +26,9 @@ class User(db.Model):
     header_pic = db.Column(db.Text(), default=get_default_header())
     profile_pic_name = db.Column(db.Text(), default=DEFAULT_PFP_FILE)
     header_pic_name = db.Column(db.Text(), default=DEFAULT_HEADER_FILE)
-    profile_pic_updated_at = db.Column(db.DateTime(), default=datetime.now())
-    header_pic_updated_at = db.Column(db.DateTime(), default=datetime.now())
-    created_at = db.Column(db.DateTime(), nullable=False, default=datetime.now())
+    profile_pic_updated_at = db.Column(db.DateTime(), default=datetime.now)
+    header_pic_updated_at = db.Column(db.DateTime(), default=datetime.now)
+    created_at = db.Column(db.DateTime(), nullable=False, default=datetime.now)
     updated_at = db.Column(db.DateTime())
     xweets = db.Relationship(
         "Xweet", backref="users", lazy=True, cascade="all, delete-orphan"

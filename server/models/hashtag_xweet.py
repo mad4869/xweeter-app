@@ -13,5 +13,5 @@ hashtag_xweet = db.Table(
         db.ForeignKey("hashtags.hashtag_id"),
         primary_key=True,
     ),
-    db.Column("created_at", db.DateTime(), nullable=False, default=datetime.now()),
+    db.Column("created_at", db.DateTime(), nullable=False, default=datetime.now),
 )

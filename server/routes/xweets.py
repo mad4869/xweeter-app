@@ -168,7 +168,7 @@ def access_xweet_by_user(user_id, xweet_id):
                 400,
             )
 
-        if media_url:
+        if media_url and media_url != xweet.media:
             media_data, media_stream, OBJECT_NAME = manage_file(media_url)
 
             try:
@@ -184,6 +184,8 @@ def access_xweet_by_user(user_id, xweet_id):
                     ),
                     500,
                 )
+        elif media_url and media_url == xweet.media:
+            media = xweet.media
         else:
             media = None
 

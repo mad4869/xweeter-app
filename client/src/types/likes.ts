@@ -15,7 +15,9 @@ interface LikeDetail extends Like {
     og_user_id: number,
     og_username: string,
     og_full_name: string,
-    og_profile_pic: string
+    og_profile_pic: string,
+    og_created_at: string,
+    og_updated_at?: string
 }
 
 type LikeResponse = {

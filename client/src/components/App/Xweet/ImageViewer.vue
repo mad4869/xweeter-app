@@ -15,6 +15,7 @@ defineProps<{
     isOwn: boolean
     isRexweeted: boolean
     isLiked: boolean
+    isReply?: boolean
     rexweetCount: number
     likeCount: number
 }>()
@@ -39,7 +40,7 @@ onClickOutside(imgRef, () => {
     <TransitionRoot
         :show="show"
         as="div" 
-        class="fixed top-0 bottom-0 left-0 right-0 z-30 flex flex-col items-center justify-center gap-4 bg-black/5 backdrop-blur-md"
+        class="fixed top-0 bottom-0 left-0 right-0 z-40 flex flex-col items-center justify-center gap-4 bg-black/5 backdrop-blur-md"
         enter="transition-opacity ease-out"
         enter-from="opacity-0"
         enter-to="opacity-100"
@@ -74,7 +75,9 @@ onClickOutside(imgRef, () => {
                         <span class="font-bold">{{ fullname }}</span>
                         <span>@{{ username }}</span>
                     </div>
-                    <div class="flex items-center justify-center gap-4 text-sky-400 dark:text-sky-900">
+                    <div 
+                        v-if="!isReply"
+                        class="flex items-center justify-center gap-4 text-sky-400 dark:text-sky-900">
                         <span class="flex items-center gap-1">
                             <font-awesome-icon 
                                 icon="fa-solid fa-retweet" 

@@ -5,17 +5,16 @@ import { TransitionRoot } from '@headlessui/vue';
 import TextEditor from './TextEditor.vue';
 import Toolbar from './Toolbar.vue';
 import useAuthStore from '@/stores/useAuthStore';
-import { countStore } from '@/stores/useCountStore';
 import { sendReqCookie } from '@/utils/axiosInstances'
 import { MAX_CHAR_COUNT } from '@/utils/constants'
 import { RepliesResponse } from '@/types/replies';
+import socket from '@/utils/socket';
 
 const { xweetId } = defineProps<{
     show: boolean
     xweetId: number
 }>()
 const emit = defineEmits<{
-    (e: 'increment-reply-count'): void
     (e: 'close-reply'): void
 }>()
 
@@ -43,6 +42,8 @@ const replyXweet = async () => {
         )
 
         if (data?.success) {
+            socket.emit('add_to_replies', xweetId)
+
             isLoading.value = false
             isSuccess.value = true
             body.value = ''
@@ -51,7 +52,6 @@ const replyXweet = async () => {
             setTimeout(() => {
                 isSuccess.value = false
                 
-                countStore.incrementRepliesCount()
                 emit('close-reply')
             }, 1000)
         }

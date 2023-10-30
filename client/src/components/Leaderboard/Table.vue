@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { watch } from 'vue';
+import { ref, watch } from 'vue';
 
 import { TopDailyUser } from '@/types/users'
 
@@ -11,14 +11,14 @@ const props = defineProps<{
     entries: number
 }>()
 
-let initialIndex = 0
-let lastIndex = 0
+const initialIndex = ref(0)
+const lastIndex = ref(0)
 
 watch(() => [props.page, props.entries, props.dataLength], () => {
-    initialIndex = props.page === 1 ? 1 : props.entries + 1
-    lastIndex = (props.dataLength as number) >= props.entries ? 
+    initialIndex.value = props.dataLength ? props.page === 1 ? 1 : props.entries + 1 : 0
+    lastIndex.value = (props.dataLength as number) >= props.entries ? 
                 (props.dataLength as number) * props.page : 
-                props.dataTotal ?? 0
+                props.dataLength ?? 0
 }, {
     immediate: true
 })
@@ -26,9 +26,9 @@ watch(() => [props.page, props.entries, props.dataLength], () => {
 </script>
 
 <template>
-    <section class="dark:text-sky-600 h-table">
-        <table class="table-auto w-full border-separate text-sky-800 text-center dark:text-white">
-            <thead class="bg-sky-800">
+    <section class="dark:text-sky-600 text-sky-800 h-table">
+        <table class="w-full text-center border-separate table-auto text-sky-800 dark:text-white">
+            <thead class="text-white bg-sky-800">
                 <tr>
                     <th>No.</th>
                     <th>Users</th>

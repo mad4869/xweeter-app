@@ -13,8 +13,13 @@ type Reply = {
     og_username: string
     og_full_name: string
     og_profile_pic: string
-    og_body: string,
-    og_media?: string,
+    og_body: string
+    og_media?: string
+}
+
+type ReplyResponse = {
+    data: Reply
+    success: boolean
 }
 
 type RepliesResponse = {
@@ -22,4 +27,4 @@ type RepliesResponse = {
     success: boolean
 }
 
-export { type Reply, type RepliesResponse }
+export { type Reply, type ReplyResponse, type RepliesResponse }

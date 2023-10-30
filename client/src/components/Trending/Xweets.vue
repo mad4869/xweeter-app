@@ -13,13 +13,18 @@ import { XweetDetail } from '@/types/xweets';
 import { LikeDetail } from '@/types/likes'
 import { RexweetDetail } from '@/types/rexweets'
 
-defineProps<{
+const props = defineProps<{
+    isFiltered: boolean
+    deletedXweet?: number | null
+    showDeleteModal: (xweetId: number) => void
     showNotice: (category: 'success' | 'error', msg: string) => void
 }>()
 
 const authStore = useAuthStore()
 
 const route = useRoute()
+
+const isLoading = ref(false)
 
 const start = ref(0)
 const trendingData = await useFetchList<XweetDetail>(`/api/hashtags/${route.query.tag}`, false)
@@ -44,12 +49,38 @@ if (authStore.getIsAuthenticated) {
     })
 }
 
+watch(() => props.isFiltered, () => {
+    if (props.isFiltered) {
+        const index = trending.value?.findIndex(xweet => xweet.xweet_id === props.deletedXweet)
+        if (index !== -1) {
+            trending.value?.splice((index as number), 1)
+        }
+    }
+})
+
+watch(() => route.query.tag, async () => {
+    const newTrendingData = await useFetchList<XweetDetail>(`/api/hashtags/${route.query.tag}`, false)
+    trending.value = newTrendingData.list.value
+})
+
 const xweetToReply = ref<number | null>()
-const isLoading = ref(false)
+const xweetHasBeenReplied = ref(false)
+const closeReply = () => {
+    xweetToReply.value = null
+    xweetHasBeenReplied.value = true
+
+    setTimeout(() => {
+        xweetHasBeenReplied.value = false
+    }, 2000)
+}
+
+watch(() => xweetToReply.value, () => {
+    console.log(xweetToReply.value)
+})
 
 const trendingRef = ref<HTMLElement | null>(null)
 const { arrivedState } = useScroll(trendingRef)
-const needMoreXweet = ref(true)
+const needMoreXweet = ref((trending.value?.length ?? 0) > 4)
 
 watch(() => arrivedState.bottom, async () => {
     if (needMoreXweet) {
@@ -87,14 +118,16 @@ watch(() => arrivedState.bottom, async () => {
                 :updated-at="xweet.updated_at" 
                 :is-rexweet="false"
                 :is-own="xweet.user_id === authStore.getSignedInUserId" 
+                :is-replied="xweetHasBeenReplied"
                 :rexweeted="userRexweets.includes(xweet.xweet_id)"
                 :liked="userLikes.includes(xweet.xweet_id)"
                 @show-notice="showNotice"
-                @reply="(xweetId) => { xweetToReply = xweetId }" />
+                @reply="(xweetId) => { xweetToReply = xweetId }"
+                @delete="showDeleteModal" />
             <ReplyXweet 
                 :show="xweetToReply === xweet.xweet_id"
                 :xweet-id="xweet.xweet_id"
-                @close-reply="xweetToReply = null" />
+                @close-reply="closeReply" />
         </div>
         <MoreXweet v-if="needMoreXweet" :is-loading="isLoading" />
         <Empty 

@@ -8,7 +8,7 @@ class Like(db.Model):
     like_id = db.Column(db.Integer(), primary_key=True)
     user_id = db.Column(db.Integer(), db.ForeignKey("users.user_id"))
     xweet_id = db.Column(db.Integer(), db.ForeignKey("xweets.xweet_id"))
-    created_at = db.Column(db.DateTime(), nullable=False, default=datetime.now())
+    created_at = db.Column(db.DateTime(), nullable=False, default=datetime.now)
     updated_at = db.Column(db.DateTime())
 
     def serialize(self):

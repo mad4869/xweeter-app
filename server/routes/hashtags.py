@@ -45,11 +45,15 @@ def get_trending():
 
 @routes.route("/hashtags/<string:tag>", methods=["GET"], strict_slashes=False)
 def get_xweets_by_tag(tag):
+    start = int(request.args.get("start", 0))
+    size = int(request.args.get("size", 10))
+
     xweets = db.session.execute(
         db.select(Xweet)
         .join(hashtag_xweet, Xweet.xweet_id == hashtag_xweet.c.xweet_id)
         .join(Hashtag, hashtag_xweet.c.hashtag_id == Hashtag.hashtag_id)
         .filter(Hashtag.body == tag)
+        .order_by(Xweet.created_at.desc())
     ).scalars()
     data = []
     for xweet in xweets:
@@ -63,4 +67,8 @@ def get_xweets_by_tag(tag):
         )
         data.append(serial)
 
-    return jsonify({"success": True, "data": data}), 200
+    end = min(start + size, len(data))
+
+    sliced_data = data[start:end]
+
+    return jsonify({"success": True, "data": sliced_data}), 200
