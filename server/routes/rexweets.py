@@ -11,7 +11,6 @@ from ..models import Xweet, User, Rexweet
     methods=["GET"],
     strict_slashes=False,
 )
-# @jwt_required()
 def access_rexweets_by_xweet(xweet_id):
     rexweets = db.session.execute(
         db.select(Rexweet)
@@ -39,7 +38,6 @@ def access_rexweets_by_xweet(xweet_id):
 
 
 @routes.route("/users/<int:user_id>/rexweets", methods=["GET"], strict_slashes=False)
-# @jwt_required()
 def get_rexweets_by_user(user_id):
     rexweets = db.session.execute(
         db.select(Rexweet)
@@ -71,6 +69,7 @@ def get_rexweets_by_user(user_id):
     methods=["POST", "DELETE"],
     strict_slashes=False,
 )
+@jwt_required()
 def access_rexweets_by_user_xweet(user_id, xweet_id):
     if request.method == "POST":
         rexweet = Rexweet(user_id=user_id, xweet_id=xweet_id)

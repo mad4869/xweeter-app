@@ -10,14 +10,6 @@ from ..constants import MINIO_BUCKET
 from ..utils.manage_file import manage_file
 
 
-@routes.route("/xweets", methods=["GET"], strict_slashes=False)
-def get_xweets():
-    xweets = db.session.execute(db.select(Xweet)).scalars()
-    data = [xweet.serialize() for xweet in xweets]
-
-    return jsonify({"success": True, "data": data}), 200
-
-
 @routes.route("/xweets/<int:xweet_id>", methods=["GET"], strict_slashes=False)
 def access_xweet(xweet_id):
     xweet = db.session.execute(
@@ -35,89 +27,8 @@ def access_xweet(xweet_id):
     return jsonify({"success": True, "data": data}), 200
 
 
-@routes.route(
-    "/users/<int:user_id>/xweets", methods=["GET", "POST"], strict_slashes=False
-)
-# @jwt_required()
-def access_xweets_by_user(user_id):
-    if request.method == "POST":
-        data = request.get_json()
-        body = data.get("body")
-        media_url = data.get("media")
-        hashtags = data.get("hashtags")
-
-        if not body and not media_url:
-            return (
-                jsonify({"success": False, "message": "Xweet cannot be empty"}),
-                400,
-            )
-
-        if media_url:
-            media_data, media_stream, OBJECT_NAME = manage_file(media_url)
-
-            try:
-                mc.put_object(MINIO_BUCKET, OBJECT_NAME, media_stream, len(media_data))
-                media = mc.presigned_get_object(MINIO_BUCKET, OBJECT_NAME)
-            except S3Error as err:
-                return (
-                    jsonify(
-                        {
-                            "success": False,
-                            "message": f"Error occured during the process: {str(err)}",
-                        }
-                    ),
-                    500,
-                )
-        else:
-            media = None
-
-        xweet = Xweet(user_id=user_id, body=body, media=media)
-
-        try:
-            db.session.add(xweet)
-            db.session.commit()
-
-            if len(hashtags) != 0:
-                for tag in hashtags:
-                    existing_tag = db.session.execute(
-                        db.select(Hashtag).filter(Hashtag.body == tag)
-                    ).scalar_one_or_none()
-
-                    if existing_tag:
-                        db.session.execute(
-                            hashtag_xweet.insert().values(
-                                xweet_id=xweet.xweet_id,
-                                hashtag_id=existing_tag.hashtag_id,
-                            )
-                        )
-                        db.session.commit()
-                    else:
-                        hashtag = Hashtag(body=tag)
-
-                        db.session.add(hashtag)
-                        db.session.commit()
-
-                        db.session.execute(
-                            hashtag_xweet.insert().values(
-                                xweet_id=xweet.xweet_id, hashtag_id=hashtag.hashtag_id
-                            )
-                        )
-                        db.session.commit()
-        except Exception as err:
-            db.session.rollback()
-
-            return (
-                jsonify(
-                    {
-                        "success": False,
-                        "message": f"Error occured during the process: {str(err)}",
-                    }
-                ),
-                500,
-            )
-        else:
-            return jsonify({"success": True, "data": xweet.serialize()}), 201
-
+@routes.route("/users/<int:user_id>/xweets", methods=["GET"], strict_slashes=False)
+def get_xweets_by_user(user_id):
     xweets = db.session.execute(
         db.select(Xweet)
         .join(User, Xweet.user_id == User.user_id)
@@ -139,9 +50,90 @@ def access_xweets_by_user(user_id):
     return jsonify({"success": True, "data": data}), 200
 
 
+@routes.route("/users/<int:user_id>/xweets", methods=["POST"], strict_slashes=False)
+@jwt_required()
+def add_xweet(user_id):
+    data = request.get_json()
+    body = data.get("body")
+    media_url = data.get("media")
+    hashtags = data.get("hashtags")
+
+    if not body and not media_url:
+        return (
+            jsonify({"success": False, "message": "Xweet cannot be empty"}),
+            400,
+        )
+
+    if media_url:
+        media_data, media_stream, OBJECT_NAME = manage_file(media_url)
+
+        try:
+            mc.put_object(MINIO_BUCKET, OBJECT_NAME, media_stream, len(media_data))
+            media = mc.presigned_get_object(MINIO_BUCKET, OBJECT_NAME)
+        except S3Error as err:
+            return (
+                jsonify(
+                    {
+                        "success": False,
+                        "message": f"Error occured during the process: {str(err)}",
+                    }
+                ),
+                500,
+            )
+    else:
+        media = None
+
+    xweet = Xweet(user_id=user_id, body=body, media=media)
+
+    try:
+        db.session.add(xweet)
+        db.session.commit()
+
+        if len(hashtags) != 0:
+            for tag in hashtags:
+                existing_tag = db.session.execute(
+                    db.select(Hashtag).filter(Hashtag.body == tag)
+                ).scalar_one_or_none()
+
+                if existing_tag:
+                    db.session.execute(
+                        hashtag_xweet.insert().values(
+                            xweet_id=xweet.xweet_id,
+                            hashtag_id=existing_tag.hashtag_id,
+                        )
+                    )
+                    db.session.commit()
+                else:
+                    hashtag = Hashtag(body=tag)
+
+                    db.session.add(hashtag)
+                    db.session.commit()
+
+                    db.session.execute(
+                        hashtag_xweet.insert().values(
+                            xweet_id=xweet.xweet_id, hashtag_id=hashtag.hashtag_id
+                        )
+                    )
+                    db.session.commit()
+    except Exception as err:
+        db.session.rollback()
+
+        return (
+            jsonify(
+                {
+                    "success": False,
+                    "message": f"Error occured during the process: {str(err)}",
+                }
+            ),
+            500,
+        )
+    else:
+        return jsonify({"success": True, "data": xweet.serialize()}), 201
+
+
 @routes.route(
     "/users/<int:user_id>/xweets/<int:xweet_id>",
-    methods=["GET", "PUT", "DELETE"],
+    methods=["PUT", "DELETE"],
     strict_slashes=False,
 )
 @jwt_required()

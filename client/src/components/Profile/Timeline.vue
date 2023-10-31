@@ -120,7 +120,7 @@ watch(() => arrivedState.bottom, async () => {
                 :og-fullname="xweet.og_full_name"
                 :og-username="xweet.og_username"
                 :og-profile-pic="xweet.og_profile_pic" 
-                :is-rexweet="xweet.rexweet_id !== undefined"
+                :is-rexweet="Number.isInteger(xweet.rexweet_id)"
                 :is-own="!xweet.rexweet_id ? 
                 xweet.user_id === authStore.getSignedInUserId : 
                 xweet.og_user_id === authStore.getSignedInUserId"

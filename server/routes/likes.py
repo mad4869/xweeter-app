@@ -12,7 +12,6 @@ from ..models import Xweet, User, Like
     methods=["GET"],
     strict_slashes=False,
 )
-# @jwt_required()
 def get_likes_by_xweet(xweet_id):
     likes = db.session.execute(
         db.select(Like)
@@ -47,7 +46,6 @@ def get_likes_by_xweet(xweet_id):
 
 
 @routes.route("/users/<int:user_id>/likes", methods=["GET"], strict_slashes=False)
-# @jwt_required()
 def get_likes_by_user(user_id):
     start = int(request.args.get("start", 0))
     size = int(request.args.get("size", 10))
@@ -93,6 +91,7 @@ def get_likes_by_user(user_id):
     methods=["POST", "DELETE"],
     strict_slashes=False,
 )
+@jwt_required()
 def access_likes_by_user_xweet(user_id, xweet_id):
     if request.method == "POST":
         like = Like(user_id=user_id, xweet_id=xweet_id)

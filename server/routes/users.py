@@ -10,17 +10,6 @@ from ..models import User, Xweet
 from ..constants import MINIO_BUCKET
 from ..utils.manage_file import manage_file
 
-BUCKET = "xweeter"
-
-
-@routes.route("/users", methods=["GET"], strict_slashes=False)
-@jwt_required()
-def get_users():
-    users = db.session.execute(db.select(User)).scalars()
-    data = [user.serialize() for user in users]
-
-    return jsonify({"success": True, "data": data}), 200
-
 
 @routes.route("/users/most-active", methods=["GET"], strict_slashes=False)
 def get_most_active_users():
@@ -115,84 +104,87 @@ def get_daily_top_users():
     return jsonify({"success": True, "data": data}), 200
 
 
-@routes.route("/users/<int:user_id>", methods=["GET", "PUT"], strict_slashes=False)
-def access_user(user_id):
+@routes.route("/users/<int:user_id>", methods=["GET"], strict_slashes=False)
+def get_user(user_id):
     user = db.session.execute(
         db.select(User).filter(User.user_id == user_id)
     ).scalar_one_or_none()
     data = user.serialize()
 
-    if request.method == "PUT":
-        updated_data = request.get_json()
-        updated_username = updated_data.get("username", data["username"])
-        updated_full_name = updated_data.get("fullname", data["full_name"])
-        updated_email = updated_data.get("email", data["email"])
-        updated_bio = updated_data.get("bio", data["bio"])
-        updated_profile_pic = updated_data.get("profile_pic", data["profile_pic"])
-        updated_header_pic = updated_data.get("header_pic", data["header_pic"])
+    return jsonify({"success": True, "data": data}), 200
 
-        if updated_profile_pic != data["profile_pic"]:
-            media_data, media_stream, OBJECT_NAME = manage_file(updated_profile_pic)
 
-            try:
-                mc.put_object(
-                    MINIO_BUCKET,
-                    OBJECT_NAME,
-                    media_stream,
-                    len(media_data),
-                )
-                updated_profile_pic = mc.presigned_get_object(MINIO_BUCKET, OBJECT_NAME)
-            except S3Error as err:
-                return (
-                    jsonify(
-                        {
-                            "success": False,
-                            "message": f"Error occured during the process: {str(err)}",
-                        }
-                    ),
-                    500,
-                )
-        if updated_header_pic != data["header_pic"]:
-            media_data, media_stream, OBJECT_NAME = manage_file(updated_header_pic)
-            try:
-                mc.put_object(
-                    MINIO_BUCKET,
-                    OBJECT_NAME,
-                    media_stream,
-                    len(media_data),
-                )
-                updated_header_pic = mc.presigned_get_object(MINIO_BUCKET, OBJECT_NAME)
-            except S3Error as err:
-                return (
-                    jsonify(
-                        {
-                            "success": False,
-                            "message": f"Error occured during the process: {str(err)}",
-                        }
-                    ),
-                    500,
-                )
+@routes.route("/users/<int:user_id>", methods=["PUT"], strict_slashes=False)
+@jwt_required()
+def update_user(user_id):
+    updated_data = request.get_json()
+    updated_username = updated_data.get("username", data["username"])
+    updated_full_name = updated_data.get("fullname", data["full_name"])
+    updated_email = updated_data.get("email", data["email"])
+    updated_bio = updated_data.get("bio", data["bio"])
+    updated_profile_pic = updated_data.get("profile_pic", data["profile_pic"])
+    updated_header_pic = updated_data.get("header_pic", data["header_pic"])
+
+    if updated_profile_pic != data["profile_pic"]:
+        media_data, media_stream, OBJECT_NAME = manage_file(updated_profile_pic)
 
         try:
-            user.username = updated_username
-            user.full_name = updated_full_name
-            user.email = updated_email
-            user.bio = updated_bio
-            user.profile_pic = updated_profile_pic
-            user.header_pic = updated_header_pic
-            user.updated_at = datetime.now()
-
-            db.session.commit()
-        except:
-            db.session.rollback()
-
+            mc.put_object(
+                MINIO_BUCKET,
+                OBJECT_NAME,
+                media_stream,
+                len(media_data),
+            )
+            updated_profile_pic = mc.presigned_get_object(MINIO_BUCKET, OBJECT_NAME)
+        except S3Error as err:
             return (
-                jsonify({"success": False, "message": "Failed to update the profile"}),
+                jsonify(
+                    {
+                        "success": False,
+                        "message": f"Error occured during the process: {str(err)}",
+                    }
+                ),
                 500,
             )
-        else:
-            updated_data = user.serialize()
+    if updated_header_pic != data["header_pic"]:
+        media_data, media_stream, OBJECT_NAME = manage_file(updated_header_pic)
+        try:
+            mc.put_object(
+                MINIO_BUCKET,
+                OBJECT_NAME,
+                media_stream,
+                len(media_data),
+            )
+            updated_header_pic = mc.presigned_get_object(MINIO_BUCKET, OBJECT_NAME)
+        except S3Error as err:
+            return (
+                jsonify(
+                    {
+                        "success": False,
+                        "message": f"Error occured during the process: {str(err)}",
+                    }
+                ),
+                500,
+            )
 
-            return jsonify({"success": True, "data": updated_data}), 201
+    try:
+        user.username = updated_username
+        user.full_name = updated_full_name
+        user.email = updated_email
+        user.bio = updated_bio
+        user.profile_pic = updated_profile_pic
+        user.header_pic = updated_header_pic
+        user.updated_at = datetime.now()
 
-    return jsonify({"success": True, "data": data}), 200
+        db.session.commit()
+    except:
+        db.session.rollback()
+
+        return (
+            jsonify({"success": False, "message": "Failed to update the profile"}),
+            500,
+        )
+    else:
+        updated_data = user.serialize()
+
+        return jsonify({"success": True, "data": updated_data}), 201

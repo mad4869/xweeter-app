@@ -7,7 +7,6 @@ from ..models import User, follow
 
 
 @routes.route("/users/<int:user_id>/following", methods=["GET"], strict_slashes=False)
-# @jwt_required()
 def get_user_following(user_id):
     followings = db.session.execute(
         db.select(User)
@@ -21,7 +20,6 @@ def get_user_following(user_id):
 
 
 @routes.route("/users/<int:user_id>/followers", methods=["GET"], strict_slashes=False)
-# @jwt_required()
 def get_user_followers(user_id):
     followers = db.session.execute(
         db.select(User)
