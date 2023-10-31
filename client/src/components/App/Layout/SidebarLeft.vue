@@ -24,7 +24,7 @@ const activateBtn = (btn: UserAuth) => {
 <template>
     <section 
         v-if="!authStore.getIsAuthenticated"
-        class="flex-[4] flex flex-col items-center px-2 pt-4 border border-solid border-sky-800 rounded-xl">
+        class="flex-[4] flex flex-col items-center px-2 pt-4 bg-sky-800 border border-solid dark:border-sky-800 rounded-xl dark:bg-transparent">
         <Toggle :active-btn="activeBtn" @activate-btn="activateBtn" />
         <Transition mode="out-in">
             <KeepAlive>

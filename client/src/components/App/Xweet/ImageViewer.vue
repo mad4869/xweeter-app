@@ -76,7 +76,7 @@ onClickOutside(imgRef, () => {
                         <span>@{{ username }}</span>
                     </div>
                     <div 
-                        v-if="!isReply"
+                        v-if="authStore.getIsAuthenticated && !isReply"
                         class="flex items-center justify-center gap-4 text-sky-400 dark:text-sky-900">
                         <span class="flex items-center gap-1">
                             <font-awesome-icon 
@@ -100,13 +100,13 @@ onClickOutside(imgRef, () => {
                         </span>
                         <span class="flex items-center gap-1">
                         <font-awesome-icon 
-                            v-if="authStore.getIsAuthenticated && !isLiked"
+                            v-if="!isLiked"
                             icon="fa-regular fa-heart"
                             class="transition-transform cursor-pointer hover:text-sky-600 hover:scale-105"
                             title="Like this xweet"
                             @click="$emit('like-xweet')" />
                         <font-awesome-icon
-                            v-if="authStore.getIsAuthenticated && isLiked"
+                            v-else
                             icon="fa-solid fa-heart"
                             class="scale-105 cursor-pointer text-sky-600"
                             title="Unlike this xweet"

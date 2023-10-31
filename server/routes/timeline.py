@@ -27,20 +27,27 @@ def add_to_timeline(user_id):
 
 @routes.route("/timeline", methods=["GET"], strict_slashes=False)
 def get_timeline():
+    start = int(request.args.get("start", 0))
+    size = int(request.args.get("size", 10))
+
     xweets = db.session.execute(
         db.select(Xweet)
         .join(User, Xweet.user_id == User.user_id)
         .order_by(Xweet.created_at.desc())
     ).scalars()
-    xweets_data = []
+    data = []
     for xweet in xweets:
         xweet_data = xweet.serialize()
         xweet_data["username"] = xweet.users.username
         xweet_data["full_name"] = xweet.users.full_name
         xweet_data["profile_pic"] = xweet.users.profile_pic
-        xweets_data.append(xweet_data)
+        data.append(xweet_data)
 
-    return jsonify({"success": True, "data": xweets_data}), 200
+    end = min(start + size, len(data))
+
+    sliced_data = data[start:end]
+
+    return jsonify({"success": True, "data": sliced_data}), 200
 
 
 @routes.route(

@@ -51,7 +51,7 @@ if (authStore.getIsAuthenticated) {
     })
 } else {
     const timelineData = await useFetchList<XweetDetail>(
-        `/api/timeline`, false
+        `/api/timeline?start=${start.value}`, false
         )
     timeline = timelineData.list
 }
@@ -88,13 +88,23 @@ watch(() => arrivedState.bottom, async () => {
     if (needMoreXweet) {
         start.value+= 10
         isLoading.value = true
+        
+        let newTimeline: Ref<XweetDetail[] | null | undefined> = ref([])
+
+        if (authStore.getIsAuthenticated) {
+            const newTimelineData = await useFetchList<XweetDetail>(
+                `/api/users/${authStore.getSignedInUserId}/timeline?start=${start.value}`, true
+            )
+            newTimeline = newTimelineData.list
+        } else {
+            const newTimelineData = await useFetchList<XweetDetail>(
+                `/api/timeline?start=${start.value}`, true
+            )
+            newTimeline = newTimelineData.list
+        }
     
-        const newTimelineData = await useFetchList<XweetDetail>(
-            `/api/users/${authStore.getSignedInUserId}/timeline?start=${start.value}`, true
-        )
-        const newTimeline = newTimelineData.list
         isLoading.value = false
-    
+
         if (newTimeline.value?.length === 0) {
             needMoreXweet.value = false
         } else {

@@ -110,7 +110,7 @@ const follow = async () => {
                 alt="Header" 
                 loading="lazy">
             <label
-                v-if="isOwn" 
+                v-if="authStore.getIsAuthenticated && isOwn" 
                 for="change-header"
                 class="absolute items-center hidden px-2 py-1 text-xs font-semibold text-white rounded-md cursor-pointer right-4 top-4 bg-sky-600/50 backdrop-blur-md group-hover/header:flex hover:bg-sky-600"
                 title="Change your header">
@@ -124,7 +124,7 @@ const follow = async () => {
             </label>
         </div>
         <div class="absolute flex justify-between items-center w-full bottom-[16vh] px-12">
-            <label 
+            <label
                 for="change-profile-pic" 
                 title="Change your profile picture" 
                 class="relative w-20 h-20 overflow-hidden border border-solid rounded-full shadow-xl border-sky-600 group/pfp">
@@ -134,10 +134,12 @@ const follow = async () => {
                     alt="Profile Pic" 
                     loading="lazy">
                 <div 
+                    v-if="authStore.getIsAuthenticated && isOwn" 
                     class="absolute top-0 left-0 items-center justify-center hidden w-full h-full text-xs font-semibold text-white cursor-pointer bg-slate-600/10 backdrop-blur-sm group-hover/pfp:flex">
                     Change
                 </div>
                 <input 
+                    v-if="authStore.getIsAuthenticated && isOwn" 
                     type="file" 
                     id="change-profile-pic"  
                     accept="image/jpeg, image/png" 
@@ -146,14 +148,14 @@ const follow = async () => {
             </label>
             <div class="flex items-center gap-2">
                 <button
-                    v-if="isOwn"
+                    v-if="authStore.getIsAuthenticated && isOwn"
                     class="px-4 py-1 font-medium bg-white border-2 border-solid rounded-md dark:text-white text-sky-600 dark:bg-sky-600 dark:border-sky-800 dark:hover:bg-sky-800 dark:hover:border-sky-600 hover:bg-slate-200"
                     title="Edit your profile"
                     @click="$emit('show-edit-profile')">
                     Edit
                 </button>
                 <button
-                    v-else-if="!isOwn && !userFollowed"
+                    v-else-if="authStore.getIsAuthenticated && !isOwn && !userFollowed"
                     class="px-4 py-1 font-medium bg-white border-2 border-solid rounded-md dark:text-white text-sky-600 dark:bg-sky-600 dark:border-sky-800 dark:hover:bg-sky-800 dark:hover:border-sky-600 hover:bg-slate-200"
                     title="Follow this user"
                     @click="follow">
@@ -161,7 +163,7 @@ const follow = async () => {
                     {{ !isLoading ? 'Follow' : '' }}
                 </button>
                 <div
-                    v-else-if="!isOwn && userFollowed"
+                    v-else-if="authStore.getIsAuthenticated && !isOwn && userFollowed"
                     class="px-4 py-1 font-medium rounded-md cursor-not-allowed bg-slate-600 text-slate-400"
                     title="You already followed this user">
                     Followed

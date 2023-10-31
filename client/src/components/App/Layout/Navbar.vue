@@ -31,7 +31,7 @@ onClickOutside(menu, () => {
             class="items-center justify-end hidden w-full col-span-1 text-sm sm:flex min-w-max md:text-base">
             <button
                 v-if="authStore.getIsAuthenticated" 
-                class="navbar-menu hover:bg-sky-600/10">
+                class="navbar-menu hover:bg-slate-900/10 dark:hover:bg-sky-600/10">
                 <router-link 
                     :to="`/users/${authStore.getSignedInUserId}`" 
                     title="View your profile" 
@@ -40,7 +40,7 @@ onClickOutside(menu, () => {
                 </router-link>
             </button>
             <button  
-                class="navbar-menu hover:bg-sky-600/10">
+                class="navbar-menu hover:bg-slate-900/10 dark:hover:bg-sky-600/10">
                 <router-link 
                     to="/leaderboard" 
                     title="View leaderboard" 
@@ -50,7 +50,7 @@ onClickOutside(menu, () => {
             </button>
             <button 
                 v-if="authStore.getIsAuthenticated && authStore.getSignedInRole === 'admin'" 
-                class="navbar-menu hover:bg-sky-600/10">
+                class="navbar-menu hover:bg-slate-900/10 dark:hover:bg-sky-600/10">
                 <router-link 
                     to="/admin" 
                     title="View admin dashboard"
@@ -72,7 +72,7 @@ onClickOutside(menu, () => {
         <div 
             v-if="showMenu"
             ref="menu" 
-            class="absolute flex flex-col border border-solid rounded-md top-12 right-8 bg-slate-900/70 backdrop-blur-md text-slate-400 border-slate-400/70">
+            class="absolute flex flex-col border border-solid rounded-md top-12 right-8 bg-white/70 dark:bg-slate-900/70 backdrop-blur-md text-slate-400 border-slate-400/70">
             <button
                 v-if="authStore.getIsAuthenticated" 
                 class="navbar-menu hover:bg-sky-600/10">

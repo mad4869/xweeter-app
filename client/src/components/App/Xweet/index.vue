@@ -60,47 +60,53 @@ const xweetRexweetsCount = await useCount('xweets', props.id, Features.Rexweets)
 const xweetLikesCount = await useCount('xweets', props.id, Features.Likes)
 
 const rexweet = async () => {
-    if (!props.isOwn) {
-        isRexweeted.value = !isRexweeted.value
+    if (!authStore.getIsAuthenticated || props.isOwn) {
+        return
+    }
+
+    isRexweeted.value = !isRexweeted.value
     
-        if (isRexweeted.value) {
-            xweetRexweetsCount.value++
-            try {
-                const { data } = await sendReqCookie.post<RexweetResponse | undefined>(
-                    `/api/users/${authStore.getSignedInUserId}/xweets/${props.id}/rexweets`
-                )
-        
-                if (data?.success) {
-                    emit('show-notice', 'success', `You rexweeted ${props.isRexweet || props.isLike ? props.ogUsername : props.username}'s xweet`)
-                }
-            } catch (err) {
-                isRexweeted.value = false
-                xweetRexweetsCount.value--
-        
-                emit('show-notice', 'error', 'Failed to rexweet: error occured during the process')
+    if (isRexweeted.value) {
+        xweetRexweetsCount.value++
+        try {
+            const { data } = await sendReqCookie.post<RexweetResponse | undefined>(
+                `/api/users/${authStore.getSignedInUserId}/xweets/${props.id}/rexweets`
+            )
+    
+            if (data?.success) {
+                emit('show-notice', 'success', `You rexweeted ${props.isRexweet || props.isLike ? props.ogUsername : props.username}'s xweet`)
             }
-        } else {
+        } catch (err) {
+            isRexweeted.value = false
             xweetRexweetsCount.value--
     
-            try {
-                const { data } = await sendReqCookie.delete<RexweetResponse | undefined>(
-                    `/api/users/${authStore.getSignedInUserId}/xweets/${props.id}/rexweets`
-                )
-    
-                if (data?.success) {
-                    emit('show-notice', 'success', `You unrexweeted ${props.isRexweet || props.isLike ? props.ogUsername : props.username}'s xweet`)
-                }
-            } catch (err) {
-                isRexweeted.value = true
-                xweetRexweetsCount.value++
-    
-                emit('show-notice', 'error', 'Failed to unrexweet: error occured during the process')
+            emit('show-notice', 'error', 'Failed to rexweet: error occured during the process')
+        }
+    } else {
+        xweetRexweetsCount.value--
+
+        try {
+            const { data } = await sendReqCookie.delete<RexweetResponse | undefined>(
+                `/api/users/${authStore.getSignedInUserId}/xweets/${props.id}/rexweets`
+            )
+
+            if (data?.success) {
+                emit('show-notice', 'success', `You unrexweeted ${props.isRexweet || props.isLike ? props.ogUsername : props.username}'s xweet`)
             }
+        } catch (err) {
+            isRexweeted.value = true
+            xweetRexweetsCount.value++
+
+            emit('show-notice', 'error', 'Failed to unrexweet: error occured during the process')
         }
     }
 }
 
 const switchRepliable = () => {
+    if (!authStore.getIsAuthenticated) {
+        return
+    }
+    
     isRepliable.value = !isRepliable.value
     
     if (isRepliable.value) {
@@ -117,6 +123,10 @@ watch(() => props.isReplied, () => {
 })
 
 const likeXweet = async () => {
+    if (!authStore.getIsAuthenticated) {
+        return
+    }
+
     isLiked.value = true
     xweetLikesCount.value++
 
@@ -137,6 +147,10 @@ const likeXweet = async () => {
 }
 
 const unlikeXweet = async () => {
+    if (!authStore.getIsAuthenticated) {
+        return
+    }
+
     isLiked.value = false
     xweetLikesCount.value--
 
@@ -194,18 +208,20 @@ const updateXweet = (newBody: string, newMedia?: string, updateDate?: string) =>
                     </em>
                 </p>
                 <span class="flex items-center justify-center gap-4 text-sm">
-                    <span v-if="authStore.getIsAuthenticated && !isReply" class="flex items-center gap-1">
+                    <span v-if="!isReply" class="flex items-center gap-1">
                         <font-awesome-icon
                             v-if="!isRepliable"
                             icon="fa-regular fa-comment"
-                            class="transition-transform cursor-pointer hover:text-sky-600 hover:scale-105"
-                            title="Reply to this xweet"
+                            class="transition-transform"
+                            :class="authStore.getIsAuthenticated ? 'cursor-pointer hover:text-sky-600 hover:scale-105' : 'cursor-not-allowed'"
+                            :title="authStore.getIsAuthenticated ? 'Reply to this xweet' : 'You need to login to use this feature'"
                             @click="switchRepliable" />
                         <font-awesome-icon
                             v-else
                             icon="fa-solid fa-comment"
                             class="transition-transform scale-105 cursor-pointer text-sky-600"
-                            title="Cancel reply"
+                            :class="authStore.getIsAuthenticated ? 'cursor-pointer' : 'cursor-not-allowed'"
+                            :title="authStore.getIsAuthenticated ? 'Cancel reply' : 'You need to login to use this feature'"
                             @click="switchRepliable" />
                         <router-link 
                             :to="`/xweets/${id}`"
@@ -221,12 +237,13 @@ const updateXweet = (newBody: string, newMedia?: string, updateDate?: string) =>
                             class="transition-transform"
                             :class="{
                                 'text-sky-600 scale-105': isRexweeted,
-                                'cursor-pointer hover:text-sky-600 hover:scale-105': !isOwn,
-                                'cursor-not-allowed': isOwn
+                                'cursor-pointer hover:text-sky-600 hover:scale-105': !isOwn && authStore.getIsAuthenticated,
+                                'cursor-not-allowed': isOwn || !authStore.getIsAuthenticated
                                 }"
-                            :title="!isOwn && !isRexweeted ? 'Rexweet' :
-                                    isOwn ? 'You can\'t rexweet your own xweet' :
-                                    'Unrexweet'"
+                            :title="authStore.getIsAuthenticated && !isOwn && !isRexweeted ? 'Rexweet' :
+                                    authStore.getIsAuthenticated && isOwn ? 'You can\'t rexweet your own xweet' :
+                                    authStore.getIsAuthenticated && isRexweeted ? 'Unrexweet' :
+                                    'You need to login to use this feature'"
                             @click="rexweet" />
                         <span 
                             v-if="xweetRexweetsCount" 
@@ -237,16 +254,18 @@ const updateXweet = (newBody: string, newMedia?: string, updateDate?: string) =>
                     </span>
                     <span v-if="!isReply" class="flex items-center gap-1">
                         <font-awesome-icon 
-                            v-if="authStore.getIsAuthenticated && !isLiked"
+                            v-if="!isLiked"
                             icon="fa-regular fa-heart"
-                            class="transition-transform cursor-pointer hover:text-sky-600 hover:scale-105"
-                            title="Like this xweet"
+                            class="transition-transform"
+                            :class="authStore.getIsAuthenticated ? 'cursor-pointer hover:text-sky-600 hover:scale-105' : 'cursor-not-allowed'"
+                            :title="authStore.getIsAuthenticated ? 'Like this xweet' : 'You need to login to use this feature'"
                             @click="likeXweet" />
                         <font-awesome-icon
-                            v-if="authStore.getIsAuthenticated && isLiked"
+                            v-else
                             icon="fa-solid fa-heart"
-                            class="scale-105 cursor-pointer text-sky-600"
-                            title="Unlike this xweet"
+                            class="scale-105 text-sky-600"
+                            :class="authStore.getIsAuthenticated ? 'cursor-pointer' : 'cursor-not-allowed'"
+                            :title="authStore.getIsAuthenticated ? 'Unlike this xweet' : 'You need to login to use this feature'"
                             @click="unlikeXweet" />
                         <span 
                             v-if="xweetLikesCount" 
