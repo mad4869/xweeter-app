@@ -26,7 +26,7 @@ const userToFollow = mostActiveUsers.list?.value?.filter(user => {
             <span class="font-semibold text-white">Who to Follow</span>
             <font-awesome-icon icon="fa-regular fa-user" class="text-white" />
         </div>
-        <div class="flex flex-col justify-center gap-2 px-4 overflow-scroll">
+        <div class="flex flex-col justify-center gap-2 xl:px-4 overflow-scroll">
             <UserToFollow
                 v-for="user in userToFollow" 
                 :key="user.user_id"
