@@ -20,7 +20,7 @@ const hashtags = await useFetchList<Trending>('api/trending', false)
                 :key="hashtag.hashtag_id" 
                 :body="hashtag.body"
                 :xweet-count="hashtag.xweet_count" />
-            <Empty v-if="hashtags.list?.value?.length === 0" msg="There are no trending topics for now" />
+            <Empty v-if="hashtags.list?.value?.length === 0" submsg="There are no trending topics for now" />
         </div>
     </section>
 </template>

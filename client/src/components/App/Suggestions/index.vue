@@ -35,7 +35,7 @@ const userToFollow = mostActiveUsers.list?.value?.filter(user => {
                 :username="user.username"
                 :last-xweet="user.body"
                 :profile-pic="user.profile_pic" />
-            <Empty v-if="userToFollow?.length === 0" msg="There is no user to follow for now" />
+            <Empty v-if="userToFollow?.length === 0" submsg="There is no user to follow for now" />
         </div>
     </section>
 </template>
