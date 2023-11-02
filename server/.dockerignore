@@ -40,3 +40,4 @@ Dockerfile
 
 # Misc
 .vscode
+*.env-sample
