@@ -15,6 +15,10 @@ def access_xweet(xweet_id):
     xweet = db.session.execute(
         db.select(Xweet).filter(Xweet.xweet_id == xweet_id)
     ).scalar_one_or_none()
+
+    if xweet is None:
+        return jsonify({"success": False, "message": "Xweet is not found"}), 404
+
     data = xweet.serialize()
     data.update(
         {

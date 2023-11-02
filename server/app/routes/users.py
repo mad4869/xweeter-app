@@ -109,6 +109,10 @@ def get_user(user_id):
     user = db.session.execute(
         db.select(User).filter(User.user_id == user_id)
     ).scalar_one_or_none()
+
+    if user is None:
+        return jsonify({"success": False, "message": "User is not found"}), 404
+
     data = user.serialize()
 
     return jsonify({"success": True, "data": data}), 200

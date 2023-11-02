@@ -14,9 +14,9 @@ const activateBtn = (btn: UserAuth) => {
 
 <template>
     <section
-        class="flex flex-col items-center justify-center col-start-2 row-span-5 row-start-1 gap-2 px-32 py-8 rounded-lg shadow-lg bg-white/10 backdrop-blur-lg shadow-sky-800">
+        class="flex flex-col items-center justify-center col-start-1 col-span-2 sm:col-start-2 sm:col-span-1 row-span-5 row-start-1 gap-2 px-32 py-8 rounded-lg shadow-lg bg-white/10 backdrop-blur-lg shadow-sky-800">
         <Toggle :active-btn="activeBtn" @activate-btn="activateBtn" />
-        <h3 class="text-2xl font-semibold text-white">
+        <h3 class="text-xl lg:text-2xl font-semibold text-white min-w-max">
             {{ activeBtn === UserAuth.SignUp ? 'Let\'s get you started!' : 'Welcome Back!' }}
         </h3>
         <Transition mode="out-in">
