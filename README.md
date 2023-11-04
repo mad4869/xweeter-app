@@ -121,7 +121,7 @@ The backend is built using the __Flask__ framework to serve REST API to the clie
 
 The actual app is located within the `app` module and includes the following directories:
 
-- __routes:__ Handles the routes that serve the REST API. The list of API endpoints can be viewed [here.](https://documenter.getpostman.com/view/11633108/2s93zH2eWg)
+- __routes:__ Handles the routes that serve the REST API. The list of API endpoints can be viewed [here.](https://documenter.getpostman.com/view/11633108/2s9YXe953W)
 - __models:__ Defines all the objects that will be mapped to the database.
 - __utils:__ Contains utility modules for managing files.
 - __static:__ Contains the CSS file for the admin page.
