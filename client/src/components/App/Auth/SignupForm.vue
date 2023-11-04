@@ -6,7 +6,7 @@ import { AxiosError } from 'axios';
 
 import InputField from '@/components/App/InputField.vue';
 import useAuthStore from '@/stores/useAuthStore';
-import { AuthResponse, AuthResponseWoUser } from '@/types/auth'
+import { AuthResponse } from '@/types/auth'
 import { sendReqWoCookie } from '@/utils/axiosInstances';
 
 const authStore = useAuthStore()
@@ -66,7 +66,7 @@ const signupAndIn = async () => {
             isLoading.value = false
             isError.value = true
 
-            const data = err.response.data as AuthResponseWoUser
+            const data = err.response.data as { success: boolean, message: string }
             errorMsg.value = data.message
 
             setTimeout(() => {

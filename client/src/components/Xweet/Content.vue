@@ -31,6 +31,10 @@ const showNotice = (category: 'success' | 'error', msg: string) => {
 
 const xweet = await useFetchObject<XweetDetail>(`/api/xweets/${route.params.id}`, false)
 
+if (xweet.error.value) {
+    router.replace({ name: '404' })
+}
+
 const isLoading = ref(false)
 const isError = ref(false)
 const isSuccess = ref(false)

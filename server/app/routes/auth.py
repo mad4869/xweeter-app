@@ -29,7 +29,7 @@ def check_if_token_is_revoked(jwt_header, jwt_payload: dict) -> bool:
 def refresh_expiring_jwts(response):
     try:
         exp_timestamp = get_jwt()["exp"]
-        now = datetime.now(timezone.utc)
+        now = datetime.now()
         target_timestamp = datetime.timestamp(now + timedelta(minutes=30))
 
         if target_timestamp > exp_timestamp:
@@ -135,6 +135,18 @@ def get_logged_in_user():
     user = db.session.execute(
         db.select(User).filter(User.user_id == user_id)
     ).scalar_one_or_none()
+
+    if not user:
+        return (
+            jsonify(
+                {
+                    "success": False,
+                    "message": "There is no signed-in user",
+                }
+            ),
+            401,
+        )
+
     data = user.serialize()
 
     return (

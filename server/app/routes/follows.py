@@ -1,5 +1,5 @@
 from flask import request, jsonify
-from flask_jwt_extended import jwt_required
+from flask_jwt_extended import jwt_required, get_jwt_identity
 
 from . import routes, logging
 from ..extensions import db, jwt_manager
@@ -39,6 +39,10 @@ def get_user_followers(user_id):
 )
 @jwt_required()
 def follows(follower_id, followed_id):
+    current_user_id = get_jwt_identity()
+    if current_user_id != follower_id:
+        return jsonify({"success": False, "message": "Unauthorized action"}), 403
+
     try:
         db.session.execute(
             follow.insert().values(followed_id=followed_id, follower_id=follower_id)

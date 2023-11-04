@@ -30,40 +30,47 @@ const emit = defineEmits<{
 
 const authStore = useAuthStore()
 
-const pfp = ref(profilePic)
-const header = ref(headerPic)
+const pfp = ref<File | null>(null)
+const pfpPreview = ref(profilePic)
+const header = ref<File | null>(null)
+const headerPreview = ref(headerPic)
 const userFollowed = ref(isFollowed)
 const isLoading = ref(false)
 const isEditable = ref(false)
 
 const managePfp = async (e: Event) => {
     isEditable.value = true
-    pfp.value = await useFile(e)
+    const fileData = await useFile(e)
+    if (fileData.file) {
+        pfp.value = fileData.file
+        pfpPreview.value = fileData.fileDataURL
+    }
 }
 
 const manageHeader = async (e: Event) => {
     isEditable.value = true
-    header.value = await useFile(e)
+    const fileData = await useFile(e)
+    if (fileData.file) {
+        header.value = fileData.file
+        headerPreview.value = fileData.fileDataURL
+    }
 }
 
 const changeImage = async () => {
     isLoading.value = true
 
-    let payload
+    const formData = new FormData()
 
     try {
-        if (pfp.value !== profilePic && header.value !== headerPic) {
-            payload = { profile_pic: pfp.value, header_pic: header.value }
-        } else if (pfp.value !== profilePic) {
-            payload = { profile_pic: pfp.value }
-        } else if (header.value !== headerPic) {
-            payload = { header_pic: header.value }
-        } else {
-            payload = {}
+        if (pfp.value) {
+            formData.append('profile_pic', pfp.value)
+        }
+        if (header.value) {
+            formData.append('header_pic', header.value)
         }
 
         const { data } = await sendReqCookie.put<UserResponse | undefined>(
-            `/api/users/${userId}`, payload
+            `/api/users/${userId}`, formData
         )
 
         if (data?.success) {
@@ -75,7 +82,8 @@ const changeImage = async () => {
     } catch (err) {
         isLoading.value = false
         isEditable.value = false
-        pfp.value = profilePic
+        pfpPreview.value = profilePic
+        headerPreview.value = headerPic
 
         emit('show-notice', 'error', 'Error occured during process. Please try again')
     }
@@ -105,7 +113,7 @@ const follow = async () => {
     <section class="relative grid grid-rows-5 h-[55vh] rounded-lg overflow-hidden">
         <div class="relative row-span-3 group/header">
             <img 
-                :src="header" 
+                :src="headerPreview" 
                 class="object-cover w-full h-full"
                 alt="Header" 
                 loading="lazy">
@@ -129,7 +137,7 @@ const follow = async () => {
                 title="Change your profile picture" 
                 class="relative w-20 h-20 overflow-hidden border border-solid rounded-full shadow-xl border-sky-600 group/pfp">
                 <img 
-                    :src="pfp" 
+                    :src="pfpPreview" 
                     class="object-cover w-full h-full"
                     alt="Profile Pic" 
                     loading="lazy">

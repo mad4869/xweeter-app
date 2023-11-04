@@ -40,7 +40,7 @@ const signout = async () => {
 </script>
 
 <template>
-    <Navbar @show-signout-modal="() => { showModal = true }" />
+    <Navbar @show-signout-modal="showModal = true" />
     <main class="grid w-full grid-cols-4 px-4 py-4 md:grid-cols-6 lg:grid-cols-5 gap-x-4">
         <aside
             v-if="showSidebar" 
@@ -66,7 +66,7 @@ const signout = async () => {
             error-msg="Failed to sign out. Please try again"
             :is-loading="isLoading"
             :is-error="isError"
-            @close-modal="() => { showModal = false }" />
+            @close-modal="showModal = false" />
     </Modal>
     <Footer />
 </template>

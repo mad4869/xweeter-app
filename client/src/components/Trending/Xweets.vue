@@ -74,10 +74,6 @@ const closeReply = () => {
     }, 2000)
 }
 
-watch(() => xweetToReply.value, () => {
-    console.log(xweetToReply.value)
-})
-
 const trendingRef = ref<HTMLElement | null>(null)
 const { arrivedState } = useScroll(trendingRef)
 const needMoreXweet = ref((trending.value?.length ?? 0) > 4)

@@ -1,5 +1,5 @@
 from flask import request, jsonify
-from flask_jwt_extended import jwt_required
+from flask_jwt_extended import jwt_required, get_jwt_identity
 from minio.error import S3Error
 from datetime import datetime
 
@@ -11,7 +11,7 @@ from ..utils.manage_file import manage_file
 
 
 @routes.route("/xweets/<int:xweet_id>", methods=["GET"], strict_slashes=False)
-def access_xweet(xweet_id):
+def get_xweet(xweet_id):
     xweet = db.session.execute(
         db.select(Xweet).filter(Xweet.xweet_id == xweet_id)
     ).scalar_one_or_none()
@@ -57,23 +57,32 @@ def get_xweets_by_user(user_id):
 @routes.route("/users/<int:user_id>/xweets", methods=["POST"], strict_slashes=False)
 @jwt_required()
 def add_xweet(user_id):
-    data = request.get_json()
-    body = data.get("body")
-    media_url = data.get("media")
-    hashtags = data.get("hashtags")
+    current_user_id = get_jwt_identity()
+    if current_user_id != user_id:
+        return jsonify({"success": False, "message": "Unauthorized action"}), 403
 
-    if not body and not media_url:
+    body = request.form.get("body", "")
+    media = request.files.get("media", None)
+    media_name = None
+    media_updated_at = None
+    hashtags = request.form.getlist("hashtags")
+
+    if not body and not media:
         return (
             jsonify({"success": False, "message": "Xweet cannot be empty"}),
             400,
         )
 
-    if media_url:
-        media_data, media_stream, OBJECT_NAME = manage_file(media_url)
+    if media:
+        media_name, media_size = manage_file(media)
 
         try:
-            mc.put_object(MINIO_BUCKET, OBJECT_NAME, media_stream, len(media_data))
-            media = mc.presigned_get_object(MINIO_BUCKET, OBJECT_NAME)
+            bucket_existing = mc.bucket_exists(MINIO_BUCKET)
+            if not bucket_existing:
+                mc.make_bucket(MINIO_BUCKET)
+            mc.put_object(MINIO_BUCKET, media_name, media, media_size)
+            media = mc.presigned_get_object(MINIO_BUCKET, media_name)
+            media_updated_at = datetime.now()
         except S3Error as err:
             return (
                 jsonify(
@@ -84,10 +93,14 @@ def add_xweet(user_id):
                 ),
                 500,
             )
-    else:
-        media = None
 
-    xweet = Xweet(user_id=user_id, body=body, media=media)
+    xweet = Xweet(
+        user_id=user_id,
+        body=body,
+        media=media,
+        media_name=media_name,
+        media_updated_at=media_updated_at,
+    )
 
     try:
         db.session.add(xweet)
@@ -95,6 +108,19 @@ def add_xweet(user_id):
 
         if len(hashtags) != 0:
             for tag in hashtags:
+                existing_tag_same_xweet = db.session.execute(
+                    db.select(Hashtag)
+                    .join(
+                        hashtag_xweet, Hashtag.hashtag_id == hashtag_xweet.c.hashtag_id
+                    )
+                    .filter(
+                        Hashtag.body == tag, hashtag_xweet.c.xweet_id == xweet.xweet_id
+                    )
+                ).scalar_one_or_none()
+
+                if existing_tag_same_xweet:
+                    continue
+
                 existing_tag = db.session.execute(
                     db.select(Hashtag).filter(Hashtag.body == tag)
                 ).scalar_one_or_none()
@@ -142,6 +168,10 @@ def add_xweet(user_id):
 )
 @jwt_required()
 def access_xweet_by_user(user_id, xweet_id):
+    current_user_id = get_jwt_identity()
+    if current_user_id != user_id:
+        return jsonify({"success": False, "message": "Unauthorized action"}), 403
+
     xweet = db.session.execute(
         db.select(Xweet).filter(Xweet.xweet_id == xweet_id)
     ).scalar_one_or_none()
@@ -153,23 +183,29 @@ def access_xweet_by_user(user_id, xweet_id):
         )
 
     if request.method == "PUT":
-        data = request.get_json()
-        body = data.get("body")
-        media_url = data.get("media")
-        hashtags = data.get("hashtags")
+        new_body = request.form.get("new_body", "")
+        new_media = request.files.get("new_media", None)
+        new_media_name = None
+        new_media_updated_at = None
+        new_media_url = request.form.get("new_media_url", "")
+        hashtags = request.form.getlist("hashtags")
 
-        if not body and not media_url:
+        if not new_body and not new_media:
             return (
                 jsonify({"success": False, "message": "Xweet cannot be empty"}),
                 400,
             )
 
-        if media_url and media_url != xweet.media:
-            media_data, media_stream, OBJECT_NAME = manage_file(media_url)
+        if new_media:
+            new_media_name, new_media_size = manage_file(new_media)
 
             try:
-                mc.put_object(MINIO_BUCKET, OBJECT_NAME, media_stream, len(media_data))
-                media = mc.presigned_get_object(MINIO_BUCKET, OBJECT_NAME)
+                bucket_existing = mc.bucket_exists(MINIO_BUCKET)
+                if not bucket_existing:
+                    mc.make_bucket(MINIO_BUCKET)
+                mc.put_object(MINIO_BUCKET, new_media_name, new_media, new_media_size)
+                new_media = mc.presigned_get_object(MINIO_BUCKET, new_media_name)
+                new_media_updated_at = datetime.now()
             except S3Error as err:
                 return (
                     jsonify(
@@ -180,42 +216,47 @@ def access_xweet_by_user(user_id, xweet_id):
                     ),
                     500,
                 )
-        elif media_url and media_url == xweet.media:
-            media = xweet.media
         else:
-            media = None
+            if new_media_url:
+                new_media = xweet.media
 
         try:
-            xweet.body = body
-            xweet.media = media
+            xweet.body = new_body
+            xweet.media = new_media
+            xweet.media_name = new_media_name
+            xweet.media_updated_at = new_media_updated_at
             xweet.updated_at = datetime.now()
             db.session.commit()
 
             if len(hashtags) != 0:
                 for tag in hashtags:
+                    existing_tag_same_xweet = db.session.execute(
+                        db.select(Hashtag)
+                        .join(
+                            hashtag_xweet,
+                            Hashtag.hashtag_id == hashtag_xweet.c.hashtag_id,
+                        )
+                        .filter(
+                            Hashtag.body == tag,
+                            hashtag_xweet.c.xweet_id == xweet.xweet_id,
+                        )
+                    ).scalar_one_or_none()
+
+                    if existing_tag_same_xweet:
+                        continue
+
                     existing_tag = db.session.execute(
                         db.select(Hashtag).filter(Hashtag.body == tag)
                     ).scalar_one_or_none()
 
                     if existing_tag:
-                        tag_already_in_xweet = db.session.execute(
-                            db.select(hashtag_xweet)
-                            .filter(
-                                hashtag_xweet.c.hashtag_id == existing_tag.hashtag_id
+                        db.session.execute(
+                            hashtag_xweet.insert().values(
+                                xweet_id=xweet.xweet_id,
+                                hashtag_id=existing_tag.hashtag_id,
                             )
-                            .filter(hashtag_xweet.c.xweet_id == xweet_id)
-                        ).scalar_one_or_none()
-
-                        if tag_already_in_xweet:
-                            pass
-                        else:
-                            db.session.execute(
-                                hashtag_xweet.insert().values(
-                                    xweet_id=xweet.xweet_id,
-                                    hashtag_id=existing_tag.hashtag_id,
-                                )
-                            )
-                            db.session.commit()
+                        )
+                        db.session.commit()
                     else:
                         hashtag = Hashtag(body=tag)
 

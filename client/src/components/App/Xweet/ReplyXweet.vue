@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import { TransitionRoot } from '@headlessui/vue';
+import { AxiosError } from 'axios';
 
 import TextEditor from './TextEditor.vue';
 import Toolbar from './Toolbar.vue';
@@ -21,17 +22,23 @@ const emit = defineEmits<{
 const authStore = useAuthStore()
 
 const body = ref('')
-const media = ref('')
+const media = ref<File | null>(null)
+const mediaPreview = ref('')
 const charCount = computed(() => body.value.length)
 
-const payload = computed(() => ({
-    xweet_id: xweetId,
-    body: body.value,
-    media: media.value,
-}))
+const payload = computed(() => {
+    const formData = new FormData()
+
+    formData.append('xweet_id', String(xweetId))
+    formData.append('body', body.value)
+    formData.append('media', media.value as Blob)
+
+    return formData
+})
 
 const isLoading = ref(false)
 const isSuccess = ref(false)
+const errorMsg = ref('')
 
 const replyXweet = async () => {
     isLoading.value = true
@@ -47,7 +54,8 @@ const replyXweet = async () => {
             isLoading.value = false
             isSuccess.value = true
             body.value = ''
-            media.value = ''
+            media.value = null
+            mediaPreview.value = ''
 
             setTimeout(() => {
                 isSuccess.value = false
@@ -55,9 +63,25 @@ const replyXweet = async () => {
                 emit('close-reply')
             }, 1000)
         }
-    } catch (err) {
-        console.error(err)
+    } catch (error) {
+        const err = error as AxiosError
+
+        if (err.response?.status === 400) {
+            isLoading.value = false
+
+            const data = err.response.data as { success: boolean, message: string }
+            errorMsg.value = data.message
+
+            setTimeout(() => {
+                errorMsg.value = ''
+            }, 1000)
+        }
     }
+}
+
+const setMedia = (file: File | null, fileUrl: string) => { 
+    media.value = file
+    mediaPreview.value = fileUrl 
 }
 </script>
 
@@ -84,7 +108,8 @@ const replyXweet = async () => {
             :is-success="isSuccess"
             :char-count="charCount"
             :max-char-count="MAX_CHAR_COUNT"
-            :media="media"
-            @set-media="(fileUrl: string) => { media = fileUrl }" />
+            :media-preview="mediaPreview"
+            :error-msg="errorMsg"
+            @set-media="setMedia" />
     </TransitionRoot>
 </template>

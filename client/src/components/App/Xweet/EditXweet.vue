@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
+import { AxiosError } from 'axios';
 
 import TextEditor from './TextEditor.vue';
 import Toolbar from './Toolbar.vue';
@@ -24,18 +25,28 @@ const emit = defineEmits<{
 const authStore = useAuthStore()
 
 const newBody = ref(body)
-const newMedia = ref(fileUrl)
+const newMedia = ref<File | null>(null)
+const newMediaPreview = ref(fileUrl)
 const charCount = computed(() => newBody.value.length)
 const hashtags = useRenderHashtags(newBody)
 
-const payload = computed(() => ({
-    body: newBody.value,
-    media: newMedia.value,
-    hashtags: hashtags.value
-}))
+const payload = computed(() => {
+    const formData = new FormData()
+
+    formData.append('new_body', newBody.value)
+    formData.append('new_media', newMedia.value as Blob)
+    formData.append('new_media_url', newMediaPreview.value ?? '')
+
+    hashtags.value.forEach(tag => {
+        formData.append(`hashtags`, tag)
+    })
+
+    return formData
+})
 
 const isLoading = ref(false)
 const isSuccess = ref(false)
+const errorMsg = ref('')
 
 const editXweet = async () => {
     isLoading.value = true
@@ -49,7 +60,8 @@ const editXweet = async () => {
             isLoading.value = false
             isSuccess.value = true
             newBody.value = ''
-            newMedia.value = ''
+            newMedia.value = null
+            newMediaPreview.value = ''
             
             setTimeout(() => {
                 isSuccess.value = false
@@ -57,8 +69,19 @@ const editXweet = async () => {
                 emit('update-xweet', data.data.body, data.data.media, data.data.updated_at)
             }, 1000)
         }
-    } catch (err) {
-        console.error(err)
+    } catch (error) {
+        const err = error as AxiosError
+
+        if (err.response?.status === 400) {
+            isLoading.value = false
+
+            const data = err.response.data as { success: boolean, message: string }
+            errorMsg.value = data.message
+
+            setTimeout(() => {
+                errorMsg.value = ''
+            }, 1000)
+        }
     }
 }
 
@@ -74,7 +97,8 @@ const editReply = async () => {
             isLoading.value = false
             isSuccess.value = true
             newBody.value = ''
-            newMedia.value = ''
+            newMedia.value = null
+            newMediaPreview.value = ''
             
             setTimeout(() => {
                 isSuccess.value = false
@@ -82,9 +106,25 @@ const editReply = async () => {
                 emit('update-xweet', data.data.body, data.data.media, data.data.updated_at)
             }, 1000)
         }
-    } catch (err) {
-        console.error(err)
+    } catch (error) {
+        const err = error as AxiosError
+
+        if (err.response?.status === 400) {
+            isLoading.value = false
+
+            const data = err.response.data as { success: boolean, message: string }
+            errorMsg.value = data.message
+
+            setTimeout(() => {
+                errorMsg.value = ''
+            }, 1000)
+        }
     }
+}
+
+const setMedia = (file: File | null, fileUrl: string) => { 
+    newMedia.value = file
+    newMediaPreview.value = fileUrl 
 }
 </script>
 
@@ -102,7 +142,8 @@ const editReply = async () => {
             :is-success="isSuccess"
             :char-count="charCount"
             :max-char-count="MAX_CHAR_COUNT"
-            :media="newMedia"
-            @set-media="(fileUrl) => { newMedia = fileUrl }" />
+            :media-preview="newMediaPreview"
+            :error-msg="errorMsg"
+            @set-media="setMedia" />
     </section>
 </template>

@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import { AxiosError } from 'axios'
 
 import { authService, sendReqCookie } from '@/utils/axiosInstances'
-import { AuthResponse, AuthResponseWoUser, AuthState } from '@/types/auth'
+import { AuthResponse, AuthState } from '@/types/auth'
 
 const useAuthStore = defineStore('auth', {
         state: () => ({
@@ -47,7 +47,7 @@ const useAuthStore = defineStore('auth', {
                     const err = error as AxiosError
 
                     if (err.response?.status === 400) {
-                        const data = err.response.data as AuthResponseWoUser
+                        const data = err.response.data as { success: boolean, message: string }
                         this.errorMsg = data.message
                     }
                 }
@@ -67,6 +67,7 @@ const useAuthStore = defineStore('auth', {
                         this.signedInHeader = data.user.header_pic
                         this.signedInJoindate = data.user.created_at
                         this.signedInUpdate = data.user.updated_at
+                        this.errorMsg = ''
                     }
                 } catch (error) {
                     const err = error as AxiosError
@@ -84,7 +85,7 @@ const useAuthStore = defineStore('auth', {
                         this.signedInJoindate = undefined
                         this.signedInUpdate = undefined
 
-                        const data = err.response.data as AuthResponseWoUser
+                        const data = err.response.data as { success: boolean, message: string }
                         this.errorMsg = data.message
                     }
                 }
@@ -104,9 +105,15 @@ const useAuthStore = defineStore('auth', {
                         this.signedInHeader = undefined
                         this.signedInJoindate = undefined
                         this.signedInUpdate = undefined
+                        this.errorMsg = ''
                     }
-                } catch (err) {
-                    console.error(err)
+                } catch (error) {
+                    const err = error as AxiosError
+
+                    if (err.response?.status === 401) {
+                        const data = err.response.data as { success: boolean, message: string }
+                        this.errorMsg = data.message
+                    }
                 }
             }
         },

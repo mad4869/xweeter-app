@@ -1,16 +1,8 @@
 from datetime import datetime
 
 from .follow import follow
-from .. import db, bcrypt, mc
-from ..constants import MINIO_BUCKET, DEFAULT_PFP_FILE, DEFAULT_HEADER_FILE
-
-
-def get_default_pfp():
-    return mc.presigned_get_object(MINIO_BUCKET, DEFAULT_PFP_FILE)
-
-
-def get_default_header():
-    return mc.presigned_get_object(MINIO_BUCKET, DEFAULT_HEADER_FILE)
+from .. import db, bcrypt
+from ..constants import DEFAULT_PFP_FILE, DEFAULT_HEADER_FILE
 
 
 class User(db.Model):
@@ -22,12 +14,12 @@ class User(db.Model):
     password_hash = db.Column(db.String(100), nullable=False)
     bio = db.Column(db.Text())
     role = db.Column(db.String(50), nullable=False, default="user")
-    profile_pic = db.Column(db.Text(), default=get_default_pfp())
-    header_pic = db.Column(db.Text(), default=get_default_header())
-    profile_pic_name = db.Column(db.Text(), default=DEFAULT_PFP_FILE)
-    header_pic_name = db.Column(db.Text(), default=DEFAULT_HEADER_FILE)
-    profile_pic_updated_at = db.Column(db.DateTime(), default=datetime.now)
-    header_pic_updated_at = db.Column(db.DateTime(), default=datetime.now)
+    profile_pic = db.Column(db.Text(), default=DEFAULT_PFP_FILE)
+    header_pic = db.Column(db.Text(), default=DEFAULT_HEADER_FILE)
+    profile_pic_name = db.Column(db.Text())
+    header_pic_name = db.Column(db.Text())
+    profile_pic_updated_at = db.Column(db.DateTime())
+    header_pic_updated_at = db.Column(db.DateTime())
     created_at = db.Column(db.DateTime(), nullable=False, default=datetime.now)
     updated_at = db.Column(db.DateTime())
     xweets = db.Relationship(

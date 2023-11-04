@@ -30,6 +30,7 @@ def get_trending():
         .join(Xweet, hashtag_xweet.c.xweet_id == Xweet.xweet_id)
         .filter(hashtag_xweet.c.created_at >= datetime.now() - timedelta(days=7))
         .group_by(Hashtag.hashtag_id)
+        .order_by(db.func.count(Xweet.xweet_id).desc())
     ).fetchall()
     data = [
         {

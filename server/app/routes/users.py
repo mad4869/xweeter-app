@@ -1,5 +1,5 @@
 from flask import request, jsonify
-from flask_jwt_extended import jwt_required
+from flask_jwt_extended import jwt_required, get_jwt_identity
 from minio.error import S3Error
 from datetime import datetime
 import json
@@ -121,25 +121,47 @@ def get_user(user_id):
 @routes.route("/users/<int:user_id>", methods=["PUT"], strict_slashes=False)
 @jwt_required()
 def update_user(user_id):
-    updated_data = request.get_json()
-    updated_username = updated_data.get("username", data["username"])
-    updated_full_name = updated_data.get("fullname", data["full_name"])
-    updated_email = updated_data.get("email", data["email"])
-    updated_bio = updated_data.get("bio", data["bio"])
-    updated_profile_pic = updated_data.get("profile_pic", data["profile_pic"])
-    updated_header_pic = updated_data.get("header_pic", data["header_pic"])
+    current_user_id = get_jwt_identity()
+    if current_user_id != user_id:
+        return jsonify({"success": False, "message": "Unauthorized action"}), 403
 
-    if updated_profile_pic != data["profile_pic"]:
-        media_data, media_stream, OBJECT_NAME = manage_file(updated_profile_pic)
+    user = db.session.execute(
+        db.select(User).filter(User.user_id == user_id)
+    ).scalar_one_or_none()
+
+    if user is None:
+        return jsonify({"success": False, "message": "User is not found"}), 404
+
+    updated_username = request.form.get("username", user.username)
+    updated_full_name = request.form.get("fullname", user.full_name)
+    updated_email = request.form.get("email", user.email)
+    updated_bio = request.form.get("bio", user.bio)
+    updated_profile_pic = request.files.get("profile_pic")
+    updated_profile_pic_name = None
+    updated_profile_pic_updated_at = None
+    updated_header_pic = request.files.get("header_pic")
+    updated_header_pic_name = None
+    updated_header_pic_updated_at = None
+
+    if updated_profile_pic:
+        updated_profile_pic_name, updated_profile_pic_size = manage_file(
+            updated_profile_pic
+        )
 
         try:
+            bucket_existing = mc.bucket_exists(MINIO_BUCKET)
+            if not bucket_existing:
+                mc.make_bucket(MINIO_BUCKET)
             mc.put_object(
                 MINIO_BUCKET,
-                OBJECT_NAME,
-                media_stream,
-                len(media_data),
+                updated_profile_pic_name,
+                updated_profile_pic,
+                updated_profile_pic_size,
             )
-            updated_profile_pic = mc.presigned_get_object(MINIO_BUCKET, OBJECT_NAME)
+            updated_profile_pic = mc.presigned_get_object(
+                MINIO_BUCKET, updated_profile_pic_name
+            )
+            updated_profile_pic_updated_at = datetime.now()
         except S3Error as err:
             return (
                 jsonify(
@@ -150,16 +172,29 @@ def update_user(user_id):
                 ),
                 500,
             )
-    if updated_header_pic != data["header_pic"]:
-        media_data, media_stream, OBJECT_NAME = manage_file(updated_header_pic)
+    else:
+        updated_profile_pic = user.profile_pic
+        updated_profile_pic_name = user.profile_pic_name
+        updated_profile_pic_updated_at = user.profile_pic_updated_at
+
+    if updated_header_pic:
+        updated_header_pic_name, updated_header_pic_size = manage_file(
+            updated_header_pic
+        )
         try:
+            bucket_existing = mc.bucket_exists(MINIO_BUCKET)
+            if not bucket_existing:
+                mc.make_bucket(MINIO_BUCKET)
             mc.put_object(
                 MINIO_BUCKET,
-                OBJECT_NAME,
-                media_stream,
-                len(media_data),
+                updated_header_pic_name,
+                updated_header_pic,
+                updated_header_pic_size,
             )
-            updated_header_pic = mc.presigned_get_object(MINIO_BUCKET, OBJECT_NAME)
+            updated_header_pic = mc.presigned_get_object(
+                MINIO_BUCKET, updated_header_pic_name
+            )
+            updated_header_pic_updated_at = datetime.now()
         except S3Error as err:
             return (
                 jsonify(
@@ -170,6 +205,10 @@ def update_user(user_id):
                 ),
                 500,
             )
+    else:
+        updated_header_pic = user.header_pic
+        updated_header_pic_name = user.header_pic_name
+        updated_header_pic_updated_at = user.header_pic_updated_at
 
     try:
         user.username = updated_username
@@ -177,7 +216,11 @@ def update_user(user_id):
         user.email = updated_email
         user.bio = updated_bio
         user.profile_pic = updated_profile_pic
+        user.profile_pic_name = updated_profile_pic_name
+        user.profile_pic_updated_at = updated_profile_pic_updated_at
         user.header_pic = updated_header_pic
+        user.header_pic_name = updated_header_pic_name
+        user.header_pic_updated_at = updated_header_pic_updated_at
         user.updated_at = datetime.now()
 
         db.session.commit()

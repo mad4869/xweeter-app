@@ -1,5 +1,5 @@
 from flask import request, jsonify
-from flask_jwt_extended import jwt_required
+from flask_jwt_extended import jwt_required, get_jwt_identity
 
 from . import routes
 from ..extensions import db
@@ -11,7 +11,7 @@ from ..models import Xweet, User, Rexweet
     methods=["GET"],
     strict_slashes=False,
 )
-def access_rexweets_by_xweet(xweet_id):
+def get_rexweets_by_xweet(xweet_id):
     rexweets = db.session.execute(
         db.select(Rexweet)
         .join(Xweet, Rexweet.xweet_id == Xweet.xweet_id)
@@ -71,6 +71,10 @@ def get_rexweets_by_user(user_id):
 )
 @jwt_required()
 def access_rexweets_by_user_xweet(user_id, xweet_id):
+    current_user_id = get_jwt_identity()
+    if current_user_id != user_id:
+        return jsonify({"success": False, "message": "Unauthorized action"}), 403
+
     if request.method == "POST":
         rexweet = Rexweet(user_id=user_id, xweet_id=xweet_id)
 

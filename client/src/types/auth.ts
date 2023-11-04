@@ -22,8 +22,6 @@ type AuthResponse = {
     user: User
 }
 
-type AuthResponseWoUser = Omit<AuthResponse, 'user'>
-
 type AuthState = {
     isAuthenticated: boolean,
     signedInUserId: number | undefined,
@@ -39,4 +37,4 @@ type AuthState = {
     errorMsg: string | undefined
 }
 
-export { UserAuth, type User, type AuthResponse, type AuthResponseWoUser, type AuthState }
+export { UserAuth, type User, type AuthResponse, type AuthState }

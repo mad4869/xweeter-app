@@ -16,6 +16,7 @@ import { useFetchList } from '@/composables/useFetch';
 
 const props = defineProps<{
     y: number
+    isOwn: boolean
     isFiltered: boolean
     deletedXweet?: number | null
     showDeleteModal: (xweetId: number) => void
@@ -33,7 +34,6 @@ const timelineData = await useFetchList<ProfileTimeline>(
     `/api/users/${route.params.id}/profile-timeline?start=${start.value}`, false
     )
 const timeline = timelineData.list
-console.log(timeline.value)
 
 socket.on('add_to_timeline', (xweet) => {
     timeline.value?.unshift(xweet)
@@ -138,8 +138,8 @@ watch(() => arrivedState.bottom, async () => {
         <MoreXweet v-if="needMoreXweet" :is-loading="isLoading" />
         <Empty 
             v-if="timeline?.length === 0"
-            msg="This is where your profile timeline would appear" 
-            submsg="Start writing your xweets!" />
+            :msg="isOwn ? 'This is where your profile timeline would appear' : ''" 
+            :submsg="isOwn ? 'Start writing your xweets!' : 'This user doesn\'t have any xweet yet'" />
     </section>
 </template>
 

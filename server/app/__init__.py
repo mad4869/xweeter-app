@@ -24,12 +24,12 @@ def create_app():
     jwt_manager.init_app(app)
     socket.init_app(app)
     admin.init_app(app)
-    admin.add_view(ModelView(User, db.session))
-    admin.add_view(ModelView(Xweet, db.session))
-    admin.add_view(ModelView(Rexweet, db.session))
-    admin.add_view(ModelView(Like, db.session))
-    admin.add_view(ModelView(Reply, db.session))
-    admin.add_view(ModelView(Hashtag, db.session))
+    admin.add_view(ModelView(User, db.session, name="Users"))
+    admin.add_view(ModelView(Xweet, db.session, name="Xweets"))
+    admin.add_view(ModelView(Rexweet, db.session, name="Rexweets"))
+    admin.add_view(ModelView(Like, db.session, name="Likes"))
+    admin.add_view(ModelView(Reply, db.session, name="Replies"))
+    admin.add_view(ModelView(Hashtag, db.session, name="Hashtags"))
 
     def scheduled_task():
         with app.app_context():

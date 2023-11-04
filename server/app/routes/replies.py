@@ -1,5 +1,5 @@
 from flask import request, jsonify
-from flask_jwt_extended import jwt_required
+from flask_jwt_extended import jwt_required, get_jwt_identity
 from flask_socketio import emit
 from minio.error import S3Error
 from datetime import datetime
@@ -103,23 +103,32 @@ def get_replies_by_user(user_id):
 @routes.route("/users/<int:user_id>/replies", methods=["POST"], strict_slashes=False)
 @jwt_required()
 def add_reply(user_id):
-    data = request.get_json()
-    xweet_id = data.get("xweet_id")
-    body = data.get("body")
-    media_url = data.get("media")
+    current_user_id = get_jwt_identity()
+    if current_user_id != user_id:
+        return jsonify({"success": False, "message": "Unauthorized action"}), 403
 
-    if not body and not media_url:
+    xweet_id = int(request.form.get("xweet_id"))
+    body = request.form.get("body", "")
+    media = request.files.get("media", None)
+    media_name = None
+    media_updated_at = None
+
+    if not body and not media:
         return (
             jsonify({"success": False, "message": "Reply cannot be empty"}),
             400,
         )
 
-    if media_url:
-        media_data, media_stream, OBJECT_NAME = manage_file(media_url)
+    if media:
+        media_name, media_size = manage_file(media)
 
         try:
-            mc.put_object(MINIO_BUCKET, OBJECT_NAME, media_stream, len(media_data))
-            media = mc.presigned_get_object(MINIO_BUCKET, OBJECT_NAME)
+            bucket_existing = mc.bucket_exists(MINIO_BUCKET)
+            if not bucket_existing:
+                mc.make_bucket(MINIO_BUCKET)
+            mc.put_object(MINIO_BUCKET, media_name, media, media_size)
+            media = mc.presigned_get_object(MINIO_BUCKET, media_name)
+            media_updated_at = datetime.now()
         except S3Error as err:
             return (
                 jsonify(
@@ -130,10 +139,15 @@ def add_reply(user_id):
                 ),
                 500,
             )
-    else:
-        media = None
 
-    reply = Reply(user_id=user_id, xweet_id=xweet_id, body=body, media=media)
+    reply = Reply(
+        user_id=user_id,
+        xweet_id=xweet_id,
+        body=body,
+        media=media,
+        media_name=media_name,
+        media_updated_at=media_updated_at,
+    )
 
     try:
         db.session.add(reply)
@@ -156,6 +170,10 @@ def add_reply(user_id):
 )
 @jwt_required()
 def access_reply_by_user(user_id, reply_id):
+    current_user_id = get_jwt_identity()
+    if current_user_id != user_id:
+        return jsonify({"success": False, "message": "Unauthorized action"}), 403
+
     reply = db.session.execute(
         db.select(Reply).filter(Reply.reply_id == reply_id)
     ).scalar_one_or_none()
@@ -167,22 +185,28 @@ def access_reply_by_user(user_id, reply_id):
         )
 
     if request.method == "PUT":
-        data = request.get_json()
-        body = data.get("body")
-        media_url = data.get("media")
+        new_body = request.form.get("new_body", "")
+        new_media = request.files.get("new_media", None)
+        new_media_name = None
+        new_media_updated_at = None
+        new_media_url = request.form.get("new_media_url", "")
 
-        if not body and not media_url:
+        if not new_body and not new_media:
             return (
                 jsonify({"success": False, "message": "Reply cannot be empty"}),
                 400,
             )
 
-        if media_url and media_url != reply.media:
-            media_data, media_stream, OBJECT_NAME = manage_file(media_url)
+        if new_media:
+            new_media_name, new_media_size = manage_file(new_media)
 
             try:
-                mc.put_object(MINIO_BUCKET, OBJECT_NAME, media_stream, len(media_data))
-                media = mc.presigned_get_object(MINIO_BUCKET, OBJECT_NAME)
+                bucket_existing = mc.bucket_exists(MINIO_BUCKET)
+                if not bucket_existing:
+                    mc.make_bucket(MINIO_BUCKET)
+                mc.put_object(MINIO_BUCKET, new_media_name, new_media, new_media_size)
+                new_media = mc.presigned_get_object(MINIO_BUCKET, new_media_name)
+                new_media_updated_at = datetime.now()
             except S3Error as err:
                 return (
                     jsonify(
@@ -193,14 +217,15 @@ def access_reply_by_user(user_id, reply_id):
                     ),
                     500,
                 )
-        elif media_url and media_url == reply.media:
-            media = reply.media
         else:
-            media = None
+            if new_media_url:
+                new_media = reply.media
 
         try:
-            reply.body = body
-            reply.media = media
+            reply.body = new_body
+            reply.media = new_media
+            reply.media_name = new_media_name
+            reply.media_updated_at = new_media_updated_at
             reply.updated_at = datetime.now()
             db.session.commit()
         except Exception as err:

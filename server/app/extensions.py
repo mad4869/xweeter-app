@@ -36,7 +36,7 @@ mc = Minio(
 )
 
 # Websocket
-socket = SocketIO(cors_allowed_origins="http://localhost:5173")
+socket = SocketIO(cors_allowed_origins="*")
 
 # Admin management
 admin = Admin(name="Xweeter Admin", template_mode="bootstrap3")

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { reactive, ref } from 'vue';
+import { computed, reactive, ref } from 'vue';
 import { useVuelidate } from '@vuelidate/core'
 import { required, email as isEmail } from '@vuelidate/validators'
 
@@ -27,9 +27,12 @@ const userProfile = reactive({
     fullname,
     email,
     bio,
-    profile_pic: profilePic,
-    header_pic: headerPic
+    profile_pic: null as File | null,
+    header_pic: null as File | null
 })
+
+const pfpPreview = ref(profilePic)
+const headerPreview = ref(headerPic)
 
 const rules = {
     username: { required },
@@ -40,14 +43,35 @@ const rules = {
 
 const v$ = useVuelidate(rules, userProfile)
 
+const payload = computed(() => {
+    const formData = new FormData()
+
+    formData.append('username', userProfile.username ?? '')
+    formData.append('fullname', userProfile.fullname ?? '')
+    formData.append('email', userProfile.email ?? '')
+    formData.append('bio', userProfile.bio ?? '')
+    formData.append('profile_pic', userProfile.profile_pic as Blob)
+    formData.append('header_pic', userProfile.header_pic as Blob)
+    
+    return formData
+})
+
 const isLoading = ref(false)
 
 const editProfilePic = async (e: Event) => {
-    userProfile.profile_pic = await useFile(e)
+    const fileData = await useFile(e)
+    if (fileData.file) {
+        userProfile.profile_pic = fileData.file
+        pfpPreview.value = fileData.fileDataURL
+    }
 }
 
 const editHeader = async (e: Event) => {
-    userProfile.header_pic = await useFile(e)
+    const fileData = await useFile(e)
+    if (fileData.file) {
+        userProfile.header_pic = fileData.file
+        headerPreview.value = fileData.fileDataURL
+    }
 }
 
 const editProfile = async () => {
@@ -55,7 +79,9 @@ const editProfile = async () => {
 
     try {
         const { data } = await sendReqCookie.put<UserResponse | undefined>(
-            `/api/users/${userId}`, userProfile
+            `/api/users/${userId}`, 
+            payload.value, 
+            { headers: { "Content-Type": 'multipart/form-data' } }
         )
 
         if (data?.success) {
@@ -123,13 +149,8 @@ const editProfile = async () => {
                     class="hidden"
                     @change="editProfilePic">
             </label>
-            <div v-if="userProfile.profile_pic" class="relative group">
-                <img :src="userProfile.profile_pic" class="w-8 h-8 object-scale-down" />
-                <font-awesome-icon 
-                    icon="fa-regular fa-circle-xmark" 
-                    title="Remove the image"
-                    class="absolute -top-1 -right-1 text-xs text-sky-800 cursor-pointer dark:text-white hidden group-hover:block"
-                    @click="userProfile.profile_pic = ''" />
+            <div v-if="pfpPreview" class="relative group">
+                <img :src="pfpPreview" class="w-8 h-8 object-scale-down" />
             </div>
         </div>
         <div class="flex justify-between items-center w-full">
@@ -146,13 +167,8 @@ const editProfile = async () => {
                     class="hidden"
                     @change="editHeader">
             </label>
-            <div v-if="userProfile.header_pic" class="relative group">
-                <img :src="userProfile.header_pic" class="w-8 h-8 object-scale-down" />
-                <font-awesome-icon 
-                    icon="fa-regular fa-circle-xmark" 
-                    title="Remove the image"
-                    class="absolute -top-1 -right-1 text-xs text-sky-800 cursor-pointer dark:text-white hidden group-hover:block"
-                    @click="userProfile.header_pic = ''" />
+            <div v-if="headerPreview" class="relative group">
+                <img :src="headerPreview" class="w-8 h-8 object-scale-down" />
             </div>
         </div>
         <button 

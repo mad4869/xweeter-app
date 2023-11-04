@@ -1,14 +1,22 @@
-import base64
-import io
-import uuid
-import imghdr
+# import base64
+# import io
+# import uuid
+# import imghdr
+import os
+from werkzeug.utils import secure_filename
+
+from ..constants import ALLOWED_EXTENSIONS
 
 
-def manage_file(media_url):
-    media_data = base64.b64decode(media_url.split(",")[1])
-    media_stream = io.BytesIO(media_data)
-    media_id = uuid.uuid4()
-    media_ext = imghdr.what(media_stream)
-    OBJECT_NAME = f"{media_id}.{media_ext}"
+def allowed_file(filename):
+    filename = filename.lower()
+    ext = filename.split(".")[-1]
+    return ext in ALLOWED_EXTENSIONS
 
-    return media_data, media_stream, OBJECT_NAME
+
+def manage_file(media):
+    if allowed_file(media.filename):
+        media_name = secure_filename(media.filename)
+        media_size = os.fstat(media.fileno()).st_size
+
+        return media_name, media_size

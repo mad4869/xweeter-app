@@ -54,6 +54,11 @@ const setActiveTab = (tab: Tabs) => {
 }
 
 const profile = await useFetchObject<User>(`/api/users/${route.params.id}`, false)
+
+if (profile.error.value) {
+    router.replace({ name: '404' })
+}
+
 const profileXweetsCount = await useCount('users', parseInt(route.params.id as string), Features.Xweets)
 const profileFollowing = await useFetchList<User>(`/api/users/${route.params.id}/following`, false)
 const profileFollowers = await useFetchList<User>(`/api/users/${route.params.id}/followers`, false)
@@ -136,6 +141,7 @@ const showDeleteModal = (xweetId: number) => {
     <Toggle :active-tab="activeTab" @set-active-tab="setActiveTab" />
     <Timeline v-show="activeTab === Tabs.Xweets"
         :y="scrollTimeline.y.value"
+        :is-own="profile.obj.value?.user_id === authStore.getSignedInUserId"
         :is-filtered="isSuccess"
         :deleted-xweet="xweetToDelete"
         :show-delete-modal="showDeleteModal"

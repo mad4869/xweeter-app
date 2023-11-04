@@ -35,10 +35,6 @@ The social media app should have the following features:
 
 ### END
 
-## Demo
-
-<https://mad4869.pythonanywhere.com>
-
 ## ERD
 
 This app utilizes __PostgreSQL__ as the database service. The structure of the schema in the database is as follows:
@@ -46,54 +42,57 @@ This app utilizes __PostgreSQL__ as the database service. The structure of the s
 
 ## Installation
 
+__Prerequisites:__
+
+1. PostgreSQL
+2. Minio (inside docker container)
+
 ### 1. Clone the repo
 
 ```bash
-git clone https://github.com/mad4869/todo-app.git
+git clone https://github.com/mad4869/xweeter-app.git
 ```
 
-### 2. Set up the enviromental variables
+### 2. Run Minio
 
-Create a new file named `.env` in the root directory of the app. Then, inside the `.env` file, add the required variables:
-
-```env
-FLASK_APP='run.py'
-FLASK_DEBUG=1
-ENVIRONMENT="development"
-SECRET_KEY="some_secret_key"
-
-POSTGRES_USER="postgres"
-POSTGRES_PASSWORD="password"
-POSTGRES_HOST="localhost"
-POSTGRES_PORT="5432"
-POSTGRES_DB="todo-db"
-
-JWT_SECRET_KEY="some_secret_key"
+```bash
+docker run -p 9000:9000 -p 9090:9090 --name minio1 -e "MINIO_ROOT_USER=ROOTUSER" -e "MINIO_ROOT_PASSWORD=CHANGEME123" quay.io/minio/minio server /data --console-address ":9090"
 ```
 
-Replace the example variables with the corresponding actual values as needed.
+Change the Root User and the Root Password as required. Access the console on port 9090, log in using the username and password, and inside the dashboard, create an access and secret key.
 
-### 3. Create a virtual environment (optional)
+### 3. Set up the enviromental variables
 
-### 4. Install the dependencies
+Create an `.env` file in the server directory and populate it with the necessary key-value pairs, similar to those in the `.env-sample` file. Replace the example variables with the corresponding actual values as required, including the Minio access and secret key.
+
+### 4. Create and activate a virtual environment
+
+Windows
+
+```bash
+python -m venv venv
+venv\Scripts\activate
+```
+
+Linux/MacOS
+
+```bash
+python3 -m venv venv
+source venv/bin/activate
+```
+
+### 5. Install the dependencies
 
 ```bash
 pip install -r requirements.txt
 npm install
 ```
 
-### 5. Build the static assets
-
-```bash
-npm run build
-flask digest compile
-```
-
 ### 6. Connect to the database
 
 ```bash
 flask db init
-flask db migrate
+flask db migrate -m "Initial migration"
 flask db upgrade
 ```
 
@@ -101,7 +100,10 @@ flask db upgrade
 
 ```bash
 flask run
+npm run dev
 ```
+
+Access the app on port 5173.
 
 ## Code Explanation
 
@@ -110,35 +112,33 @@ flask run
 The backend is built using the __Flask__ framework to serve REST API to the clients through various endpoints. The entry point is `run.py` inside the `server` directory. The app utilizes several supporting libraries, including:
 
 - `SQLAlchemy` for object-relational mapping (ORM).
-- `flask-migrate` to manage database migrations.
-- `flask-bcrypt` for generating password hashes.
-- `flask-jwt-extended` for authentication and authorization using JSON Web Tokens (JWT).
+- `Flask-Migrate` for managing database migrations.
+- `Flask-Bcrypt` for generating password hashes.
+- `Flask-JWT-Extended` for authentication and authorization using JSON Web Tokens (JWT).
+- `Flask-Admin` for managing the admin page.
+- `Flask-CORS` for setting the CORS configuration.
+- `Minio Client` for connecting to Minio storage.
 
-Inside the todo module, the following files are present:
+The actual app is located within the `app` module and includes the following directories:
 
-- `__init__.py:` Initialization file.
-- `config.py:` App configuration.
-- `extensions.py:` Initialization file for the app's supporting libraries.
-
-The `server` also includes the following directories:
-
-#### routes
-
-- `api:` Handling the routes that serve the data. The list of API endpoints can be viewed [here.](https://documenter.getpostman.com/view/11633108/2s93zH2eWg)
-- `auth:` Handling the routes for authentication.
-- `views:` Handling the routes for rendering HTML templates.
-
-#### static
-
-Contains all the static assets (e.g., CSS, JavaScript, images).
-
-#### templates
-
-Contains HTML templates used for rendering web pages.
+- __routes:__ Handles the routes that serve the REST API. The list of API endpoints can be viewed [here.](https://documenter.getpostman.com/view/11633108/2s93zH2eWg)
+- __models:__ Defines all the objects that will be mapped to the database.
+- __utils:__ Contains utility modules for managing files.
+- __static:__ Contains the CSS file for the admin page.
+- __templates:__ Contains the template for the admin page.
 
 ### 2. Frontend
 
-The frontend is built using __Vue__ as the Javascript framework and __Tailwind CSS__ as the CSS framework.
+The frontend is built using __Vite__ and utilizes __Vue__ as the Javascript/Typescript framework and __Tailwind CSS__ as the CSS framework. It is located inside the `client` directory. The `src` includes the following directories:
+
+- __assets:__ Contains all the static assets, such as pictures.
+- __components:__ The main directory where all the components that compose the app are located.
+- __composables:__ Contains various reusable functions.
+- __pages:__ Contains the page components that serve each route.
+- __routes:__ Defines all the routes within the app.
+- __stores:__ Contains the stores for managing global state.
+- __types:__ Defines all the object types for static type checking.
+- __utils:__ Contains utility objects that do not belong to the previous directories.
 
 ## Test Case
 
@@ -191,10 +191,4 @@ The frontend is built using __Vue__ as the Javascript framework and __Tailwind C
 
 ## Conclusion
 
-TODO is a simple to-do app that allows users to track their tasks or projects. However, there are a few things that can be done to enhance the app:
-
-1. Implement task pagination to improve the user experience.
-2. Optimize the static files to enhance the app's performance.
-3. Clean up the code to improve its overall readability.
-
-By implementing these improvements, the overall functionality and performance of the app can be enhanced.
+This is a simple Twitter-like social media app that enables users to create their own posts and interact with others. There are still some minor bugs that need to be cleaned up to make a better user experience, but overall this app already meets all the requirements for a functional social media platform.

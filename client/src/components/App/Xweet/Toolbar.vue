@@ -8,10 +8,11 @@ defineProps<{
     isSuccess: boolean
     charCount: number
     maxCharCount: number
-    media?: string
+    mediaPreview?: string
+    errorMsg?: string
 }>()
 const emit = defineEmits<{
-    (e: 'set-media', fileUrl: string): void
+    (e: 'set-media', file: File | null, fileUrl: string): void
 }>()
 
 const modeMap = {
@@ -38,23 +39,23 @@ const modeMap = {
 }
 
 const addFile = async (e: Event) => {
-    const file =  await useFile(e)
-    if (file) {
-        emit('set-media', file)
+    const fileData = await useFile(e)
+    if (fileData.file) {
+        emit('set-media', fileData.file, fileData.fileDataURL ?? '')
     }
 }
 
 const removeFile = () => {
-    emit('set-media', '')
+    emit('set-media', null, '')
 }
 </script>
 
 <template>
-    <div class="w-full py-4 flex justify-between items-start">
-        <div class="flex items-center gap-2 h-full">
+    <div class="flex items-start justify-between w-full py-4">
+        <div class="flex items-center h-full gap-2">
             <label :for="`${mode}-add-image`" title="Add image to your xweet">
                 <span
-                    class="flex items-center gap-2 px-2 py-1 bg-sky-800/70 text-xs text-white rounded-md transition-colors cursor-pointer hover:bg-sky-800 dark:bg-sky-400/50 dark:hover:bg-sky-400">
+                    class="flex items-center gap-2 px-2 py-1 text-xs text-white transition-colors rounded-md cursor-pointer bg-sky-800/70 hover:bg-sky-800 dark:bg-sky-400/50 dark:hover:bg-sky-400">
                     <font-awesome-icon icon="fa-solid fa-images" />
                     <h6>Image</h6>
                 </span>
@@ -65,31 +66,34 @@ const removeFile = () => {
                     class="hidden"
                     @change="addFile">
             </label>
-            <div v-show="media" class="relative group">
-                <img :src="media" class="w-8 h-8 object-scale-down" />
+            <div v-show="mediaPreview" class="relative group">
+                <img :src="mediaPreview" class="object-scale-down w-8 h-8" />
                 <font-awesome-icon 
                     icon="fa-regular fa-circle-xmark" 
                     title="Remove the image"
-                    class="absolute -top-1 -right-1 text-xs text-sky-800 cursor-pointer dark:text-white hidden group-hover:block"
-                    @click.prevent="removeFile" />
+                    class="absolute hidden text-xs cursor-pointer -top-1 -right-1 text-sky-800 dark:text-white group-hover:block"
+                    @click="removeFile" />
             </div>
         </div>
         <div class="flex items-center h-full px-2 text-center text-white">
             <Transition mode="out-in">
-                <p v-if="charCount <= maxCharCount && !isSuccess && !isLoading" class="text-xs">
+                <p v-if="charCount > maxCharCount" class="text-red-600 fade-in dark:text-red-400">
+                    Your xweet exceeds the maximum number of characters
+                </p>
+                <p v-else-if="isSuccess" class="font-bold text-sky-800 fade-in dark:text-sky-600">
+                    {{ modeMap[mode].successMsg }}
+                </p>
+                <p v-else-if="errorMsg" class="text-red-600 fade-in dark:text-red-400">
+                    {{ errorMsg }}
+                </p>
+                <p v-else class="text-xs">
                     <span>{{ charCount }}</span>
                     /
                     <span class="font-medium dark:text-sky-600 dark:font-normal">{{ maxCharCount }}</span>
                 </p>
-                <p v-else-if="charCount > maxCharCount" class="text-red-600 fade-in dark:text-red-400">
-                    Your xweet exceeds the maximum number of characters
-                </p>
-                <p v-else-if="isSuccess" class="text-sky-800 font-bold fade-in dark:text-sky-600">
-                    {{ modeMap[mode].successMsg }}
-                </p>
             </Transition>
         </div>
-        <div class="flex items-center gap-2 h-full">
+        <div class="flex items-center h-full gap-2">
             <font-awesome-icon 
                 v-show="isLoading"
                 icon="fa-solid fa-spinner" spin-pulse 
@@ -97,10 +101,10 @@ const removeFile = () => {
             <input 
                 type="button" 
                 :value="modeMap[mode].btn"
-                class="px-4 py-1 bg-white dark:bg-sky-600 text-sky-600 dark:text-white font-semibold rounded-md transition-colors duration-200 cursor-pointer dark:hover:bg-sky-800 active:shadow-inner disabled:bg-sky-700 dark:disabled:bg-slate-800 dark:disabled:text-slate-600 disabled:cursor-not-allowed"
-                :disabled="charCount > maxCharCount || (charCount === 0 && !media) || isLoading" 
+                class="px-4 py-1 font-semibold transition-colors duration-200 bg-white rounded-md cursor-pointer dark:bg-sky-600 text-sky-600 dark:text-white dark:hover:bg-sky-800 active:shadow-inner disabled:bg-sky-700 dark:disabled:bg-slate-800 dark:disabled:text-slate-600 disabled:cursor-not-allowed"
+                :disabled="charCount > maxCharCount || (charCount === 0 && !mediaPreview) || isLoading" 
                 :title="modeMap[mode].tooltip" 
-                @mousedown.prevent="submitFunc">
+                @mousedown="submitFunc">
         </div>
     </div>
 </template>
