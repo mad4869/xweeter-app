@@ -59,17 +59,18 @@ git clone https://github.com/mad4869/xweeter-app.git
 docker run -p 9000:9000 -p 9090:9090 --name minio1 -e "MINIO_ROOT_USER=ROOTUSER" -e "MINIO_ROOT_PASSWORD=CHANGEME123" quay.io/minio/minio server /data --console-address ":9090"
 ```
 
-Change the Root User and the Root Password as required. Access the console on port 9090, log in using the username and password, and inside the dashboard, create an access and secret key.
+Change the _Root User_ and the _Root Password_ as required. Access the console on port _9090_, log in using the username and password, and inside the dashboard, create an access and secret key.
 
 ### 3. Set up the enviromental variables
 
-Create an `.env` file in the server directory and populate it with the necessary key-value pairs, similar to those in the `.env-sample` file. Replace the example variables with the corresponding actual values as required, including the Minio access and secret key.
+Create an `.env` file in the `server` directory and populate it with the necessary key-value pairs, similar to those in the `.env-sample` file. Replace the example variables with the corresponding actual values as required, including PostgreSQL configuration and the Minio access and secret key.
 
 ### 4. Create and activate a virtual environment
 
 Windows
 
 ```bash
+cd server
 python -m venv venv
 venv\Scripts\activate
 ```
@@ -77,6 +78,7 @@ venv\Scripts\activate
 Linux/MacOS
 
 ```bash
+cd server
 python3 -m venv venv
 source venv/bin/activate
 ```
@@ -84,13 +86,17 @@ source venv/bin/activate
 ### 5. Install the dependencies
 
 ```bash
+cd server
 pip install -r requirements.txt
+
+cd client
 npm install
 ```
 
 ### 6. Connect to the database
 
 ```bash
+cd server
 flask db init
 flask db migrate -m "Initial migration"
 flask db upgrade
@@ -99,11 +105,14 @@ flask db upgrade
 ### 7. Run the app
 
 ```bash
+cd server
 flask run
+
+cd client
 npm run dev
 ```
 
-Access the app on port 5173.
+Access the app on port _5173_.
 
 ## Code Explanation
 
